@@ -100,3 +100,45 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+
+
+model Question {
+  id           String           @id @default(cuid())
+  externalId   String?          @unique
+  text         String           @db.Text
+  codeLanguage String?
+  code         String?          @db.Text
+  type         String           @default("THEORY")
+  timeSeconds  Int?
+  marks        Int              @default(1)
+  position     Int
+  included     Boolean          @default(true)
+  options      QuestionOption[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([included, position])
+  @@map("questions")
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  questionId String
+  label      String
+  content    String   @db.Text
+  isCode     Boolean  @default(false)
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, label])
+  @@index([questionId])
+  @@map("question_options")
+}
+
+model Setting {
+  key   String @id
+  value Json
+
+  @@map("settings")
+}

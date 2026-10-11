@@ -10,6 +10,7 @@ const navigation = [
   { label: "Teams", href: "/admin/teams" },
   { label: "Questions", href: "/admin/questions" },
   { label: "Quiz Control", href: "/admin/quiz-control" },
+  { label: "Settings", href: "/admin/settings" },
   { label: "Monitor", href: "/admin/monitor" },
   { label: "Results", href: "/admin/results" },
   { label: "Round 2", href: "/admin/round-2" },
