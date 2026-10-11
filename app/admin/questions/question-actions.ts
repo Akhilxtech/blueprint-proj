@@ -332,24 +332,68 @@ export async function reorderQuestion(
   }
 }
 
+
 export async function deleteAllQuestions() {
   await requireAdmin();
 
-  const result = await prisma.$transaction(async (tx) => {
-    const options = await tx.questionOption.deleteMany({});
-    const questions = await tx.question.deleteMany({});
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const run = await tx.quizRun.findUnique({
+        where: { id: "main" },
+        select: { status: true },
+      });
+
+      if (run?.status === "RUNNING" || run?.status === "PAUSED") {
+        throw new Error(
+          "End the quiz before deleting all questions.",
+        );
+      }
+
+      // Responses reference questions, so delete them first.
+      await tx.response.deleteMany();
+
+      // Frozen quiz slots also reference questions.
+      await tx.quizRunQuestion.deleteMany();
+
+      // Clear the frozen team roster for the old practice run.
+      await tx.quizRoster.deleteMany();
+
+      // Options belong to questions.
+      await tx.questionOption.deleteMany();
+
+      const questions = await tx.question.deleteMany();
+
+      // Keep the run reusable after the question bank is cleared.
+      if (run) {
+        await tx.quizRun.update({
+          where: { id: "main" },
+          data: {
+            status: "NOT_STARTED",
+            startedAt: null,
+            pausedAt: null,
+            pausedMs: 0,
+            skipMs: 0,
+            endedAt: null,
+          },
+        });
+      }
+
+      return questions;
+    });
+
+    revalidateQuestionPages();
 
     return {
-      deletedQuestions: questions.count,
-      deletedOptions: options.count,
+      success: true,
+      message: `Deleted ${result.count} questions.`,
     };
-  });
-
-  revalidatePath("/admin/questions");
-  revalidatePath("/admin/settings");
-
-  return {
-    success: true,
-    ...result,
-  };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Could not delete all questions.",
+    };
+  }
 }

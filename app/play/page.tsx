@@ -1,18 +1,33 @@
+
+import { Suspense } from "react";
 import Link from "next/link";
 import { requireParticipant } from "@/lib/auth-helper";
-
+import { prisma } from "@/lib/db";
 import SignOutButton from "@/components/sign-out-button";
+import ParticipantQuiz from "./participant-quiz";
 
-export default async function PlayPage() {
+function PlayPageFallback() {
+  return (
+    <main className="min-h-screen bg-zinc-950 px-6 py-12 text-white">
+      <div className="mx-auto max-w-3xl">
+        <p className="text-sm text-violet-400">Blueprint to Live</p>
+        <h1 className="mt-1 text-3xl font-bold">
+          Participant Dashboard
+        </h1>
+        <p className="mt-8 text-zinc-400">Loading your dashboard...</p>
+      </div>
+    </main>
+  );
+}
+
+async function ParticipantDashboard() {
   const { session, participant, team } = await requireParticipant();
 
-  const teamMembers = await import("@/lib/db").then(({ prisma }) =>
-    prisma.participant.findMany({
-      where: { teamId: participant.teamId },
-      select: { name: true, email: true },
-      orderBy: { name: "asc" },
-    }),
-  );
+  const teamMembers = await prisma.participant.findMany({
+    where: { teamId: participant.teamId },
+    select: { name: true, email: true },
+    orderBy: { name: "asc" },
+  });
 
   return (
     <main className="min-h-screen bg-zinc-950 px-6 py-12 text-white">
@@ -20,7 +35,9 @@ export default async function PlayPage() {
         <header className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm text-violet-400">Blueprint to Live</p>
-            <h1 className="mt-1 text-3xl font-bold">Participant Dashboard</h1>
+            <h1 className="mt-1 text-3xl font-bold">
+              Participant Dashboard
+            </h1>
           </div>
           <SignOutButton />
         </header>
@@ -44,15 +61,19 @@ export default async function PlayPage() {
                 className="py-3 first:pt-0 last:pb-0"
               >
                 <p className="font-medium">{member.name}</p>
-                <p className="mt-1 text-sm text-zinc-400">{member.email}</p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  {member.email}
+                </p>
               </li>
             ))}
           </ul>
         </section>
 
+        <ParticipantQuiz initialRulesAccepted={team.rulesAcceptedAt !== null} />
+
         <p className="mt-8 text-sm text-zinc-500">
-          Event information and activities will appear here when they are
-          available.
+          Event information and activities will appear here when they
+          are available.
         </p>
 
         <Link
@@ -63,5 +84,13 @@ export default async function PlayPage() {
         </Link>
       </div>
     </main>
+  );
+}
+
+export default function PlayPage() {
+  return (
+    <Suspense fallback={<PlayPageFallback />}>
+      <ParticipantDashboard />
+    </Suspense>
   );
 }

@@ -7,13 +7,34 @@ datasource db {
   provider = "postgresql"
 }
 
-model Team {
-  id           String        @id @default(cuid())
-  name         String        @unique
-  participants Participant[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+enum QuizRunStatus {
+  NOT_STARTED
+  RUNNING
+  PAUSED
+  ENDED
+}
 
+enum TeamQuizStatus {
+  ACTIVE
+  ELIMINATED
+}
+
+model Team {
+  id              String         @id @default(cuid())
+  name            String         @unique
+  participants    Participant[]
+  rulesAcceptedAt DateTime?
+  lastSeenAt      DateTime?
+  quizStatus      TeamQuizStatus @default(ACTIVE)
+  warningCount    Int            @default(0)
+  eliminatedAt    DateTime?
+  isFinalist      Boolean        @default(false)
+  quizRoster      QuizRoster?
+  responses       Response[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([lastSeenAt])
   @@map("teams")
 }
 
@@ -101,22 +122,22 @@ model Verification {
   @@map("verification")
 }
 
-
-
 model Question {
-  id           String           @id @default(cuid())
-  externalId   String?          @unique
-  text         String           @db.Text
+  id           String            @id @default(cuid())
+  externalId   String?           @unique
+  text         String            @db.Text
   codeLanguage String?
-  code         String?          @db.Text
-  type         String           @default("THEORY")
+  code         String?           @db.Text
+  type         String            @default("THEORY")
   timeSeconds  Int?
-  marks        Int              @default(1)
+  marks        Int               @default(1)
   position     Int
-  included     Boolean          @default(true)
+  included     Boolean           @default(true)
   options      QuestionOption[]
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  runQuestions QuizRunQuestion[]
+  responses    Response[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
   @@index([included, position])
   @@map("questions")
@@ -141,4 +162,59 @@ model Setting {
   value Json
 
   @@map("settings")
+}
+
+model QuizRun {
+  id        String        @id
+  status    QuizRunStatus @default(NOT_STARTED)
+  startedAt DateTime?
+  pausedAt  DateTime?
+  pausedMs  Int           @default(0)
+  skipMs    Int           @default(0)
+  endedAt   DateTime?
+
+  questions QuizRunQuestion[]
+
+  @@map("quiz_runs")
+}
+
+model QuizRunQuestion {
+  id         String @id @default(cuid())
+  runId      String
+  position   Int
+  questionId String
+  durationMs Int
+  gapMs      Int
+
+  run      QuizRun  @relation(fields: [runId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, position])
+  @@unique([runId, questionId])
+  @@index([questionId])
+  @@map("quiz_run_questions")
+}
+
+model QuizRoster {
+  id     String @id @default(cuid())
+  teamId String @unique
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_roster")
+}
+
+model Response {
+  id         String   @id @default(cuid())
+  teamId     String
+  questionId String
+  optionId   String
+  answeredAt DateTime @default(now())
+  responseMs Int
+
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([teamId, questionId])
+  @@index([questionId])
+  @@map("responses")
 }

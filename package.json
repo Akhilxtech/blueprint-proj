@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma skills sync || exit 0",
-    "seed:test": "bun run scripts/seed-test.ts"
+    "seed:test": "bun run scripts/seed-test.ts",
+    "test": "vitest run",
+"test:watch": "vitest"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.7.7",
@@ -36,6 +38,7 @@
     "eslint-config-next": "16.4.0",
     "prisma": "7",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.3"
   }
 }
