@@ -1,0 +1,704 @@
+
+"use client";
+
+import { useMemo, useState, useTransition } from "react";
+import Papa from "papaparse";
+import Link from "next/link";
+import {
+  importCsvParticipants,
+  validateCsvImport,
+} from "./import-actions";
+
+const FIELDS = [
+  { key: "teamName", label: "Team name", required: true },
+  { key: "name", label: "Participant name", required: true },
+  { key: "email", label: "Email address", required: true },
+  { key: "usn", label: "USN", required: false },
+  { key: "phone", label: "Phone", required: false },
+  { key: "semester", label: "Semester", required: false },
+  { key: "branch", label: "Branch", required: false },
+] as const;
+
+type FieldKey = (typeof FIELDS)[number]["key"];
+type Mapping = Record<FieldKey, string>;
+type CsvRow = Record<string, string>;
+
+type ValidationIssue = {
+  severity: "error" | "warning";
+  message: string;
+};
+
+type ValidatedRow = {
+  rowNumber: number;
+  teamName: string;
+  name: string;
+  email: string;
+  usn: string;
+  phone: string;
+  semester: string;
+  branch: string;
+  issues: ValidationIssue[];
+};
+
+const EMPTY_MAPPING: Mapping = {
+  teamName: "",
+  name: "",
+  email: "",
+  usn: "",
+  phone: "",
+  semester: "",
+  branch: "",
+};
+
+const inputClass =
+  "mt-2 w-full rounded-lg border border-white/15 bg-zinc-950 px-3 py-2.5 text-sm text-white outline-none focus:border-violet-400";
+
+const TEMPLATE = [
+  "team_name,name,email,usn,phone,semester,branch",
+  "Team Alpha,Rahul K,rahul@gmail.com,1DB23CS054,9876543210,3,ISE",
+  "Team Alpha,Priya S,priya@gmail.com,1DB23CS055,9876543211,3,ISE",
+  "Team Beta,Aman R,aman@gmail.com,1DB23CS060,9876543212,5,ISE",
+  "Team Beta,Neha P,neha@gmail.com,1DB23CS061,9876543213,5,ISE",
+].join("\n");
+
+const HEADER_ALIASES: Record<FieldKey, string[]> = {
+  teamName: ["teamname", "team", "group", "groupname"],
+  name: ["name", "participantname", "fullname", "studentname"],
+  email: ["email", "emailaddress", "gmail", "mail"],
+  usn: ["usn", "universityseatnumber", "studentusn"],
+  phone: ["phone", "phonenumber", "mobile", "mobilenumber"],
+  semester: ["semester", "sem"],
+  branch: ["branch", "department", "course"],
+};
+
+function normalizeHeader(header: string) {
+  return header.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function guessMapping(headers: string[]): Mapping {
+  const result = { ...EMPTY_MAPPING };
+  const usedHeaders = new Set<string>();
+
+  for (const field of FIELDS) {
+    const match = headers.find(
+      (header) =>
+        !usedHeaders.has(header) &&
+        HEADER_ALIASES[field.key].includes(normalizeHeader(header)),
+    );
+
+    if (match) {
+      result[field.key] = match;
+      usedHeaders.add(match);
+    }
+  }
+
+  return result;
+}
+
+function downloadTemplate() {
+  const blob = new Blob([TEMPLATE], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = "blueprint-team-template.csv";
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadErrorCsv(rows: ValidatedRow[]) {
+  const rejectedRows = rows.filter((row) =>
+    row.issues.some((issue) => issue.severity === "error"),
+  );
+
+  const csv = Papa.unparse(
+    rejectedRows.map((row) => ({
+      row_number: row.rowNumber,
+      team_name: row.teamName,
+      name: row.name,
+      email: row.email,
+      usn: row.usn,
+      phone: row.phone,
+      semester: row.semester,
+      branch: row.branch,
+      errors: row.issues
+        .filter((issue) => issue.severity === "error")
+        .map((issue) => issue.message)
+        .join("; "),
+      warnings: row.issues
+        .filter((issue) => issue.severity === "warning")
+        .map((issue) => issue.message)
+        .join("; "),
+    })),
+  );
+
+  const url = URL.createObjectURL(
+    new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+  );
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = "blueprint-import-errors.csv";
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function getMappedRows(rows: CsvRow[], mapping: Mapping) {
+  return rows.map((row) => {
+    const value = (field: FieldKey) =>
+      mapping[field] ? (row[mapping[field]] ?? "").trim() : "";
+
+    return {
+      teamName: value("teamName"),
+      name: value("name"),
+      email: value("email").toLowerCase(),
+      usn: value("usn"),
+      phone: value("phone"),
+      semester: value("semester"),
+      branch: value("branch"),
+    };
+  });
+}
+
+function getClientValidation(
+  rows: CsvRow[],
+  mapping: Mapping,
+): ValidatedRow[] {
+  const seenEmails = new Set<string>();
+
+  return getMappedRows(rows, mapping).map((row, index) => {
+    const issues: ValidationIssue[] = [];
+
+    if (!row.teamName) {
+      issues.push({ severity: "error", message: "Team name is required." });
+    }
+    if (!row.name) {
+      issues.push({ severity: "error", message: "Participant name is required." });
+    }
+    if (!row.email) {
+      issues.push({ severity: "error", message: "Email is required." });
+    } else if (
+      !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@gmail\.com$/i.test(row.email)
+    ) {
+      issues.push({
+        severity: "error",
+        message: "Enter a valid Gmail address.",
+      });
+    }
+
+    if (row.email) {
+      if (seenEmails.has(row.email)) {
+        issues.push({
+          severity: "error",
+          message: "Duplicate email within this CSV.",
+        });
+      }
+      seenEmails.add(row.email);
+    }
+
+    if (row.branch && row.branch.toLowerCase() !== "ise") {
+      issues.push({ severity: "warning", message: "Branch is not ISE." });
+    }
+
+    return { ...row, rowNumber: index + 2, issues };
+  });
+}
+
+export default function CsvImportWizard() {
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [rows, setRows] = useState<CsvRow[]>([]);
+  const [mapping, setMapping] = useState<Mapping>(EMPTY_MAPPING);
+  const [fileName, setFileName] = useState("");
+  const [error, setError] = useState("");
+  const [isParsing, setIsParsing] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [validatedRows, setValidatedRows] = useState<ValidatedRow[] | null>(
+    null,
+  );
+  const [overrideTeamLimit, setOverrideTeamLimit] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    imported: number;
+    skipped: number;
+    teamsCreated: number;
+    message: string;
+  } | null>(null);
+
+  const previewRows = useMemo(() => rows.slice(0, 5), [rows]);
+
+  const missingRequiredMappings = FIELDS.filter(
+    (field) => field.required && !mapping[field.key],
+  );
+
+  const selectedColumns = FIELDS.map((field) => mapping[field.key]).filter(
+    Boolean,
+  );
+  const duplicateMappings =
+    new Set(selectedColumns).size !== selectedColumns.length;
+
+  const displayedRows = validatedRows ?? getClientValidation(rows, mapping);
+  const errorCount = displayedRows.filter((row) =>
+    row.issues.some((issue) => issue.severity === "error"),
+  ).length;
+  const warningCount = displayedRows.filter((row) =>
+    row.issues.some((issue) => issue.severity === "warning"),
+  ).length;
+
+  function handleFile(file?: File) {
+    setError("");
+    setHeaders([]);
+    setRows([]);
+    setMapping(EMPTY_MAPPING);
+    setFileName("");
+    setValidatedRows(null);
+    setImportResult(null);
+    setOverrideTeamLimit(false);
+
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setError("Please select a CSV file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File size must be 5 MB or smaller.");
+      return;
+    }
+
+    setIsParsing(true);
+    setFileName(file.name);
+
+    Papa.parse<CsvRow>(file, {
+      header: true,
+      skipEmptyLines: "greedy",
+      transformHeader: (header) => header.trim(),
+      transform: (value) => value.trim(),
+      complete: (result) => {
+        setIsParsing(false);
+
+        if (result.errors.length > 0) {
+          setFileName("");
+          setError(`CSV parsing issue: ${result.errors[0].message}`);
+          return;
+        }
+
+        const parsedHeaders = result.meta.fields ?? [];
+
+        if (!parsedHeaders.length || !result.data.length) {
+          setFileName("");
+          setError("The CSV must contain headers and at least one data row.");
+          return;
+        }
+
+        if (parsedHeaders.some((header) => !header)) {
+          setFileName("");
+          setError("Every CSV column must have a non-empty header.");
+          return;
+        }
+
+        if (new Set(parsedHeaders).size !== parsedHeaders.length) {
+          setFileName("");
+          setError("CSV headers must be unique. Rename duplicate columns.");
+          return;
+        }
+
+        if (result.data.length > 500) {
+          setFileName("");
+          setError("A maximum of 500 participant rows can be imported at once.");
+          return;
+        }
+
+        setHeaders(parsedHeaders);
+        setRows(result.data);
+        setMapping(guessMapping(parsedHeaders));
+      },
+      error: (parseError) => {
+        setIsParsing(false);
+        setFileName("");
+        setError(parseError.message || "Unable to read this CSV file.");
+      },
+    });
+  }
+
+  function updateMapping(field: FieldKey, value: string) {
+    setMapping((current) => ({ ...current, [field]: value }));
+    setValidatedRows(null);
+    setImportResult(null);
+    setError("");
+  }
+
+  function validateAgainstDatabase() {
+    setError("");
+    setImportResult(null);
+    setValidatedRows(null);
+
+    const mappedRows = getMappedRows(rows, mapping);
+
+    startTransition(async () => {
+      const result = await validateCsvImport({
+        rows: mappedRows,
+        overrideTeamLimit,
+      });
+
+      if (!result.success) {
+        setError(result.message);
+        return;
+      }
+
+      setValidatedRows(result.rows);
+    });
+  }
+
+  function importParticipants() {
+    if (!validatedRows || errorCount > 0) return;
+
+    const confirmed = window.confirm(
+      `Import ${validatedRows.length} CSV rows? Existing emails will be skipped. Continue?`,
+    );
+
+    if (!confirmed) return;
+
+    setError("");
+    setImportResult(null);
+
+    startTransition(async () => {
+      const result = await importCsvParticipants({
+        rows: getMappedRows(rows, mapping),
+        overrideTeamLimit,
+      });
+
+      if (!result.success) {
+        setError(result.message);
+        return;
+      }
+
+      setImportResult({
+        imported: result.imported,
+        skipped: result.skipped,
+        teamsCreated: result.teamsCreated,
+        message: result.message,
+      });
+
+      setValidatedRows(null);
+    });
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-zinc-400">
+          Step 1 of 3: Upload and map columns
+        </p>
+        <button
+          type="button"
+          onClick={downloadTemplate}
+          className="rounded-lg border border-white/15 px-4 py-2 text-sm hover:bg-white/10"
+        >
+          Download sample CSV
+        </button>
+      </div>
+
+      <section className="rounded-xl border border-white/10 bg-zinc-900 p-5 sm:p-6">
+        <h2 className="text-lg font-semibold">1. Upload CSV</h2>
+        <p className="mt-2 text-sm text-zinc-400">
+          Upload one row per participant. Each row needs a team name.
+        </p>
+
+        <label className="mt-5 block rounded-xl border border-dashed border-white/20 p-6 text-center hover:border-violet-400">
+          <span className="block font-medium">
+            {isParsing ? "Reading CSV..." : "Choose a CSV file"}
+          </span>
+          <span className="mt-2 block text-sm text-zinc-500">
+            CSV files only, maximum 5 MB and 500 rows
+          </span>
+          <input
+            className="mt-4 block w-full text-sm text-zinc-300 file:mr-4 file:rounded-lg file:border-0 file:bg-white file:px-4 file:py-2 file:font-medium file:text-zinc-950"
+            type="file"
+            accept=".csv,text/csv"
+            disabled={isParsing || isPending}
+            onChange={(event) => handleFile(event.target.files?.[0])}
+          />
+        </label>
+
+        {fileName && (
+          <p className="mt-3 text-sm text-emerald-300">
+            Loaded {fileName}: {rows.length} data rows.
+          </p>
+        )}
+      </section>
+
+      {error && (
+        <p role="alert" className="rounded-lg bg-red-500/10 p-3 text-sm text-red-300">
+          {error}
+        </p>
+      )}
+
+      {headers.length > 0 && !importResult && (
+        <>
+          <section className="rounded-xl border border-white/10 bg-zinc-900 p-5 sm:p-6">
+            <h2 className="text-lg font-semibold">2. Map your columns</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              Review the detected mappings. Required fields are marked with *.
+            </p>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {FIELDS.map((field) => (
+                <label key={field.key} className="text-sm font-medium">
+                  {field.label}{field.required ? " *" : " (optional)"}
+                  <select
+                    className={inputClass}
+                    value={mapping[field.key]}
+                    disabled={isPending}
+                    onChange={(event) =>
+                      updateMapping(field.key, event.target.value)
+                    }
+                  >
+                    <option value="">Do not map</option>
+                    {headers.map((header) => (
+                      <option key={header} value={header}>
+                        {header}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+
+            {missingRequiredMappings.length > 0 && (
+              <p className="mt-4 text-sm text-amber-300">
+                Map required fields:{" "}
+                {missingRequiredMappings.map((field) => field.label).join(", ")}.
+              </p>
+            )}
+            {duplicateMappings && (
+              <p className="mt-2 text-sm text-amber-300">
+                A column cannot be assigned to multiple fields.
+              </p>
+            )}
+          </section>
+
+          <section className="rounded-xl border border-white/10 bg-zinc-900 p-5 sm:p-6">
+            <h2 className="text-lg font-semibold">3. Preview your data</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              Showing up to five of {rows.length} rows.
+            </p>
+
+            <div className="mt-4 overflow-x-auto rounded-lg border border-white/10">
+              <table className="w-full min-w-[650px] text-left text-sm">
+                <thead className="bg-zinc-950 text-zinc-400">
+                  <tr>
+                    {FIELDS.map((field) => (
+                      <th key={field.key} className="px-3 py-3 font-medium">
+                        {field.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {previewRows.map((row, index) => (
+                    <tr key={index}>
+                      {FIELDS.map((field) => (
+                        <td key={field.key} className="px-3 py-3 text-zinc-300">
+                          {mapping[field.key]
+                            ? row[mapping[field.key]] || "—"
+                            : "—"}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              disabled={
+                isPending ||
+                missingRequiredMappings.length > 0 ||
+                duplicateMappings
+              }
+              onClick={validateAgainstDatabase}
+              className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isPending ? "Working..." : "Validate against database"}
+            </button>
+            <Link
+              href="/admin/teams"
+              className="rounded-lg border border-white/15 px-5 py-2.5 text-sm text-zinc-300 hover:bg-white/10"
+            >
+              Cancel
+            </Link>
+          </div>
+        </>
+      )}
+
+      {validatedRows && (
+        <section className="rounded-xl border border-white/10 bg-zinc-900 p-5 sm:p-6">
+          <h2 className="text-lg font-semibold">Database validation report</h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            These checks include existing participant emails and current team sizes.
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-3 text-sm">
+            <span className="rounded-lg bg-emerald-500/10 px-3 py-2 text-emerald-300">
+              Rows without errors: {validatedRows.length - errorCount}
+            </span>
+            <span className="rounded-lg bg-red-500/10 px-3 py-2 text-red-300">
+              Errors: {errorCount}
+            </span>
+            <span className="rounded-lg bg-amber-500/10 px-3 py-2 text-amber-300">
+              Warnings: {warningCount}
+            </span>
+          </div>
+
+          {errorCount > 0 && (
+            <button
+              type="button"
+              onClick={() => downloadErrorCsv(validatedRows)}
+              className="mt-4 rounded-lg border border-red-400/30 px-4 py-2 text-sm text-red-300 hover:bg-red-400/10"
+            >
+              Download error report CSV
+            </button>
+          )}
+
+          <div className="mt-5 space-y-3">
+            {validatedRows.map((row) => {
+              const hasErrors = row.issues.some(
+                (issue) => issue.severity === "error",
+              );
+              const hasWarnings = row.issues.some(
+                (issue) => issue.severity === "warning",
+              );
+
+              return (
+                <article
+                  key={row.rowNumber}
+                  className="rounded-lg border border-white/10 p-3"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium">
+                        Row {row.rowNumber}: {row.name || "Unnamed participant"}
+                      </p>
+                      <p className="mt-1 text-sm text-zinc-400">
+                        {row.teamName || "No team"} · {row.email || "No email"}
+                      </p>
+                    </div>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs ${
+                        hasErrors
+                          ? "bg-red-500/10 text-red-300"
+                          : hasWarnings
+                            ? "bg-amber-500/10 text-amber-300"
+                            : "bg-emerald-500/10 text-emerald-300"
+                      }`}
+                    >
+                      {hasErrors ? "Error" : hasWarnings ? "Warning" : "Valid"}
+                    </span>
+                  </div>
+
+                  {row.issues.length === 0 ? (
+                    <p className="mt-2 text-sm text-emerald-300">
+                      No issues detected.
+                    </p>
+                  ) : (
+                    <ul className="mt-2 space-y-1">
+                      {row.issues.map((issue, index) => (
+                        <li
+                          key={index}
+                          className={`text-sm ${
+                            issue.severity === "error"
+                              ? "text-red-300"
+                              : "text-amber-300"
+                          }`}
+                        >
+                          {issue.severity === "error" ? "Error" : "Warning"}:{" "}
+                          {issue.message}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 rounded-lg border border-white/10 p-4">
+            <label className="flex items-start gap-3 text-sm text-zinc-300">
+              <input
+                type="checkbox"
+                className="mt-1 accent-violet-500"
+                checked={overrideTeamLimit}
+                disabled={isPending}
+                onChange={(event) => {
+                  setOverrideTeamLimit(event.target.checked);
+                  setValidatedRows(null);
+                }}
+              />
+              <span>
+                <span className="font-medium text-white">
+                  Override team-size restrictions
+                </span>
+                <span className="mt-1 block text-zinc-400">
+                  Allow teams to finish with fewer than 2 or more than 3 members.
+                  Use only if this is intentional.
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              disabled={isPending || errorCount > 0}
+              onClick={importParticipants}
+              className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isPending ? "Importing..." : "Import participants"}
+            </button>
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={validateAgainstDatabase}
+              className="rounded-lg border border-white/15 px-5 py-2.5 text-sm hover:bg-white/10 disabled:opacity-40"
+            >
+              Revalidate
+            </button>
+          </div>
+        </section>
+      )}
+
+      {importResult && (
+        <section className="rounded-xl border border-emerald-400/20 bg-zinc-900 p-5 sm:p-6">
+          <h2 className="text-lg font-semibold text-emerald-300">
+            Import completed
+          </h2>
+          <p className="mt-2 text-sm text-zinc-300">{importResult.message}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-white/10 p-4">
+              <p className="text-sm text-zinc-400">Participants imported</p>
+              <p className="mt-1 text-2xl font-bold">{importResult.imported}</p>
+            </div>
+            <div className="rounded-lg border border-white/10 p-4">
+              <p className="text-sm text-zinc-400">Existing emails skipped</p>
+              <p className="mt-1 text-2xl font-bold">{importResult.skipped}</p>
+            </div>
+            <div className="rounded-lg border border-white/10 p-4">
+              <p className="text-sm text-zinc-400">Teams created</p>
+              <p className="mt-1 text-2xl font-bold">{importResult.teamsCreated}</p>
+            </div>
+          </div>
+          <Link
+            href="/admin/teams"
+            className="mt-5 inline-block rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950"
+          >
+            View teams
+          </Link>
+        </section>
+      )}
+    </div>
+  );
+}
