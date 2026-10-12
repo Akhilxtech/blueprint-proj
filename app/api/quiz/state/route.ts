@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import { requireParticipant } from "@/lib/auth-helper";
 import { prisma } from "@/lib/db";
@@ -57,6 +56,14 @@ export async function GET() {
   const currentSlot =
     clock.index >= 0 ? run?.questions[clock.index] : undefined;
 
+  // Duration of the currently active question, in milliseconds.
+  const questionDurationMs =
+  currentSlot && clock.questionStartAtMs !== null
+    ? Math.max(
+        0,
+        clock.questionEndAtMs! - clock.questionStartAtMs,
+      )
+    : 0;
   const currentQuestionId =
     clock.phase === "QUESTION" || clock.phase === "GAP"
       ? currentSlot?.questionId ?? null
@@ -66,10 +73,10 @@ export async function GET() {
   // or after the quiz has ended.
   const previousSlot =
     clock.index > 0 ? run?.questions[clock.index - 1] : undefined;
-
-  const canRevealPrevious =
-    clock.phase === "QUESTION" ||
-    clock.phase === "ENDED";
+const canRevealPrevious =
+  clock.phase === "GAP" ||
+  clock.phase === "QUESTION" ||
+  clock.phase === "ENDED";
 
   const verdictQuestionId = canRevealPrevious
     ? clock.phase === "ENDED"
@@ -89,6 +96,7 @@ export async function GET() {
           select: { optionId: true },
         })
       : null,
+
     verdictQuestionId
       ? prisma.response.findUnique({
           where: {
@@ -116,7 +124,7 @@ export async function GET() {
 
   const verdict = verdictResponse
     ? {
-        questionId: verdictQuestionId,
+        questionId: verdictQuestionId!,
         selectedOptionId: verdictResponse.optionId,
         isCorrect:
           verdictResponse.question.options.find(
@@ -134,6 +142,8 @@ export async function GET() {
     questionEndsAtMs: clock.questionEndAtMs,
     msUntilStart: clock.msUntilStart,
     remainingMs: clock.remainingMs,
+    questionDurationMs,
+
     team: {
       id: team.id,
       name: team.name,
@@ -142,6 +152,7 @@ export async function GET() {
       warningCount: team.warningCount,
       maxWarnings: settings.maxWarnings,
     },
+
     lockedOptionId: lockedResponse?.optionId ?? null,
     verdict,
   });

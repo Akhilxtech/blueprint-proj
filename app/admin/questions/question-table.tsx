@@ -114,11 +114,13 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
     });
   }
 
+
+
 const [isDeletingAll, startDeleteTransition] = useTransition();
 
 function handleDeleteAllQuestions() {
   const confirmed = window.confirm(
-    "Delete ALL questions and their options? This cannot be undone."
+    "Delete ALL questions and their options? This cannot be undone.",
   );
 
   if (!confirmed) return;
@@ -127,17 +129,18 @@ function handleDeleteAllQuestions() {
     try {
       const result = await deleteAllQuestions();
 
-      if (result.success) {
-        window.alert(
-          `Deleted ${result.deletedQuestions} questions successfully.`
-        );
-        router.refresh();
+      if (!result.success) {
+        window.alert(result.message);
+        return;
       }
+
+      window.alert(result.message);
+      router.refresh();
     } catch (error) {
       window.alert(
         error instanceof Error
           ? error.message
-          : "Failed to delete questions."
+          : "Failed to delete questions.",
       );
     }
   });
