@@ -1,502 +1,7 @@
 
-// "use client";
-// import { useMemo, useState, useTransition } from "react";
-// import { useRouter } from "next/navigation";
-// import { deleteEmptyTeam } from "./teams-actions";
-// import {
-//   deleteParticipant,
-//   updateParticipant,
-//   type UpdateParticipantInput,
-// } from "./participant-actions";
-
-
-
-// type Member = {
-//   id: string;
-//   name: string;
-//   email: string;
-//   usn: string | null;
-//   phone: string | null;
-//   semester: string | null;
-//   branch: string | null;
-// };
-
-// type Team = {
-//   id: string;
-//   name: string;
-//   members: Member[];
-// };
-
-// type EditForm = {
-//   participantId: string;
-//   name: string;
-//   email: string;
-//   usn: string;
-//   phone: string;
-//   semester: string;
-//   branch: string;
-//   teamId: string;
-//   overrideTeamLimit: boolean;
-// };
-
-// const inputClass =
-//   "mt-1 w-full rounded-lg border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-violet-400";
-
-// export default function TeamsTable({
-//   initialTeams,
-// }: {
-//   initialTeams: Team[];
-// }) {
-//   const router = useRouter();
-//   const [teams, setTeams] = useState(initialTeams);
-  
-//   const [search, setSearch] = useState("");
-//   const [message, setMessage] = useState("");
-//   const [isPending, startTransition] = useTransition();
-//   const [editing, setEditing] = useState<EditForm | null>(null);
-
-//   const filteredTeams = useMemo(() => {
-//     const query = search.trim().toLowerCase();
-
-//     if (!query) return teams;
-
-//     return teams.filter((team) => {
-//       return (
-//         team.name.toLowerCase().includes(query) ||
-//         team.members.some(
-//           (member) =>
-//             member.name.toLowerCase().includes(query) ||
-//             member.email.toLowerCase().includes(query) ||
-//             (member.usn ?? "").toLowerCase().includes(query),
-//         )
-//       );
-//     });
-//   }, [teams, search]);
-
-//   const targetTeam = editing
-//     ? teams.find((team) => team.id === editing.teamId)
-//     : undefined;
-
-//   const originalTeam = editing
-//     ? teams.find((team) =>
-//         team.members.some((member) => member.id === editing.participantId),
-//       )
-//     : undefined;
-
-//   const exceedsLimit =
-//     !!editing &&
-//     !!targetTeam &&
-//     targetTeam.id !== originalTeam?.id &&
-//     targetTeam.members.length + 1 > 3;
-
-//   function handleDeleteTeam(team: Team) {
-//     if (team.members.length !== 0 || isPending) return;
-
-//     if (!window.confirm(`Delete empty team "${team.name}"?`)) return;
-
-//     setMessage("");
-
-//     startTransition(async () => {
-//       const result = await deleteEmptyTeam(team.id);
-
-//       if (!result.success) {
-//         setMessage(result.error);
-//         return;
-//       }
-
-//       setTeams((current) =>
-//         current.filter((item) => item.id !== team.id),
-//       );
-//       setMessage(`Deleted ${team.name}.`);
-//     });
-//   }
-
-//   function openEdit(team: Team, member: Member) {
-//     setMessage("");
-//     setEditing({
-//       participantId: member.id,
-//       name: member.name,
-//       email: member.email,
-//       usn: member.usn ?? "",
-//       phone: member.phone ?? "",
-//       semester: member.semester ?? "",
-//       branch: member.branch ?? "",
-//       teamId: team.id,
-//       overrideTeamLimit: false,
-//     });
-//   }
-
-//   function updateField(field: keyof EditForm, value: string | boolean) {
-//     setEditing((current) =>
-//       current ? { ...current, [field]: value } : current,
-//     );
-//   }
-
-//   function handleUpdate(event: React.FormEvent<HTMLFormElement>) {
-//     event.preventDefault();
-//     if (!editing) return;
-
-//     setMessage("");
-
-//     const input: UpdateParticipantInput = {
-//       ...editing,
-//       name: editing.name.trim(),
-//       email: editing.email.trim().toLowerCase(),
-//       usn: editing.usn.trim(),
-//       phone: editing.phone.trim(),
-//       semester: editing.semester.trim(),
-//       branch: editing.branch.trim(),
-//     };
-
-//     startTransition(async () => {
-//       const result = await updateParticipant(input);
-
-//       if (!result.success) {
-//         setMessage(result.message);
-//         return;
-//       }
-
-//       setEditing(null);
-//       setMessage(result.message);
-//       router.refresh();
-//     });
-//   }
-
-//   function handleDeleteParticipant(member: Member) {
-//     if (isPending) return;
-
-//     if (
-//       !window.confirm(
-//         `Delete participant "${member.name}" (${member.email})? This cannot be undone.`,
-//       )
-//     ) {
-//       return;
-//     }
-
-//     setMessage("");
-
-//     startTransition(async () => {
-//       const result = await deleteParticipant(member.id);
-
-//       if (!result.success) {
-//         setMessage(result.message);
-//         return;
-//       }
-
-//       setTeams((current) =>
-//         current.map((team) => ({
-//           ...team,
-//           members: team.members.filter(
-//             (item) => item.id !== member.id,
-//           ),
-//         })),
-//       );
-
-//       setMessage(result.message);
-//       router.refresh();
-//     });
-//   }
-
-//   return (
-//     <div className="space-y-4">
-//       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-//         <input
-//           value={search}
-//           onChange={(event) => setSearch(event.target.value)}
-//           placeholder="Search teams, names, emails, or USNs..."
-//           aria-label="Search teams and participants"
-//           className="w-full rounded-lg border border-white/15 bg-zinc-900 px-4 py-3 text-sm outline-none focus:border-violet-400 sm:max-w-md"
-//         />
-
-//         <p className="text-sm text-zinc-400">
-//           {filteredTeams.length} of {teams.length} teams
-//         </p>
-//       </div>
-
-//       {message && (
-//         <p role="status" className="text-sm text-zinc-300">
-//           {message}
-//         </p>
-//       )}
-
-//       <div className="overflow-x-auto rounded-xl border border-white/10">
-//         <table className="w-full min-w-[850px] border-collapse text-left text-sm">
-//           <thead className="bg-zinc-900 text-zinc-400">
-//             <tr>
-//               <th className="px-4 py-3 font-medium">Team</th>
-//               <th className="px-4 py-3 font-medium">Members</th>
-//               <th className="px-4 py-3 font-medium">Member count</th>
-//               <th className="px-4 py-3 font-medium">Team action</th>
-//             </tr>
-//           </thead>
-
-//           <tbody className="divide-y divide-white/10">
-//             {filteredTeams.map((team) => (
-//               <tr key={team.id} className="align-top hover:bg-white/[0.02]">
-//                 <td className="px-4 py-4 font-medium">{team.name}</td>
-
-//                 <td className="px-4 py-4">
-//                   {team.members.length === 0 ? (
-//                     <span className="text-zinc-500">No members</span>
-//                   ) : (
-//                     <ul className="space-y-5">
-//                       {team.members.map((member) => (
-//                         <li key={member.id}>
-//                           <p className="font-medium text-zinc-200">
-//                             {member.name}
-//                           </p>
-//                           <p className="mt-1 text-zinc-400">{member.email}</p>
-
-//                           {(member.usn ||
-//                             member.phone ||
-//                             member.semester ||
-//                             member.branch) && (
-//                             <p className="mt-1 text-xs text-zinc-500">
-//                               {[
-//                                 member.usn,
-//                                 member.phone,
-//                                 member.semester
-//                                   ? `${member.semester}th semester`
-//                                   : null,
-//                                 member.branch,
-//                                 member.phone,
-//                               ]
-//                                 .filter(Boolean)
-//                                 .filter(
-//                                   (value, index, values) =>
-//                                     values.indexOf(value) === index,
-//                                 )
-//                                 .join(" · ")}
-//                             </p>
-//                           )}
-
-//                           <div className="mt-2 flex flex-wrap gap-2">
-//                             <button
-//                               type="button"
-//                               disabled={isPending}
-//                               onClick={() => openEdit(team, member)}
-//                               className="rounded-md border border-violet-400/30 px-3 py-1.5 text-xs text-violet-200 hover:bg-violet-400/10 disabled:opacity-50"
-//                             >
-//                               Edit / Move
-//                             </button>
-
-//                             <button
-//                               type="button"
-//                               disabled={isPending}
-//                               onClick={() => handleDeleteParticipant(member)}
-//                               className="rounded-md border border-red-400/30 px-3 py-1.5 text-xs text-red-300 hover:bg-red-400/10 disabled:opacity-50"
-//                             >
-//                               Delete participant
-//                             </button>
-//                           </div>
-//                         </li>
-//                       ))}
-//                     </ul>
-//                   )}
-//                 </td>
-
-//                 <td className="px-4 py-4">
-//                   <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs">
-//                     {team.members.length}
-//                   </span>
-//                 </td>
-
-//                 <td className="px-4 py-4">
-//                   <button
-//                     type="button"
-//                     disabled={team.members.length !== 0 || isPending}
-//                     onClick={() => handleDeleteTeam(team)}
-//                     className="rounded-md border border-red-400/30 px-3 py-2 text-xs font-medium text-red-300 transition hover:bg-red-400/10 disabled:cursor-not-allowed disabled:opacity-30"
-//                     title={
-//                       team.members.length
-//                         ? "Only empty teams can be deleted"
-//                         : "Delete empty team"
-//                     }
-//                   >
-//                     Delete empty team
-//                   </button>
-//                 </td>
-//               </tr>
-//             ))}
-
-//             {filteredTeams.length === 0 && (
-//               <tr>
-//                 <td colSpan={4} className="px-4 py-10 text-center text-zinc-400">
-//                   No matching teams found.
-//                 </td>
-//               </tr>
-//             )}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {editing && (
-//         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-4">
-//           <form
-//             onSubmit={handleUpdate}
-//             className="my-auto max-h-[90vh] w-full max-w-2xl space-y-5 overflow-y-auto rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl"
-//           >
-//             <div className="flex items-start justify-between gap-4">
-//               <div>
-//                 <h2 className="text-xl font-bold">Edit participant</h2>
-//                 <p className="mt-1 text-sm text-zinc-400">
-//                   Update details or move this member to another team.
-//                 </p>
-//               </div>
-
-//               <button
-//                 type="button"
-//                 onClick={() => setEditing(null)}
-//                 className="rounded-md px-3 py-1 text-zinc-400 hover:bg-white/10 hover:text-white"
-//                 aria-label="Close edit form"
-//               >
-//                 ✕
-//               </button>
-//             </div>
-
-//             <div className="grid gap-4 sm:grid-cols-2">
-//               <label className="text-sm text-zinc-300">
-//                 Full name *
-//                 <input
-//                   className={inputClass}
-//                   value={editing.name}
-//                   onChange={(event) => updateField("name", event.target.value)}
-//                   required
-//                 />
-//               </label>
-
-//               <label className="text-sm text-zinc-300">
-//                 Gmail address *
-//                 <input
-//                   className={inputClass}
-//                   type="email"
-//                   pattern="[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@gmail\.com"
-//                   title="Enter an email address ending in @gmail.com"
-//                   value={editing.email}
-//                   onChange={(event) => updateField("email", event.target.value)}
-//                   required
-//                 />
-//               </label>
-
-//               <label className="text-sm text-zinc-300">
-//                 USN
-//                 <input
-//                   className={inputClass}
-//                   value={editing.usn}
-//                   onChange={(event) => updateField("usn", event.target.value)}
-//                 />
-//               </label>
-
-//               <label className="text-sm text-zinc-300">
-//                 Phone
-//                 <input
-//                   className={inputClass}
-//                   type="tel"
-//                   value={editing.phone}
-//                   onChange={(event) => updateField("phone", event.target.value)}
-//                 />
-//               </label>
-
-//               <label className="text-sm text-zinc-300">
-//                 Semester
-//                 <select
-//                   className={inputClass}
-//                   value={editing.semester}
-//                   onChange={(event) =>
-//                     updateField("semester", event.target.value)
-//                   }
-//                 >
-//                   <option value="">Select semester</option>
-//                   {[3, 4, 5, 6, 7].map((semester) => (
-//                     <option key={semester} value={String(semester)}>
-//                       {semester}th semester
-//                     </option>
-//                   ))}
-//                 </select>
-//               </label>
-
-//               <label className="text-sm text-zinc-300">
-//                 Branch
-//                 <input
-//                   className={inputClass}
-//                   value={editing.branch}
-//                   onChange={(event) => updateField("branch", event.target.value)}
-//                 />
-//               </label>
-//             </div>
-
-//             <label className="block text-sm text-zinc-300">
-//               Team *
-//               <select
-//                 className={inputClass}
-//                 value={editing.teamId}
-//                 onChange={(event) => {
-//                   setEditing((current) =>
-//                     current
-//                       ? {
-//                           ...current,
-//                           teamId: event.target.value,
-//                           overrideTeamLimit: false,
-//                         }
-//                       : current,
-//                   );
-//                 }}
-//                 required
-//               >
-//                 {teams.map((team) => (
-//                   <option key={team.id} value={team.id}>
-//                     {team.name} ({team.members.length} members)
-//                   </option>
-//                 ))}
-//               </select>
-//             </label>
-
-//             {exceedsLimit && (
-//               <label className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
-//                 <input
-//                   type="checkbox"
-//                   className="mt-1 accent-violet-400"
-//                   checked={editing.overrideTeamLimit}
-//                   onChange={(event) =>
-//                     updateField("overrideTeamLimit", event.target.checked)
-//                   }
-//                 />
-//                 Allow the destination team to exceed 3 members.
-//               </label>
-//             )}
-
-//             <div className="flex flex-wrap gap-3 border-t border-white/10 pt-5">
-//               <button
-//                 type="submit"
-//                 disabled={isPending}
-//                 className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 disabled:opacity-50"
-//               >
-//                 {isPending ? "Saving..." : "Save changes"}
-//               </button>
-
-//               <button
-//                 type="button"
-//                 onClick={() => setEditing(null)}
-//                 disabled={isPending}
-//                 className="rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/10"
-//               >
-//                 Cancel
-//               </button>
-//             </div>
-//           </form>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-
-
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -531,15 +36,13 @@ type Member = {
 };
 
 type Team = {
-
   id: string;
-
   name: string;
-
   members: Member[];
-
+  quizStatus: "ACTIVE" | "ELIMINATED";
+  warningCount: number;
+  eliminatedAt: string | null;
 };
-
 type DeleteTarget =
   | { type: "participant"; member: Member }
   | { type: "team"; team: Team };
@@ -571,14 +74,13 @@ const inputClass =
   "mt-1 w-full rounded-lg border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-violet-400";
 
 export default function TeamsTable({
-
-initialTeams,
-
+  initialTeams,
+  maxWarnings,
 }: {
-
   initialTeams: Team[];
-
+  maxWarnings: number;
 }) {
+  const [teamActionLoading, setTeamActionLoading] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -593,13 +95,37 @@ initialTeams,
   const [editing, setEditing] = useState<EditForm | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
 
-  const filteredTeams = useMemo(() => {
+  useEffect(() => {
+  const interval = window.setInterval(() => {
+    router.refresh();
+  }, 2000);
 
-    const query = search.trim().toLowerCase();
+  return () => window.clearInterval(interval);
+}, [router]);
 
-    if (!query) return teams;
+const displayedTeams = useMemo(
+  () =>
+    teams.map((team) => {
+      const refreshed = initialTeams.find((item) => item.id === team.id);
 
-    return teams.filter((team) => {
+      return refreshed
+        ? {
+            ...team,
+            quizStatus: refreshed.quizStatus,
+            warningCount: refreshed.warningCount,
+            eliminatedAt: refreshed.eliminatedAt,
+          }
+        : team;
+    }),
+  [teams, initialTeams],
+);
+
+ const filteredTeams = useMemo(() => {
+  const query = search.trim().toLowerCase();
+
+  if (!query) return displayedTeams;
+
+  return displayedTeams.filter((team) => {
 
       return (
 
@@ -621,8 +147,7 @@ member.email.toLowerCase().includes(query) ||
 
     });
 
-  }, [teams, search]);
-
+  }, [displayedTeams, search]);
   const targetTeam = editing
 
     ? teams.find((team) => team.id === editing.teamId)
@@ -648,6 +173,83 @@ team.members.some((member) => member.id === editing.participantId),
     targetTeam.id !== originalTeam?.id &&
 
     targetTeam.members.length + 1 > 3;
+
+
+    async function handleWarningChange(team: Team, delta: 1 | -1) {
+  if (teamActionLoading) return;
+
+  setTeamActionLoading(team.id);
+  setMessage("");
+
+  try {
+    const response = await fetch(
+      `/api/admin/teams/${encodeURIComponent(team.id)}/warnings`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ delta }),
+      },
+    );
+
+    const data = (await response.json()) as {
+      error?: string;
+      warningCount?: number;
+      quizStatus?: "ACTIVE" | "ELIMINATED";
+    };
+
+    if (!response.ok) {
+      throw new Error(data.error ?? "Could not update team warnings.");
+    }
+
+    setMessage(
+      `${team.name}: warning count updated to ${data.warningCount}.`,
+    );
+    router.refresh();
+  } catch (error) {
+    setMessage(
+      error instanceof Error
+        ? error.message
+        : "Could not update team warnings.",
+    );
+  } finally {
+    setTeamActionLoading(null);
+  }
+}
+
+async function handleRestoreTeam(team: Team) {
+  if (teamActionLoading) return;
+
+  const confirmed = window.confirm(
+    `Restore ${team.name}? This will reset its warning count to zero.`,
+  );
+
+  if (!confirmed) return;
+
+  setTeamActionLoading(team.id);
+  setMessage("");
+
+  try {
+    const response = await fetch(
+      `/api/admin/teams/${encodeURIComponent(team.id)}/restore`,
+      { method: "POST" },
+    );
+
+    const data = (await response.json()) as { error?: string };
+
+    if (!response.ok) {
+      throw new Error(data.error ?? "Could not restore team.");
+    }
+
+    setMessage(`${team.name} restored successfully.`);
+    router.refresh();
+  } catch (error) {
+    setMessage(
+      error instanceof Error ? error.message : "Could not restore team.",
+    );
+  } finally {
+    setTeamActionLoading(null);
+  }
+}
 
   function handleDeleteTeam(team: Team) {
     if (team.members.length !== 0 || isPending) return;
@@ -980,35 +582,83 @@ className="rounded-md border border-red-400/30 px-3 py-1.5 text-xs text-red-300 
 
                 </td>
 
-                <td className="px-4 py-4">
+                
+<td className="px-4 py-4">
+  <div className="flex min-w-48 flex-col items-start gap-3">
+    <span
+      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+        team.quizStatus === "ELIMINATED"
+          ? "bg-red-400/10 text-red-300"
+          : "bg-emerald-400/10 text-emerald-300"
+      }`}
+    >
+      {team.quizStatus}
+    </span>
 
-                  <button
+    <div className="text-xs text-zinc-400">
+      Warnings:{" "}
+      <span className="font-semibold text-white">
+        {team.warningCount}
+        {maxWarnings > 0 ? ` / ${maxWarnings}` : ""}
+      </span>
+    </div>
 
-type="button"
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        disabled={
+          !!teamActionLoading ||
+          team.warningCount === 0
+        }
+        onClick={() => handleWarningChange(team, -1)}
+        className="rounded-md border border-white/15 px-3 py-1.5 text-xs hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        - Warning
+      </button>
 
-disabled={team.members.length !== 0 || isPending}
+      <button
+        type="button"
+        disabled={!!teamActionLoading}
+        onClick={() => handleWarningChange(team, 1)}
+        className="rounded-md border border-amber-400/30 px-3 py-1.5 text-xs text-amber-200 hover:bg-amber-400/10 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        + Warning
+      </button>
 
-onClick={() => handleDeleteTeam(team)}
+      {team.quizStatus === "ELIMINATED" && (
+        <button
+          type="button"
+          disabled={!!teamActionLoading}
+          onClick={() => handleRestoreTeam(team)}
+          className="rounded-md border border-emerald-400/30 px-3 py-1.5 text-xs text-emerald-200 hover:bg-emerald-400/10 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {teamActionLoading === team.id
+            ? "Processing..."
+            : "Restore team"}
+        </button>
+      )}
 
-className="rounded-md border border-red-400/30 px-3 py-2 text-xs font-medium text-red-300 transition hover:bg-red-400/10 disabled:cursor-not-allowed disabled:opacity-30"
+      <button
+        type="button"
+        disabled={
+          team.members.length !== 0 ||
+          isPending ||
+          !!teamActionLoading
+        }
+        onClick={() => handleDeleteTeam(team)}
+        className="rounded-md border border-red-400/30 px-3 py-2 text-xs font-medium text-red-300 transition hover:bg-red-400/10 disabled:cursor-not-allowed disabled:opacity-30"
+        title={
+          team.members.length
+            ? "Only empty teams can be deleted"
+            : "Delete empty team"
+        }
+      >
+        Delete empty team
+      </button>
+    </div>
+  </div>
+</td>
 
-title={
-
-team.members.length
-
-                        ? "Only empty teams can be deleted"
-
-                        : "Delete empty team"
-
-                    }
-
-                  >
-
-                    Delete empty team
-
-                  </button>
-
-                </td>
 
               </tr>
 

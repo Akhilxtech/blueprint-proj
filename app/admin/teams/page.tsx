@@ -1,8 +1,9 @@
 
 import { prisma } from "@/lib/db";
 import TeamsTable from "./teams-table";
-import { connection } from "next/server";
+import { connection } from "next/server"
 import DeleteAllParticipantsButton from "@/components/admin/delete-all-participants-button";
+import { getSettings } from "@/lib/settings";
 export const instant = false;
 
 export default async function TeamsPage() {
@@ -25,12 +26,16 @@ export default async function TeamsPage() {
     },
   });
 
-  const serializedTeams = teams.map((team) => ({
-    id: team.id,
-    name: team.name,
-    members: team.participants,
-  }));
+  const settings = await getSettings();
 
+const serializedTeams = teams.map((team) => ({
+  id: team.id,
+  name: team.name,
+  members: team.participants,
+  quizStatus: team.quizStatus,
+  warningCount: team.warningCount,
+  eliminatedAt: team.eliminatedAt?.toISOString() ?? null,
+}));
   const participantCount = teams.reduce(
   (sum, team) => sum + team.participants.length,
   0,
@@ -89,9 +94,9 @@ export default async function TeamsPage() {
       </div>
 
       <div className="mt-8">
-        <TeamsTable
-  key={JSON.stringify(serializedTeams)}
+       <TeamsTable
   initialTeams={serializedTeams}
+  maxWarnings={settings.maxWarnings}
 />
       </div>
     </section>

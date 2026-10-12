@@ -59,6 +59,10 @@ export async function POST(request: Request) {
     return json({ error: "Team is not on the quiz roster" }, 403);
   }
 
+  if (team.quizStatus !== "ACTIVE") {
+  return json({ error: "Team is not active" }, 403);
+}
+
   // An existing response is immutable. Return its locked option
   // without exposing whether that option is correct.
   const existing = await prisma.response.findUnique({
