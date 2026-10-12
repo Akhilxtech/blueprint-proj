@@ -34,8 +34,7 @@ model Team {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
-  tabSwitchViolations TabSwitchViolation[]
-
+violationEvents ViolationEvent[]
   @@index([lastSeenAt])
   @@map("teams")
 }
@@ -222,12 +221,14 @@ model Response {
 }
 
 
-model TabSwitchViolation {
-  id             String   @id @default(cuid())
-  eventId        String   @unique
-  teamId         String
-  awayDurationMs Int
-  createdAt      DateTime @default(now())
+
+model ViolationEvent {
+  id            String   @id @default(cuid())
+  teamId        String
+  clientEventId String   @unique
+  startedAt     DateTime
+  durationMs    Int
+  createdAt     DateTime @default(now())
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
