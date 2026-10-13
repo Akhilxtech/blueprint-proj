@@ -1,0 +1,528 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+type Settings = {
+  weightRound1: number;
+  weightRound2: number;
+  finalistCount: number;
+};
+
+type Round2Row = {
+  teamId: string;
+  teamName: string;
+  marks: number[];
+  sectionA: number;
+  sectionB: number;
+  sectionC: number;
+  round2Total: number;
+  round2Percent: number;
+  round1Score: number;
+  round1Percent: number;
+  totalCorrectMs: number;
+  combined: number;
+  rank: number;
+  isFinalist: boolean;
+  suddenDeathTie: boolean;
+  cutLineTie: boolean;
+  whyRankedHere: string;
+};
+
+type Snapshot = {
+  settings: Settings;
+  rows: Round2Row[];
+  totalTeams: number;
+  finalistCount: number;
+  cutLineTie: boolean;
+};
+
+const panel = "rounded-2xl border border-white/10 bg-zinc-900 p-5";
+const button =
+  "rounded-lg border border-white/15 px-3 py-2 text-sm font-medium transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
+const field =
+  "rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-pink-500";
+
+export default function Round2Dashboard() {
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [weightRound1, setWeightRound1] = useState(40);
+  const [weightRound2, setWeightRound2] = useState(60);
+  const [finalistCount, setFinalistCount] = useState(10);
+
+  const refresh = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/round2", {
+        cache: "no-store",
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Could not load Round 2.");
+      }
+
+      const data = payload as Snapshot;
+      setSnapshot(data);
+      setWeightRound1(Math.round(data.settings.weightRound1 * 100));
+      setWeightRound2(Math.round(data.settings.weightRound2 * 100));
+      setFinalistCount(data.settings.finalistCount);
+      setError("");
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not load Round 2.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const initial = window.setTimeout(() => void refresh(), 0);
+    return () => window.clearTimeout(initial);
+  }, [refresh]);
+
+  const rows = snapshot?.rows ?? [];
+
+  const visibleRows = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return rows.filter((row) => row.teamName.toLowerCase().includes(query));
+  }, [rows, search]);
+
+  const saveMark = async (
+    row: Round2Row,
+    questionNo: number,
+    rawValue: string,
+  ) => {
+    if (rawValue.trim() === "") return;
+
+    const marks = Number(rawValue);
+    if (!Number.isInteger(marks) || marks < 0 || marks > 10) {
+      setError("Marks must be a whole number between 0 and 10.");
+      return;
+    }
+
+    const key = `${row.teamId}-${questionNo}`;
+    setSaving(key);
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await fetch("/api/admin/round2/marks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamId: row.teamId, questionNo, marks }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Could not save marks.");
+      }
+
+      setNotice(`Saved Q${questionNo} for ${row.teamName}.`);
+      await refresh();
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not save marks.",
+      );
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const saveSettings = async () => {
+    if (
+      weightRound1 < 0 ||
+      weightRound2 < 0 ||
+      weightRound1 + weightRound2 !== 100
+    ) {
+      setError("Round 1 and Round 2 weights must add up to 100%.");
+      return;
+    }
+
+    if (!Number.isInteger(finalistCount) || finalistCount < 1) {
+      setError("Finalist count must be a positive whole number.");
+      return;
+    }
+
+    setSaving("settings");
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await fetch("/api/admin/round2/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          weightRound1: weightRound1 / 100,
+          weightRound2: weightRound2 / 100,
+          finalistCount,
+        }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Could not save settings.");
+      }
+
+      setNotice("Scoring settings saved.");
+      await refresh();
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not save settings.",
+      );
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const selectFinalists = async () => {
+    const confirmed = window.confirm(
+      `Select the top ${snapshot?.finalistCount ?? finalistCount} teams as finalists? This will replace the current finalist selection.`,
+    );
+    if (!confirmed) return;
+
+    setSaving("finalists");
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await fetch("/api/admin/round2/finalists", {
+        method: "POST",
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Could not select finalists.");
+      }
+
+      await refresh();
+      setNotice(
+        payload.warning
+          ? `Finalists updated. WARNING: ${payload.warning}`
+          : `Selected ${payload.finalistCount} finalists.`,
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not select finalists.",
+      );
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const toggleFinalist = async (row: Round2Row) => {
+    setSaving(row.teamId);
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await fetch(
+        `/api/admin/round2/teams/${encodeURIComponent(row.teamId)}/finalist`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isFinalist: !row.isFinalist }),
+        },
+      );
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Could not update finalist.");
+      }
+
+      setNotice(
+        `${row.teamName} ${row.isFinalist ? "removed from" : "added to"} finalists.`,
+      );
+      await refresh();
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not update finalist.",
+      );
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const exportCsv = () => {
+    if (!rows.length) return;
+
+    const headers = [
+      "Rank",
+      "Team",
+      ...Array.from({ length: 10 }, (_, i) => `Q${i + 1}`),
+      "Section A",
+      "Section B",
+      "Section C",
+      "Round 2 Total",
+      "Round 1 Raw Score",
+      "Round 1 Percent",
+      "Combined Score",
+      "Finalist",
+      "Tie Warning",
+      "Ranking Explanation",
+    ];
+
+    const escapeCsv = (value: string | number | boolean) =>
+      `"${String(value).replaceAll('"', '""')}"`;
+
+    const lines = [
+      headers.map(escapeCsv).join(","),
+      ...rows.map((row) =>
+        [
+          row.rank,
+          row.teamName,
+          ...row.marks,
+          row.sectionA,
+          row.sectionB,
+          row.sectionC,
+          row.round2Total,
+          row.round1Score,
+          row.round1Percent,
+          row.combined,
+          row.isFinalist ? "Yes" : "No",
+          row.cutLineTie ? "Cut-line tie" : row.suddenDeathTie ? "Exact tie" : "",
+          row.whyRankedHere,
+        ]
+          .map(escapeCsv)
+          .join(","),
+      ),
+    ];
+
+    const blob = new Blob(["\uFEFF", lines.join("\r\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "round-2-results.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const finalistTotal = rows.filter((row) => row.isFinalist).length;
+
+  return (
+    <section className="mx-auto max-w-[1600px] space-y-6">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-widest text-pink-400">
+            Administration
+          </p>
+          <h1 className="mt-2 text-3xl font-bold">Round 2 Evaluation</h1>
+          <p className="mt-2 text-sm text-zinc-400">
+            Enter paper-test marks, review combined rankings, and manage
+            finalists.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <button className={button} onClick={() => void refresh()} disabled={loading}>
+            {loading ? "Loading..." : "Refresh"}
+          </button>
+          <button className={button} onClick={exportCsv} disabled={!rows.length}>
+            Export CSV
+          </button>
+        </div>
+      </header>
+
+      {error && (
+        <div role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+          {error}
+        </div>
+      )}
+
+      {notice && (
+        <div role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300">
+          {notice}
+        </div>
+      )}
+
+      {snapshot?.cutLineTie && (
+        <div role="alert" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-200">
+          An exact tie crosses the finalist cutoff. Review the ranking and
+          resolve the tie before confirming the final shortlist.
+        </div>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { label: "Registered teams", value: snapshot?.totalTeams ?? "—" },
+          { label: "Current finalists", value: finalistTotal },
+          { label: "Target finalists", value: snapshot?.finalistCount ?? finalistCount },
+          { label: "Teams tied at cutoff", value: rows.filter((row) => row.cutLineTie).length },
+        ].map((item) => (
+          <div key={item.label} className={panel}>
+            <p className="text-sm text-zinc-400">{item.label}</p>
+            <p className="mt-2 text-3xl font-bold">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <section className={panel}>
+        <h2 className="text-lg font-semibold">Scoring configuration</h2>
+        <p className="mt-1 text-sm text-zinc-400">
+          Combined score = Round 1 percentage × Round 1 weight + Round 2
+          percentage × Round 2 weight. Round 2 currently treats the sum of the
+          ten question marks as a percentage.
+        </p>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <label className="space-y-2 text-sm">
+            <span className="block text-zinc-300">Round 1 weight (%)</span>
+            <input className={`${field} w-full`} type="number" min={0} max={100} value={weightRound1} onChange={(event) => setWeightRound1(Number(event.target.value))} />
+          </label>
+          <label className="space-y-2 text-sm">
+            <span className="block text-zinc-300">Round 2 weight (%)</span>
+            <input className={`${field} w-full`} type="number" min={0} max={100} value={weightRound2} onChange={(event) => setWeightRound2(Number(event.target.value))} />
+          </label>
+          <label className="space-y-2 text-sm">
+            <span className="block text-zinc-300">Number of finalists</span>
+            <input className={`${field} w-full`} type="number" min={1} value={finalistCount} onChange={(event) => setFinalistCount(Number(event.target.value))} />
+          </label>
+          <div className="flex items-end">
+            <button className="w-full rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-500 disabled:opacity-50" onClick={() => void saveSettings()} disabled={saving !== null}>
+              {saving === "settings" ? "Saving..." : "Save settings"}
+            </button>
+          </div>
+        </div>
+        <p className={`mt-3 text-xs ${weightRound1 + weightRound2 === 100 ? "text-zinc-500" : "text-amber-300"}`}>
+          Weights total: {weightRound1 + weightRound2}%
+        </p>
+      </section>
+
+      <section className={panel}>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">Marks and rankings</h2>
+            <p className="mt-1 text-sm text-zinc-400">
+              Enter whole-number marks from 0 to 10. Changes save when you leave
+              a marks field.
+            </p>
+          </div>
+          <input
+            className={field}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search teams..."
+            aria-label="Search teams"
+          />
+        </div>
+
+        {loading && !snapshot ? (
+          <p className="py-10 text-center text-sm text-zinc-400">Loading Round 2...</p>
+        ) : (
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[1450px] border-collapse text-left text-sm">
+              <thead className="bg-black/30 text-xs uppercase tracking-wide text-zinc-400">
+                <tr>
+                  <th className="sticky left-0 bg-zinc-900 px-3 py-3">Rank</th>
+                  <th className="sticky left-14 bg-zinc-900 px-3 py-3">Team</th>
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <th key={i} className="px-2 py-3 text-center">Q{i + 1}</th>
+                  ))}
+                  <th className="px-3 py-3">A</th>
+                  <th className="px-3 py-3">B</th>
+                  <th className="px-3 py-3">C</th>
+                  <th className="px-3 py-3">R2 total</th>
+                  <th className="px-3 py-3">R1 %</th>
+                  <th className="px-3 py-3">Combined</th>
+                  <th className="px-3 py-3">Finalist</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {visibleRows.map((row) => (
+                  <tr key={row.teamId} className={row.isFinalist ? "bg-pink-500/5" : "hover:bg-white/[0.025]"}>
+                    <td className="sticky left-0 bg-zinc-900 px-3 py-3 font-semibold">{row.rank}</td>
+                    <td className="sticky left-14 max-w-52 truncate bg-zinc-900 px-3 py-3 font-medium" title={row.teamName}>
+                      {row.teamName}
+                      {row.cutLineTie && <span className="ml-2 text-amber-300" title="Exact tie at finalist cutoff">⚠</span>}
+                    </td>
+                    {row.marks.map((mark, index) => (
+                      <td key={index} className="px-1 py-2">
+                        <input
+                          aria-label={`${row.teamName} question ${index + 1} marks`}
+                          className="w-14 rounded-md border border-white/10 bg-black/30 px-2 py-2 text-center outline-none focus:border-pink-500"
+                          type="number"
+                          min={0}
+                          max={10}
+                          step={1}
+                          defaultValue={mark}
+                          onBlur={(event) => {
+                            if (Number(event.target.value) !== mark) {
+                              void saveMark(row, index + 1, event.target.value);
+                            }
+                          }}
+                        />
+                        {saving === `${row.teamId}-${index + 1}` && (
+                          <span className="block text-center text-[10px] text-pink-300">Saving</span>
+                        )}
+                      </td>
+                    ))}
+                    <td className="px-3 py-3">{row.sectionA}</td>
+                    <td className="px-3 py-3">{row.sectionB}</td>
+                    <td className="px-3 py-3">{row.sectionC}</td>
+                    <td className="px-3 py-3 font-semibold">{row.round2Total}</td>
+                    <td className="px-3 py-3">{row.round1Percent.toFixed(2)}%</td>
+                    <td className="px-3 py-3 font-semibold text-pink-300">{row.combined.toFixed(2)}</td>
+                    <td className="px-3 py-3">
+                      <button
+                        className={row.isFinalist ? "rounded-md bg-pink-600 px-2 py-1 text-xs font-semibold" : button}
+                        disabled={saving !== null}
+                        onClick={() => void toggleFinalist(row)}
+                      >
+                        {row.isFinalist ? "Selected" : "Select"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {visibleRows.length === 0 && (
+                  <tr><td colSpan={18} className="px-3 py-10 text-center text-zinc-500">No teams found.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className={`${panel} flex flex-wrap items-center justify-between gap-4`}>
+        <div>
+          <h2 className="font-semibold">Select top-ranked finalists</h2>
+          <p className="mt-1 text-sm text-zinc-400">
+            This replaces the current finalist list using the latest saved
+            ranking. Manual selections may be overwritten.
+          </p>
+        </div>
+        <button
+          className="rounded-lg bg-pink-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-pink-500 disabled:opacity-50"
+          onClick={() => void selectFinalists()}
+          disabled={saving !== null || !snapshot || rows.length === 0}
+        >
+          {saving === "finalists" ? "Selecting..." : `Select top ${snapshot?.finalistCount ?? finalistCount}`}
+        </button>
+      </section>
+
+      <section className={panel}>
+        <h2 className="text-lg font-semibold">Ranking and tie-break details</h2>
+        <p className="mt-1 text-sm text-zinc-400">
+          Ranking priority: combined score, Round 2 total, Round 1 raw score,
+          Section C, then lower Round 1 correct-answer time.
+        </p>
+        <div className="mt-4 space-y-2">
+          {rows.filter((row) => row.suddenDeathTie).map((row) => (
+            <div key={row.teamId} className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-sm">
+              <span className="font-medium">{row.teamName}</span>
+              <span className="text-zinc-400"> · Rank {row.rank} · </span>
+              <span className="text-amber-200">{row.whyRankedHere}</span>
+            </div>
+          ))}
+          {!rows.some((row) => row.suddenDeathTie) && (
+            <p className="text-sm text-zinc-500">No exact ties detected.</p>
+          )}
+        </div>
+      </section>
+    </section>
+  );
+}

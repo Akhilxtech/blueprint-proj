@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { computeClock } from "@/lib/quiz-clock";
 import { highlightCode } from "@/lib/highlight-code";
 
-// export const dynamic = "force-dynamic";
+//  
 
 type CachedQuestion = {
   id: string;

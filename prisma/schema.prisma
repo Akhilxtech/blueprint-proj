@@ -34,7 +34,10 @@ model Team {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
-violationEvents ViolationEvent[]
+  round2Marks Round2Mark[]
+
+  violationEvents ViolationEvent[]
+
   @@index([lastSeenAt])
   @@map("teams")
 }
@@ -220,8 +223,6 @@ model Response {
   @@map("responses")
 }
 
-
-
 model ViolationEvent {
   id            String   @id @default(cuid())
   teamId        String
@@ -234,4 +235,16 @@ model ViolationEvent {
 
   @@index([teamId, createdAt])
   @@map("tab_switch_violations")
+}
+
+model Round2Mark {
+  id         String @id @default(cuid())
+  teamId     String
+  questionNo Int
+  marks      Int
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, questionNo])
+  @@map("round2_marks")
 }

@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { computeClock } from "@/lib/quiz-clock";
 import { getSettings } from "@/lib/settings";
 
-// export const dynamic = "force-dynamic";
+//  
 
 const answerSchema = z.object({
   questionId: z.string().min(1),
