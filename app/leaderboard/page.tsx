@@ -10,6 +10,7 @@ type Round1Team = {
   round1Score: number;
   round1MaxMarks: number;
   round1Percent: number;
+  totalCorrectMs: number;
 };
 
 type FinalTeam = Round1Team & {
@@ -18,6 +19,9 @@ type FinalTeam = Round1Team & {
   round2Percent: number;
   combined: number;
   status: "Selected" | "Not Selected";
+  tieBreakReason: string;
+  timeDecided: boolean;
+  unresolvedTie: boolean;
 };
 
 type LeaderboardResponse = {
@@ -29,6 +33,9 @@ type LeaderboardResponse = {
 
 function formatNumber(value: number) {
   return Number(value).toFixed(2).replace(/\.?0+$/, "");
+}
+function formatTime(ms: number) {
+  return `${(ms / 1000).toFixed(3)} s`;
 }
 
 export default function LeaderboardPage() {
@@ -244,6 +251,9 @@ useEffect(() => {
                       <th className="whitespace-nowrap px-4 py-3">
                         Round 1 %
                       </th>
+                      <th className="whitespace-nowrap px-4 py-3">
+  Round 1 Correct Time
+</th>
 
                       {isFinal && (
                         <>
@@ -291,6 +301,19 @@ useEffect(() => {
                         <td className="whitespace-nowrap px-4 py-4 tabular-nums">
                           {formatNumber(team.round1Percent)}%
                         </td>
+                        <td className="whitespace-nowrap px-4 py-3">
+  {formatTime(team.totalCorrectMs)}
+  {isFinal && (team as FinalTeam).timeDecided && (
+    <span className="ml-2 inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-600">
+      Rank decided by time
+    </span>
+  )}
+  {isFinal && (team as FinalTeam).unresolvedTie && (
+    <span className="ml-2 inline-flex rounded-full border border-red-500/40 bg-red-500/10 px-2 py-1 text-xs text-red-600">
+      Manual review required
+    </span>
+  )}
+</td>
 
                         {isFinal && (
                           <>

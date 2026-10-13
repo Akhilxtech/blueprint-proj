@@ -50,6 +50,9 @@ const button =
   "rounded-lg border border-white/15 px-3 py-2 text-sm font-medium transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
 const field =
   "rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-pink-500";
+  function formatCorrectTime(ms: number) {
+  return `${(ms / 1000).toFixed(3)} s`;
+}
 
 export default function Round2Dashboard() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
@@ -61,6 +64,19 @@ export default function Round2Dashboard() {
   const [weightRound1, setWeightRound1] = useState(40);
   const [weightRound2, setWeightRound2] = useState(60);
   const [finalistCount, setFinalistCount] = useState(10);
+const [cutoffTieTeams, setCutoffTieTeams] = useState<
+  {
+    teamId: string;
+    teamName: string;
+    rank: number;
+    combined: number;
+    round2Percent: number;
+    round1Percent: number;
+    sectionC: number;
+    totalCorrectMs: number;
+    whyRankedHere: string;
+  }[]
+>([]);
   const [questionMaxMarks, setQuestionMaxMarks] = useState<number[]>(
     Array(10).fill(10),
   );
@@ -100,6 +116,15 @@ export default function Round2Dashboard() {
   }, [refresh]);
 
   const rows = snapshot?.rows ?? [];
+  const pendingMarksCount = Object.keys(draftMarks).filter((key) => {
+  const [teamId, questionNoText] = key.split("-");
+  const questionNo = Number(questionNoText);
+
+  const row = rows.find((item) => item.teamId === teamId);
+  if (!row) return false;
+
+  return draftMarks[key] !== String(row.marks[questionNo - 1]);
+}).length;
   const round2MaxMarks = questionMaxMarks.reduce((a, b) => a + b, 0);
   const sectionAMax = questionMaxMarks.slice(0, 4).reduce((a, b) => a + b, 0);
   const sectionBMax = questionMaxMarks.slice(4, 7).reduce((a, b) => a + b, 0);
@@ -113,49 +138,93 @@ export default function Round2Dashboard() {
   const finalists = visibleRows.filter((row) => row.isFinalist);
   const otherTeams = visibleRows.filter((row) => !row.isFinalist);
 
-  const saveMark = async (
-    row: Round2Row,
-    questionNo: number,
-    rawValue: string,
-  ) => {
-    if (rawValue.trim() === "") {
-      setError("Marks cannot be empty.");
-      return;
-    }
+  
+const saveAllMarks = async () => {
+  if (!snapshot) return;
 
-    const marks = Number(rawValue);
-    const maximum = questionMaxMarks[questionNo - 1];
+  const changes: {
+    teamId: string;
+    questionNo: number;
+    marks: number;
+  }[] = [];
 
-    if (!Number.isInteger(marks) || marks < 0 || marks > maximum) {
-      setError(`Q${questionNo} marks must be a whole number from 0 to ${maximum}.`);
-      return;
-    }
+  for (const row of rows) {
+    for (let index = 0; index < row.marks.length; index++) {
+      const questionNo = index + 1;
+      const key = `${row.teamId}-${questionNo}`;
+      const rawValue = draftMarks[key];
 
-    const key = `${row.teamId}-${questionNo}`;
-    setSaving(key);
-    setError("");
-    setNotice("");
+      if (rawValue === undefined) continue;
 
-    try {
-      const response = await fetch("/api/admin/round2/marks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teamId: row.teamId, questionNo, marks }),
-      });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Could not save marks.");
+      if (rawValue.trim() === "") {
+        setError(
+          `Marks cannot be empty for ${row.teamName}, Q${questionNo}.`,
+        );
+        return;
       }
 
-      setNotice(`Saved Q${questionNo} for ${row.teamName}.`);
-      await refresh();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not save marks.");
-    } finally {
-      setSaving(null);
+      const marks = Number(rawValue);
+      const maximum = questionMaxMarks[index];
+
+      if (
+        !Number.isInteger(marks) ||
+        marks < 0 ||
+        marks > maximum
+      ) {
+        setError(
+          `${row.teamName}, Q${questionNo}: enter a whole number from 0 to ${maximum}.`,
+        );
+        return;
+      }
+
+      if (marks !== row.marks[index]) {
+        changes.push({
+          teamId: row.teamId,
+          questionNo,
+          marks,
+        });
+      }
     }
-  };
+  }
+
+  if (changes.length === 0) {
+    setNotice("No mark changes to save.");
+    setError("");
+    return;
+  }
+
+  setSaving("batch");
+  setError("");
+  setNotice("");
+
+  try {
+    const response = await fetch("/api/admin/round2/marks/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ marks: changes }),
+    });
+
+    const payload = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payload.error ?? "Could not save all marks.");
+    }
+
+    setNotice(
+      `Successfully saved ${payload.savedCount} mark entries. Rankings updated.`,
+    );
+
+    await refresh();
+  } catch (cause) {
+    setError(
+      cause instanceof Error
+        ? cause.message
+        : "Could not save all marks. Your drafts have been retained.",
+    );
+  } finally {
+    setSaving(null);
+  }
+};
 
   const saveSettings = async () => {
     if (
@@ -222,19 +291,25 @@ export default function Round2Dashboard() {
     );
     if (!confirmed) return;
 
-    setSaving("finalists");
-    setError("");
-    setNotice("");
-
+   setSaving("finalists");
+setError("");
+setNotice("");
+setCutoffTieTeams([]);
     try {
       const response = await fetch("/api/admin/round2/finalists", {
         method: "POST",
       });
       const payload = await response.json();
 
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Could not select finalists.");
-      }
+      
+if (!response.ok) {
+  if (payload.code === "FINALIST_CUTOFF_TIE") {
+    setCutoffTieTeams(payload.tiedTeams ?? []);
+  }
+
+  throw new Error(payload.error ?? "Could not select finalists.");
+}
+
 
       await refresh();
       setNotice(
@@ -462,6 +537,13 @@ async function toggleFinalResults() {
   const finalistTotal = rows.filter((row) => row.isFinalist).length;
 
   const renderTable = (tableRows: Round2Row[], title: string) => (
+
+    
+
+    
+
+
+
     <section className={panel}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">{title}</h2>
@@ -485,8 +567,9 @@ async function toggleFinalResults() {
               <th className="px-3 py-3">C</th>
               <th className="px-3 py-3">R2 raw</th>
               <th className="px-3 py-3">R2 %</th>
-              <th className="px-3 py-3">R1 raw</th>
-              <th className="px-3 py-3">R1 %</th>
+         <th className="px-3 py-3">R1 raw</th>
+<th className="px-3 py-3">R1 %</th>
+<th className="px-3 py-3">R1 correct time</th>
               <th className="px-3 py-3">Combined</th>
               <th className="px-3 py-3">Status</th>
             </tr>
@@ -520,12 +603,7 @@ async function toggleFinalResults() {
                             [key]: event.target.value,
                           }))
                         }
-                        onBlur={(event) => {
-                          const raw = event.target.value;
-                          if (Number(raw) !== mark) {
-                            void saveMark(row, index + 1, raw);
-                          }
-                        }}
+                        
                       />
                     </td>
                   );
@@ -540,10 +618,33 @@ async function toggleFinalResults() {
                 <td className="px-3 py-3">
                   {row.round1Score}/{row.round1MaxMarks}
                 </td>
-                <td className="px-3 py-3">{row.round1Percent.toFixed(2)}%</td>
-                <td className="px-3 py-3 font-semibold text-pink-300">
-                  {row.combined.toFixed(2)}%
-                </td>
+              
+<td className="px-3 py-3">{row.round1Percent.toFixed(2)}%</td>
+
+<td className="px-3 py-3 whitespace-nowrap">
+  <div>{formatCorrectTime(row.totalCorrectMs)}</div>
+
+  {row.whyRankedHere.includes(
+    "lower Round 1 correct-answer time decided the order",
+  ) && (
+    <span className="mt-1 inline-block rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs text-amber-200">
+      Rank decided by time
+    </span>
+  )}
+
+  {row.suddenDeathTie && (
+    <span className="mt-1 inline-block rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-200">
+      {row.cutLineTie
+        ? "Manual review: cutoff tie"
+        : "Exact tie: review"}
+    </span>
+  )}
+</td>
+
+<td className="px-3 py-3 font-semibold text-pink-300">
+  {row.combined.toFixed(2)}%
+</td>
+
               
 <td className="px-3 py-3">
   {snapshot?.resetAwaitingReevaluation ? (
@@ -630,6 +731,58 @@ async function toggleFinalResults() {
           {error}
         </div>
       )}
+
+{cutoffTieTeams.length > 0 && (
+  <section
+    role="alert"
+    className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4"
+  >
+    <h2 className="font-semibold text-amber-200">
+      Finalist cutoff tie requires manual review
+    </h2>
+
+    <p className="mt-1 text-sm text-zinc-300">
+      Automatic selection was blocked. Review these teams before
+      manually finalizing the shortlist. Existing finalist selections
+      have not been changed by the blocked request.
+    </p>
+
+    <div className="mt-4 overflow-x-auto">
+      <table className="w-full min-w-[850px] text-left text-sm">
+        <thead className="text-zinc-400">
+          <tr>
+            <th className="p-2">Team</th>
+            <th className="p-2">Rank</th>
+            <th className="p-2">Combined</th>
+            <th className="p-2">Round 2 %</th>
+            <th className="p-2">Round 1 %</th>
+            <th className="p-2">Section C</th>
+            <th className="p-2">Correct-answer time</th>
+            <th className="p-2">Comparison</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {cutoffTieTeams.map((team) => (
+            <tr key={team.teamId} className="border-t border-white/10">
+              <td className="p-2 font-medium">{team.teamName}</td>
+              <td className="p-2">{team.rank}</td>
+              <td className="p-2">{team.combined.toFixed(2)}</td>
+              <td className="p-2">{team.round2Percent.toFixed(2)}%</td>
+              <td className="p-2">{team.round1Percent.toFixed(2)}%</td>
+              <td className="p-2">{team.sectionC}</td>
+              <td className="p-2">
+                {(team.totalCorrectMs / 1000).toFixed(2)} s
+              </td>
+              <td className="p-2">{team.whyRankedHere}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+)}
+
       {notice && (
         <div role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300">
           {notice}
@@ -734,7 +887,8 @@ async function toggleFinalResults() {
       <section className={panel}>
         <h2 className="text-lg font-semibold">Ranking and team search</h2>
         <p className="mt-1 text-sm text-zinc-400">
-          Marks save when you leave a marks field. Maximum marks are validated by the server.
+         Marks remain as drafts until you click Save All Marks.
+Maximum marks are validated before saving.
         </p>
         <input
           className={`${field} mt-4 w-full sm:max-w-md`}
@@ -749,22 +903,60 @@ async function toggleFinalResults() {
       </section>
 
    
+
 {snapshot && (
   <>
-    {snapshot.resetAwaitingReevaluation ? (
-      <>
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-          <h2 className="font-semibold text-amber-200">
-            Round 2 reset: re-evaluation pending
-          </h2>
-          <p className="mt-1 text-sm text-zinc-300">
-            All teams are shown together. Existing finalist labels are
-            unchanged until you finish re-evaluation and select finalists
-            again.
+    {snapshot.resetAwaitingReevaluation && (
+      <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+        <h2 className="font-semibold text-amber-200">
+          Round 2 reset: re-evaluation pending
+        </h2>
+        <p className="mt-1 text-sm text-zinc-300">
+          All teams are shown together. Existing finalist labels are
+          unchanged until you finish re-evaluation and select finalists
+          again.
+        </p>
+      </div>
+    )}
+
+    <section className={`${panel} mb-4`}>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold">Mark entry</h2>
+          <p className="mt-1 text-sm text-zinc-400">
+            Changes stay as drafts until you save them.
+            Rankings update after all changes are saved successfully.
+          </p>
+
+          <p
+            aria-live="polite"
+            className={`mt-2 text-sm ${
+              pendingMarksCount > 0
+                ? "text-amber-300"
+                : "text-zinc-400"
+            }`}
+          >
+            {pendingMarksCount > 0
+              ? `${pendingMarksCount} unsaved mark changes`
+              : "All marks saved"}
           </p>
         </div>
-        {renderTable(visibleRows, "All teams")}
-      </>
+
+        <button
+          type="button"
+          className="rounded-lg bg-pink-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={saving !== null || pendingMarksCount === 0}
+          onClick={() => void saveAllMarks()}
+        >
+          {saving === "batch"
+            ? "Saving all marks..."
+            : "Save All Marks"}
+        </button>
+      </div>
+    </section>
+
+    {snapshot.resetAwaitingReevaluation ? (
+      renderTable(visibleRows, "All teams")
     ) : (
       <>
         {renderTable(finalists, "Selected finalists")}
@@ -773,6 +965,7 @@ async function toggleFinalResults() {
     )}
   </>
 )}
+
 
 
       <section className={`${panel} flex flex-wrap items-center justify-between gap-4`}>

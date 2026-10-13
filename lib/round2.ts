@@ -302,12 +302,21 @@ export async function getRound2Snapshot() {
     };
   });
 
-  rows.sort(compareScores);
+  
+rows.sort(compareScores);
 
-  for (let i = 0; i < rows.length; i++) {
+for (let i = 0; i < rows.length; i++) {
+  const previous = rows[i - 1];
+
+  if (previous && sameRankCriteria(rows[i], previous)) {
+    rows[i].rank = previous.rank;
+  } else {
     rows[i].rank = i + 1;
-    rows[i].whyRankedHere = explainRank(rows[i], rows[i - 1]);
   }
+
+  rows[i].whyRankedHere = explainRank(rows[i], previous);
+}
+
 
   const finalistCount = Math.min(settings.finalistCount, rows.length);
 
