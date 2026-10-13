@@ -22,6 +22,7 @@ type Phase =
   | "ENDED";
 
 type QuizState = {
+  runStartedAt: string | null;
   serverNow: string;
   phase: Phase;
   index: number;
@@ -119,6 +120,8 @@ export default function ParticipantQuiz({
     maxWarnings: number;
   } | null>(null);
 
+  const runStartedAtRef = useRef<string | null | undefined>(undefined);
+
   const answerEventRef = useRef<{
     questionId: string;
     optionId: string;
@@ -142,10 +145,34 @@ export default function ParticipantQuiz({
         throw new Error(data.error ?? "Could not load quiz state.");
       }
 
-      setServerOffsetMs(Date.parse(data.serverNow) - Date.now());
-      setState(data);
-      setError("");
+     const nextRunStartedAt = data.runStartedAt ?? null;
+const previousRunStartedAt = runStartedAtRef.current;
 
+const isNewRun =
+  previousRunStartedAt !== undefined &&
+  previousRunStartedAt !== nextRunStartedAt;
+
+if (isNewRun) {
+  // Remove the previous run's local answer and status message.
+  setSelectedAnswer(null);
+  setNotice("");
+  setError("");
+  setAnswerNeedsRetry(false);
+  setSubmitting(false);
+
+  answerEventRef.current = null;
+  answerRequestId.current = null;
+
+  // Force the question-loading effect to recognize a new run.
+  questionRequestId.current = null;
+  setQuestion(null);
+}
+
+runStartedAtRef.current = nextRunStartedAt;
+
+setServerOffsetMs(Date.parse(data.serverNow) - Date.now());
+setState(data);
+setError("");
       if (
         data.phase === "QUESTION" &&
         data.questionId &&
@@ -292,7 +319,7 @@ export default function ParticipantQuiz({
     return () => {
       cancelled = true;
     };
-  }, [activeQuestionId]);
+  }, [activeQuestionId ,state?.runStartedAt]);
 
   async function acceptRules() {
     setAcceptingRules(true);

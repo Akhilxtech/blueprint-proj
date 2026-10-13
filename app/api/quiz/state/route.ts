@@ -135,6 +135,7 @@ const canRevealPrevious =
 
   return NextResponse.json({
     serverNow: serverNow.toISOString(),
+      runStartedAt: run?.startedAt?.toISOString() ?? null,
     phase: clock.phase,
     index: clock.index,
     total: run?.questions.length ?? 0,

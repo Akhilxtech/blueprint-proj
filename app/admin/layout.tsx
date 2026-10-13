@@ -4,13 +4,14 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth-helper";
 import SignOutButton from "@/components/sign-out-button";
 import { connection } from "next/server";
+import AdminQuizBanner from "@/components/admin-quiz-banner";
 export const instant=false;
 const navigation = [
   { label: "Dashboard", href: "/admin" },
   { label: "Teams", href: "/admin/teams" },
   { label: "Questions", href: "/admin/questions" },
-  { label: "Quiz Control", href: "/admin/quiz-control" },
-  { label: "Settings", href: "/admin/settings" },
+{ label: "Quiz Control", href: "/admin/quiz" },  
+{ label: "Settings", href: "/admin/settings" },
   { label: "Monitor", href: "/admin/monitor" },
   { label: "Results", href: "/admin/results" },
   { label: "Round 2", href: "/admin/round-2" },
@@ -51,8 +52,9 @@ async function AdminContent({
       </aside>
 
       <main className="min-w-0 flex-1 p-6 md:p-10">
-        {children}
-      </main>
+  <AdminQuizBanner />
+  {children}
+</main>
     </div>
   );
 }
