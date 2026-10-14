@@ -28,13 +28,17 @@ model Team {
   quizStatus      TeamQuizStatus @default(ACTIVE)
   warningCount    Int            @default(0)
   eliminatedAt    DateTime?
-  isFinalist      Boolean        @default(false)
+    isFinalist           Boolean        @default(false)
+  selectionResetCount  Int            @default(0)
   quizRoster      QuizRoster?
   responses       Response[]
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
-  round2Marks Round2Mark[]
+  round3Selection      TeamSelection?
+  round2Marks          Round2Mark[]
+  deploymentSubmission DeploymentSubmission?
+  deliverableProgress  TeamDeliverableProgress[]
 
   violationEvents ViolationEvent[]
 
@@ -247,4 +251,82 @@ model Round2Mark {
 
   @@unique([teamId, questionNo])
   @@map("round2_marks")
+}
+
+model ProblemStatement {
+  id                  String                    @id @default(cuid())
+  title               String
+  domain              String
+  difficulty          String
+  shortDescription    String                    @db.Text
+  description         String                    @db.Text
+  constraints         String                    @db.Text
+  deliverables        String                    @db.Text
+  maxTeams            Int?
+  enabled             Boolean                   @default(true)
+  displayOrder        Int                       @default(0)
+  hints               StatementHint[]
+  selections          TeamSelection[]
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  deliverableProgress TeamDeliverableProgress[]
+
+  @@index([enabled, displayOrder])
+  @@map("problem_statements")
+}
+
+model StatementHint {
+  id          String           @id @default(cuid())
+  statementId String
+  order       Int
+  title       String
+  content     String           @db.Text
+  statement   ProblemStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@unique([statementId, order])
+  @@index([statementId])
+  @@map("statement_hints")
+}
+
+model TeamSelection {
+  id              String           @id @default(cuid())
+  teamId          String           @unique
+  statementId     String
+  selectedAt      DateTime         @default(now())
+  assignedByAdmin Boolean          @default(false)
+  resetCount      Int              @default(0)
+  team            Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  statement       ProblemStatement @relation(fields: [statementId], references: [id], onDelete: Restrict)
+
+  @@index([statementId])
+  @@index([selectedAt])
+  @@map("team_selections")
+}
+
+model DeploymentSubmission {
+  id          String   @id @default(cuid())
+  teamId      String   @unique
+  url         String   @db.Text
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@map("deployment_submissions")
+}
+
+model TeamDeliverableProgress {
+  id               String   @id @default(cuid())
+  teamId           String
+  statementId      String
+  deliverableIndex Int
+  completed        Boolean  @default(false)
+  updatedAt        DateTime @updatedAt
+
+  team      Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  statement ProblemStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, statementId, deliverableIndex])
+  @@index([teamId, statementId])
+  @@map("team_deliverable_progress")
 }

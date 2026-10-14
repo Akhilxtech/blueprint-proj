@@ -10,7 +10,8 @@
     "postinstall": "prisma skills sync || exit 0",
     "seed:test": "bun run scripts/seed-test.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:statements": "bun run scripts/seed-statements.ts"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.7.7",

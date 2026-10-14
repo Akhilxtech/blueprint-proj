@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth-helper";
 import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 
-// export const runtime = "nodejs";
+// export const runtime = "nodejs"
 
 function json(
   body: Record<string, unknown>,
