@@ -7,7 +7,7 @@ import { connection } from "next/server";
 import AdminQuizBanner from "@/components/admin-quiz-banner";
 export const instant=false;
 const navigation = [
-  { label: "Dashboard", href: "/admin" },
+ 
   { label: "Teams", href: "/admin/teams" },
   { label: "Questions", href: "/admin/questions" },
 { label: "Quiz Control", href: "/admin/quiz" },  
