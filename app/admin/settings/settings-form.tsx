@@ -124,10 +124,10 @@ export default function SettingsForm({
         {fields.map((field) => (
           <label
             key={field.key}
-            className="block rounded-xl border border-white/10 bg-zinc-900 p-4"
+            className="block rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md"
           >
-            <span className="font-medium">{field.label}</span>
-            <span className="mt-1 block text-sm text-zinc-400">
+            <span className="text-sm font-bold text-[#302630]">{field.label}</span>
+            <span className="mt-1 block text-xs text-[#4E404C]">
               {field.description}
             </span>
 
@@ -142,9 +142,9 @@ export default function SettingsForm({
                 onChange={(event) =>
                   updateValue(field.key, event.target.value)
                 }
-                className="w-full rounded-lg border border-white/15 bg-zinc-950 px-3 py-2 outline-none focus:border-violet-400"
+                className="w-full rounded-xl border border-[#E7DCE4] bg-white/90 px-3.5 py-2 text-xs font-bold text-[#302630] outline-none focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20 transition-all"
               />
-              <span className="shrink-0 text-sm text-zinc-400">
+              <span className="shrink-0 rounded-lg bg-[#F1E9EF] px-2.5 py-1 text-xs font-semibold text-[#4E404C]">
                 {field.suffix}
               </span>
             </span>
@@ -155,17 +155,21 @@ export default function SettingsForm({
       {message && (
         <p
           role="status"
-          className={isSuccess ? "text-sm text-green-400" : "text-sm text-red-400"}
+          className={`rounded-xl border p-3 text-xs font-semibold ${
+            isSuccess
+              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+              : "border-rose-300 bg-rose-50 text-rose-800"
+          }`}
         >
           {message}
         </p>
       )}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 disabled:opacity-50"
+          className="rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:opacity-50"
         >
           {pending ? "Saving..." : "Save settings"}
         </button>
@@ -174,7 +178,7 @@ export default function SettingsForm({
           type="button"
           onClick={resetDefaults}
           disabled={pending}
-          className="rounded-lg border border-white/15 px-5 py-2.5 text-sm hover:bg-white/5 disabled:opacity-50"
+          className="rounded-xl border border-[#E7DCE4] bg-white/80 px-5 py-2.5 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:opacity-50"
         >
           Reset form to defaults
         </button>

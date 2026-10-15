@@ -325,7 +325,7 @@ function QuestionEditorForm({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/50"
+      className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs animate-fade-in"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !isPending) {
           onClose();
@@ -336,14 +336,14 @@ function QuestionEditorForm({
         role="dialog"
         aria-modal="true"
         aria-labelledby="question-editor-title"
-        className="flex h-full w-full max-w-3xl flex-col overflow-hidden bg-background shadow-xl"
+        className="flex h-full w-full max-w-3xl flex-col overflow-hidden border-l border-[#E7DCE4] bg-[#F7F2F5] shadow-2xl animate-fade-in-up"
       >
-        <header className="flex items-center justify-between border-b p-5">
+        <header className="flex items-center justify-between border-b border-[#E7DCE4] bg-white/80 p-5 backdrop-blur-xs">
           <div>
-            <h2 id="question-editor-title" className="text-xl font-semibold">
+            <h2 id="question-editor-title" className="text-base font-bold text-[#302630]">
               {question.id ? "Edit question" : "Create question"}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-0.5 text-xs text-[#4E404C]">
               Configure the question and answer options.
             </p>
           </div>
@@ -352,7 +352,7 @@ function QuestionEditorForm({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-md border px-3 py-2"
+            className="rounded-xl border border-[#E7DCE4] bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors"
           >
             Close
           </button>
@@ -362,9 +362,9 @@ function QuestionEditorForm({
           onSubmit={submitQuestion}
           className="flex min-h-0 flex-1 flex-col"
         >
-          <div className="flex-1 space-y-6 overflow-y-auto p-5">
-            <section className="space-y-2">
-              <label htmlFor="external-id" className="text-sm font-medium">
+          <div className="flex-1 space-y-5 overflow-y-auto p-5">
+            <section className="space-y-1.5">
+              <label htmlFor="external-id" className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
                 External ID (optional)
               </label>
               <input
@@ -374,13 +374,13 @@ function QuestionEditorForm({
                   updateQuestion("externalId", event.target.value)
                 }
                 placeholder="e.g. Q001"
-                className="w-full rounded-md border bg-background px-3 py-2"
+                className="w-full rounded-xl border border-[#E7DCE4] bg-white/90 px-3.5 py-2 text-xs text-[#302630] outline-none placeholder:text-[#4E404C]/60 focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20 transition-all"
               />
             </section>
 
-            <section className="space-y-2">
-              <label htmlFor="question-text" className="text-sm font-medium">
-                Question text
+            <section className="space-y-1.5">
+              <label htmlFor="question-text" className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+                Question text *
               </label>
               <textarea
                 id="question-text"
@@ -391,37 +391,42 @@ function QuestionEditorForm({
                   updateQuestion("text", event.target.value)
                 }
                 placeholder="Enter the question. Markdown syntax is accepted."
-                className="w-full rounded-md border bg-background px-3 py-2"
+                className="w-full rounded-xl border border-[#E7DCE4] bg-white/90 px-3.5 py-2 text-xs text-[#302630] outline-none placeholder:text-[#4E404C]/60 focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20 transition-all"
               />
-              <p className="text-xs text-muted-foreground">
-                Markdown syntax can be entered. Rendering depends on the
-                QuestionCard implementation.
+              <p className="text-2xs text-[#4E404C]">
+                Markdown syntax can be entered. Rendering depends on the QuestionCard implementation.
               </p>
             </section>
 
-            <section className="space-y-3 rounded-lg border p-4">
-              <h3 className="font-semibold">Question code (optional)</h3>
+            <section className="space-y-3 rounded-2xl border border-white/80 bg-white/70 p-4 shadow-xs">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+                Question code (optional)
+              </h3>
 
-              <label htmlFor="question-language" className="text-sm">
-                Language
-              </label>
-              <select
-                id="question-language"
-                value={question.codeLanguage ?? "javascript"}
-                onChange={(event) =>
-                  updateQuestion(
-                    "codeLanguage",
-                    event.target.value as CodeLanguage,
-                  )
-                }
-                className="w-full rounded-md border bg-background px-3 py-2"
-              >
-                {LANGUAGES.map((language) => (
-                  <option key={language.value} value={language.value}>
-                    {language.label}
-                  </option>
-                ))}
-              </select>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="question-language" className="text-2xs font-bold uppercase tracking-wider text-[#4E404C]">
+                    Language
+                  </label>
+                  <select
+                    id="question-language"
+                    value={question.codeLanguage ?? "javascript"}
+                    onChange={(event) =>
+                      updateQuestion(
+                        "codeLanguage",
+                        event.target.value as CodeLanguage,
+                      )
+                    }
+                    className="mt-1 w-full rounded-xl border border-[#E7DCE4] bg-white/90 px-3.5 py-2 text-xs text-[#302630] outline-none focus:border-[#D9468D]"
+                  >
+                    {LANGUAGES.map((language) => (
+                      <option key={language.value} value={language.value}>
+                        {language.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
               <textarea
                 aria-label="Question code"
@@ -438,43 +443,42 @@ function QuestionEditorForm({
                   }));
                 }}
                 placeholder="Paste code here..."
-                className="w-full rounded-md border bg-background px-3 py-2 font-mono text-sm"
+                className="w-full rounded-xl border border-[#E7DCE4] bg-[#221721] p-3 font-mono text-xs text-pink-100 outline-none focus:border-[#D9468D]"
               />
 
               {codeToHighlight && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Syntax-highlighted code</p>
+                  <p className="text-xs font-bold text-[#4E404C]">Syntax-highlighted preview</p>
 
                   {currentHighlightedCode ? (
                     <div
-                      className="max-h-72 overflow-auto rounded-lg border bg-muted/30 p-3 text-sm [&_pre]:m-0 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_code]:whitespace-pre"
+                      className="max-h-72 overflow-auto rounded-xl border border-[#E7DCE4] bg-[#221721] p-3 text-xs [&_pre]:m-0 [&_pre]:overflow-x-auto [&_pre]:whitespace-pre [&_code]:whitespace-pre"
                       dangerouslySetInnerHTML={{
                         __html: currentHighlightedCode,
                       }}
                     />
                   ) : (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-[#4E404C]">
                       Generating code preview...
                     </p>
                   )}
 
                   {highlightError && (
-                    <p role="status" className="text-sm text-red-500">
+                    <p role="status" className="rounded-xl border border-rose-300 bg-rose-50 p-2.5 text-xs font-semibold text-rose-800">
                       {highlightError}
                     </p>
                   )}
                 </div>
               )}
 
-              <p className="text-xs text-muted-foreground">
-                Adding code automatically selects CODE. You can override the
-                type below.
+              <p className="text-2xs text-[#4E404C]">
+                Adding code automatically selects CODE. You can override the type below.
               </p>
             </section>
 
             <section className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <label htmlFor="question-type" className="text-sm font-medium">
+              <div className="space-y-1.5">
+                <label htmlFor="question-type" className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
                   Type
                 </label>
                 <select
@@ -483,15 +487,15 @@ function QuestionEditorForm({
                   onChange={(event) =>
                     updateQuestion("type", event.target.value as QuestionType)
                   }
-                  className="w-full rounded-md border bg-background px-3 py-2"
+                  className="w-full rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs font-bold text-[#302630] outline-none focus:border-[#D9468D]"
                 >
                   <option value="THEORY">Theory</option>
                   <option value="CODE">Code</option>
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="question-time" className="text-sm font-medium">
+              <div className="space-y-1.5">
+                <label htmlFor="question-time" className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
                   Time override (sec)
                 </label>
                 <input
@@ -509,12 +513,12 @@ function QuestionEditorForm({
                     )
                   }
                   placeholder="Default"
-                  className="w-full rounded-md border bg-background px-3 py-2"
+                  className="w-full rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs font-bold text-[#302630] outline-none focus:border-[#D9468D]"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="question-marks" className="text-sm font-medium">
+              <div className="space-y-1.5">
+                <label htmlFor="question-marks" className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
                   Marks
                 </label>
                 <input
@@ -526,14 +530,15 @@ function QuestionEditorForm({
                   onChange={(event) =>
                     updateQuestion("marks", Number(event.target.value))
                   }
-                  className="w-full rounded-md border bg-background px-3 py-2"
+                  className="w-full rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs font-bold text-[#302630] outline-none focus:border-[#D9468D]"
                 />
               </div>
             </section>
 
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2.5 rounded-xl border border-white/80 bg-white/60 p-3 text-xs font-bold text-[#302630]">
               <input
                 type="checkbox"
+                className="accent-[#BE3477]"
                 checked={question.included}
                 onChange={(event) =>
                   updateQuestion("included", event.target.checked)
@@ -544,37 +549,41 @@ function QuestionEditorForm({
 
             <section className="space-y-4">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="font-semibold">Answer options</h3>
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+                    Answer options
+                  </h3>
+                  <p className="mt-0.5 text-xs text-[#4E404C]">
+                    Select exactly one correct answer. Add between 2 and 6 options.
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={addOption}
                   disabled={question.options.length >= 6}
-                  className="rounded-md border px-3 py-2 text-sm disabled:opacity-40"
+                  className="rounded-xl border border-[#D9468D]/30 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-[#BE3477] hover:bg-[#FCE7F1] transition-colors disabled:opacity-40"
                 >
-                  Add option
+                  + Add option
                 </button>
               </div>
-
-              <p className="text-sm text-muted-foreground">
-                Select exactly one correct answer. Add between 2 and 6 options.
-              </p>
 
               {question.options.map((option, index) => (
                 <div
                   key={option.label}
-                  className="space-y-3 rounded-lg border p-4"
+                  className="space-y-3 rounded-2xl border border-white/80 bg-white/70 p-4 shadow-xs"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <label className="flex items-center gap-2 font-medium">
+                    <label className="flex items-center gap-2 text-xs font-bold text-[#302630]">
                       <input
                         type="radio"
                         name="correct-option"
+                        className="accent-[#BE3477]"
                         checked={option.isCorrect}
                         onChange={() => selectCorrectOption(index)}
                       />
                       Option {option.label}
                       {option.isCorrect && (
-                        <span className="text-xs text-green-700">
+                        <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-2xs font-bold text-emerald-800">
                           Correct answer
                         </span>
                       )}
@@ -584,7 +593,7 @@ function QuestionEditorForm({
                       type="button"
                       onClick={() => removeOption(index)}
                       disabled={question.options.length <= 2}
-                      className="text-sm text-red-600 disabled:opacity-40"
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline disabled:opacity-40"
                     >
                       Remove
                     </button>
@@ -598,12 +607,13 @@ function QuestionEditorForm({
                       updateOption(index, { content: event.target.value })
                     }
                     placeholder={`Enter option ${option.label}`}
-                    className="w-full rounded-md border bg-background px-3 py-2"
+                    className="w-full rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs text-[#302630] outline-none focus:border-[#D9468D]"
                   />
 
-                  <label className="flex items-center gap-2 text-sm">
+                  <label className="flex items-center gap-2 text-xs text-[#4E404C]">
                     <input
                       type="checkbox"
+                      className="accent-[#BE3477]"
                       checked={option.isCode}
                       onChange={(event) =>
                         updateOption(index, { isCode: event.target.checked })
@@ -621,7 +631,7 @@ function QuestionEditorForm({
                         })
                       }
                       aria-label={`Language for option ${option.label}`}
-                      className="w-full rounded-md border bg-background px-3 py-2"
+                      className="w-full rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs text-[#302630] outline-none focus:border-[#D9468D]"
                     >
                       {LANGUAGES.map((language) => (
                         <option key={language.value} value={language.value}>
@@ -635,9 +645,9 @@ function QuestionEditorForm({
             </section>
 
             <section className="space-y-3">
-              <h3 className="font-semibold">Live preview</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Live preview</h3>
 
-              <div className="rounded-xl border p-4">
+              <div className="rounded-2xl border border-white/80 bg-white/70 p-4 shadow-xs">
                 <QuestionCard
                   question={{
                     text: question.text || "Your question will appear here.",
@@ -653,18 +663,18 @@ function QuestionEditorForm({
             </section>
 
             {error && (
-              <p role="alert" className="text-sm text-red-600">
+              <p role="alert" className="rounded-xl border border-rose-300 bg-rose-50 p-3 text-xs font-semibold text-rose-800">
                 {error}
               </p>
             )}
           </div>
 
-          <footer className="flex justify-end gap-3 border-t p-5">
+          <footer className="flex justify-end gap-3 border-t border-[#E7DCE4] bg-white/80 p-4 backdrop-blur-xs">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="rounded-md border px-4 py-2"
+              className="rounded-xl border border-[#E7DCE4] bg-white px-5 py-2 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors"
             >
               Cancel
             </button>
@@ -672,7 +682,7 @@ function QuestionEditorForm({
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+              className="rounded-xl bg-[#BE3477] px-6 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:opacity-50"
             >
               {isPending ? "Saving..." : "Save question"}
             </button>

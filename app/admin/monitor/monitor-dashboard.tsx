@@ -2,6 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 type Team = {
   id: string;
@@ -38,10 +39,10 @@ type StatusFilter =
   | "ELIMINATED";
 
 const panel =
-  "rounded-2xl border border-white/10 bg-zinc-900 p-5";
+  "rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md";
 
 const button =
-  "rounded-lg border border-white/15 px-3 py-2 text-sm font-medium transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40";
+  "rounded-xl border border-[#E7DCE4] bg-white/80 px-3 py-1.5 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:cursor-not-allowed disabled:opacity-40 shadow-2xs";
 
 function formatDuration(ms: number) {
   const seconds = Math.max(0, Math.floor(ms / 1000));
@@ -57,6 +58,7 @@ export default function MonitorDashboard() {
   const [filter, setFilter] = useState<StatusFilter>("ALL");
   const [loading, setLoading] = useState(true);
   const [busyTeam, setBusyTeam] = useState<string | null>(null);
+  const [teamToRestore, setTeamToRestore] = useState<Team | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -83,20 +85,20 @@ export default function MonitorDashboard() {
     }
   }, []);
 
- useEffect(() => {
-  const initialRefresh = window.setTimeout(() => {
-    void refresh();
-  }, 0);
+  useEffect(() => {
+    const initialRefresh = window.setTimeout(() => {
+      void refresh();
+    }, 0);
 
-  const interval = window.setInterval(() => {
-    void refresh();
-  }, 2000);
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 2000);
 
-  return () => {
-    window.clearTimeout(initialRefresh);
-    window.clearInterval(interval);
-  };
-}, [refresh]);
+    return () => {
+      window.clearTimeout(initialRefresh);
+      window.clearInterval(interval);
+    };
+  }, [refresh]);
 
   async function teamAction(
     teamId: string,
@@ -146,6 +148,13 @@ export default function MonitorDashboard() {
     }
   }
 
+  function handleConfirmRestoreTeam() {
+    if (!teamToRestore) return;
+    const targetId = teamToRestore.id;
+    setTeamToRestore(null);
+    void teamAction(targetId, "restore");
+  }
+
   const teams = useMemo(() => {
     if (!snapshot) return [];
 
@@ -174,13 +183,13 @@ export default function MonitorDashboard() {
     });
   }, [snapshot, search, filter]);
 
- const answeredCurrent =
-  snapshot?.phase === "QUESTION"
-    ? snapshot.teams.filter(
-        (team) =>
-          team.onRoster && team.answeredCurrentQuestion,
-      ).length
-    : 0;
+  const answeredCurrent =
+    snapshot?.phase === "QUESTION"
+      ? snapshot.teams.filter(
+          (team) =>
+            team.onRoster && team.answeredCurrentQuestion,
+        ).length
+      : 0;
 
   const counterCards = [
     {
@@ -197,11 +206,11 @@ export default function MonitorDashboard() {
       label: "Answered current question",
       value: answeredCurrent,
       detail:
-  snapshot?.phase === "ENDED"
-    ? "Quiz ended"
-    : snapshot?.currentQuestion
-      ? `Question ${snapshot.currentQuestion.position}`
-      : "No active question",
+        snapshot?.phase === "ENDED"
+          ? "Quiz ended"
+          : snapshot?.currentQuestion
+            ? `Question ${snapshot.currentQuestion.position}`
+            : "No active question",
     },
     {
       label: "Eliminated",
@@ -211,15 +220,17 @@ export default function MonitorDashboard() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl space-y-6">
+    <section className="mx-auto max-w-7xl space-y-6 animate-fade-in-up">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-widest text-pink-400">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
             Administration
           </p>
-          <h1 className="mt-2 text-3xl font-bold">Live Monitor</h1>
-          <p className="mt-2 text-sm text-zinc-400">
-            Team readiness, answer progress and warning management.
+          <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] sm:text-3xl">
+            Live Monitor
+          </h1>
+          <p className="mt-1 text-sm text-[#4E404C]">
+            Team readiness, answer progress and warning management in real time.
           </p>
         </div>
 
@@ -234,19 +245,20 @@ export default function MonitorDashboard() {
       </header>
 
       {snapshot?.run?.status === "RUNNING" &&
-  snapshot.phase !== "ENDED" && (
-        <div
-          role="status"
-          className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200"
-        >
-          ● Quiz running · Phase: {snapshot.phase} · Updates every 2 seconds
-        </div>
-      )}
+        snapshot.phase !== "ENDED" && (
+          <div
+            role="status"
+            className="flex items-center gap-3 rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-bold text-emerald-800 backdrop-blur-xs"
+          >
+            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-600 animate-pulse" aria-hidden="true" />
+            Quiz running · Phase: {snapshot.phase} · Updates every 2 seconds
+          </div>
+        )}
 
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+          className="rounded-2xl border border-rose-300 bg-rose-50/90 p-4 text-xs font-semibold text-rose-800"
         >
           {error}
         </div>
@@ -255,7 +267,7 @@ export default function MonitorDashboard() {
       {message && (
         <div
           role="status"
-          className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300"
+          className="rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-semibold text-emerald-800"
         >
           {message}
         </div>
@@ -264,31 +276,31 @@ export default function MonitorDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {counterCards.map((card) => (
           <article key={card.label} className={panel}>
-            <p className="text-sm text-zinc-400">{card.label}</p>
-            <p className="mt-3 text-3xl font-bold tabular-nums">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">{card.label}</p>
+            <p className="mt-2 text-3xl font-black tabular-nums text-[#BE3477]">
               {card.value}
             </p>
-            <p className="mt-2 text-xs text-zinc-500">{card.detail}</p>
+            <p className="mt-1 text-2xs text-[#4E404C]">{card.detail}</p>
           </article>
         ))}
       </div>
 
       <div className={panel}>
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E7DCE4] pb-5">
           <div>
-            <h2 className="text-lg font-semibold">Teams</h2>
-            <p className="mt-1 text-sm text-zinc-400">
+            <h2 className="text-base font-bold text-[#302630]">Teams</h2>
+            <p className="mt-0.5 text-xs text-[#4E404C]">
               Showing {teams.length} of {snapshot?.teams.length ?? 0} teams.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search team or member..."
               aria-label="Search teams"
-              className="min-w-56 rounded-lg border border-white/15 bg-black/20 px-3 py-2 text-sm outline-none focus:border-pink-500"
+              className="min-w-56 rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs text-[#302630] outline-none placeholder:text-[#4E404C]/60 focus:border-[#D9468D]"
             />
 
             <select
@@ -297,7 +309,7 @@ export default function MonitorDashboard() {
                 setFilter(event.target.value as StatusFilter)
               }
               aria-label="Filter teams"
-              className="rounded-lg border border-white/15 bg-zinc-950 px-3 py-2 text-sm outline-none focus:border-pink-500"
+              className="rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs font-semibold text-[#302630] outline-none focus:border-[#D9468D]"
             >
               <option value="ALL">All teams</option>
               <option value="READY">Ready</option>
@@ -310,41 +322,41 @@ export default function MonitorDashboard() {
         </div>
 
         {loading && !snapshot ? (
-          <p className="py-10 text-center text-sm text-zinc-400">
+          <p className="py-10 text-center text-xs text-[#4E404C]">
             Loading teams...
           </p>
         ) : teams.length === 0 ? (
-          <p className="py-10 text-center text-sm text-zinc-400">
+          <p className="py-10 text-center text-xs text-[#4E404C]">
             No teams match this search or filter.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[1250px] text-left text-sm">
-              <thead className="border-b border-white/10 text-xs uppercase tracking-wide text-zinc-400">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-[#E7DCE4] bg-white/80">
+            <table className="w-full min-w-[1250px] text-left text-xs">
+              <thead className="border-b border-[#E7DCE4] bg-[#F1E9EF]/80 text-[#4E404C]">
                 <tr>
-                  <th className="px-3 py-3">Team / members</th>
-                  <th className="px-3 py-3">Ready</th>
-                  <th className="px-3 py-3">Roster</th>
-                  <th className="px-3 py-3">Current answer</th>
-                  <th className="px-3 py-3">Total answered</th>
-                  <th className="px-3 py-3">Correct</th>
-                  <th className="px-3 py-3">Correct time</th>
-                  <th className="px-3 py-3">Warnings</th>
-                  <th className="px-3 py-3">Status</th>
-                  <th className="px-3 py-3">Actions</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Team / members</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Ready</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Roster</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Current answer</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Total answered</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Correct</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Correct time</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Warnings</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Status</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-[#E7DCE4] bg-white/60">
                 {teams.map((team) => (
-                  <tr key={team.id} className="align-top">
-                    <td className="px-3 py-4">
-                      <p className="font-semibold">{team.name}</p>
-                      <div className="mt-2 space-y-1 text-xs text-zinc-400">
+                  <tr key={team.id} className="align-top hover:bg-[#FCE7F1]/20">
+                    <td className="px-3.5 py-3.5">
+                      <p className="font-bold text-[#302630]">{team.name}</p>
+                      <div className="mt-1.5 space-y-1 text-2xs text-[#4E404C]">
                         {team.members.map((member) => (
                           <p key={member.id}>
-                            {member.name}
-                            <span className="block text-zinc-500">
+                            <span className="font-semibold text-[#302630]">{member.name}</span>
+                            <span className="block text-[#4E404C]/80">
                               {member.email}
                             </span>
                           </p>
@@ -352,56 +364,70 @@ export default function MonitorDashboard() {
                       </div>
                     </td>
 
-                    <td className="px-3 py-4">
-                      {team.ready ? "✓ Ready" : "○ Not ready"}
+                    <td className="px-3.5 py-3.5">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-2xs font-bold ${
+                          team.ready
+                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
+                            : "border border-[#E7DCE4] bg-[#F1E9EF] text-[#4E404C]"
+                        }`}
+                      >
+                        {team.ready ? "✓ Ready" : "○ Not ready"}
+                      </span>
                     </td>
-                    <td className="px-3 py-4">
+                    <td className="px-3.5 py-3.5 font-semibold text-[#4E404C]">
                       {team.onRoster ? "✓ Yes" : "○ No"}
                     </td>
-                    <td className="px-3 py-4">
-                      {team.answeredCurrentQuestion ? "✓ Answered" : "○ Waiting"}
+                    <td className="px-3.5 py-3.5">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-2xs font-bold ${
+                          team.answeredCurrentQuestion
+                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
+                            : "border border-[#E7DCE4] bg-white text-[#4E404C]"
+                        }`}
+                      >
+                        {team.answeredCurrentQuestion ? "✓ Answered" : "○ Waiting"}
+                      </span>
                     </td>
-                    <td className="px-3 py-4 tabular-nums">
+                    <td className="px-3.5 py-3.5 font-bold tabular-nums text-[#302630]">
                       {team.totalAnswered}
                     </td>
-                    <td className="px-3 py-4 tabular-nums">
+                    <td className="px-3.5 py-3.5 font-bold tabular-nums text-emerald-700">
                       {team.correctSoFar}
                     </td>
-                    <td className="px-3 py-4 tabular-nums">
+                    <td className="px-3.5 py-3.5 font-mono tabular-nums text-[#4E404C]">
                       {formatDuration(team.totalCorrectMs)}
                     </td>
-                    <td className="px-3 py-4">
+                    <td className="px-3.5 py-3.5">
                       <span
-                        className={
+                        className={`rounded-full px-2.5 py-0.5 text-2xs font-bold ${
                           team.warningCount >= (snapshot?.maxWarnings ?? 3)
-                            ? "font-semibold text-red-300"
-                            : "text-zinc-200"
-                        }
+                            ? "border border-rose-300 bg-rose-50 text-rose-800"
+                            : "border border-[#E7DCE4] bg-white text-[#4E404C]"
+                        }`}
                       >
                         {team.warningCount}/{snapshot?.maxWarnings ?? 3}
                       </span>
                     </td>
-                    <td className="px-3 py-4">
-                      {team.quizStatus === "ELIMINATED"
-                        ? "⛔ Eliminated"
-                        : "✓ Active"}
+                    <td className="px-3.5 py-3.5">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-2xs font-bold ${
+                          team.quizStatus === "ELIMINATED"
+                            ? "border border-rose-300 bg-rose-50 text-rose-800"
+                            : "border border-emerald-300 bg-emerald-50 text-emerald-800"
+                        }`}
+                      >
+                        {team.quizStatus === "ELIMINATED" ? "⛔ Eliminated" : "✓ Active"}
+                      </span>
                     </td>
-                    <td className="px-3 py-4">
-                      <div className="flex min-w-36 flex-col gap-2">
+                    <td className="px-3.5 py-3.5">
+                      <div className="flex min-w-36 flex-col gap-1.5">
                         {team.quizStatus === "ELIMINATED" && (
                           <button
                             type="button"
-                            className={button}
+                            className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-2xs"
                             disabled={busyTeam === team.id}
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  `Restore ${team.name} and reset its warnings?`,
-                                )
-                              ) {
-                                void teamAction(team.id, "restore");
-                              }
-                            }}
+                            onClick={() => setTeamToRestore(team)}
                           >
                             Restore team
                           </button>
@@ -440,6 +466,16 @@ export default function MonitorDashboard() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!teamToRestore}
+        title="Restore Team"
+        description={`Restore team "${teamToRestore?.name}" and reset its warnings? The team will be marked active.`}
+        confirmLabel="Restore Team"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmRestoreTeam}
+        onCancel={() => setTeamToRestore(null)}
+      />
     </section>
   );
 }

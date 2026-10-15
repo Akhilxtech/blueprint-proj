@@ -15,20 +15,20 @@ export default async function NewParticipantPage() {
   });
 
   return (
-    <section className="mx-auto max-w-3xl">
-      <p className="text-sm font-medium uppercase tracking-widest text-violet-400">
-        Administration
-      </p>
+    <section className="mx-auto max-w-3xl animate-fade-in-up">
+      <div className="mb-6">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+          Administration
+        </p>
+        <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] sm:text-3xl">
+          Add participant
+        </h1>
+        <p className="mt-1 text-sm text-[#4E404C]">
+          Register a participant and assign them to a team.
+        </p>
+      </div>
 
-      <h1 className="mt-3 text-3xl font-bold">
-        Add participant
-      </h1>
-
-      <p className="mt-2 text-sm text-zinc-400">
-        Register a participant and assign them to a team.
-      </p>
-
-      <div className="mt-8 rounded-2xl border border-white/10 bg-zinc-900 p-6 sm:p-8">
+      <div className="rounded-2xl border border-white/70 bg-white/70 p-6 shadow-sm backdrop-blur-md sm:p-8">
         <AddParticipantForm teams={teams} />
       </div>
     </section>

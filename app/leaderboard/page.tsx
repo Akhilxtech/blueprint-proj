@@ -128,66 +128,74 @@ useEffect(() => {
   const isFinal = data?.stage === "FINAL";
 
   return (
-    <main className="min-h-screen bg-background px-4 py-10 text-foreground sm:px-8">
+    <main className="min-h-screen bg-[#F7F2F5] px-4 py-10 text-[#302630] sm:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <header className="space-y-3 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-pink-600">
-            Blueprint to Live
-          </p>
+          <div className="flex items-center justify-center gap-2">
+            <span className="rounded-full border border-[#D9468D]/25 bg-[#FCE7F1] px-3.5 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#BE3477]">
+              ISE Department
+            </span>
+          </div>
 
-          <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
-            Leaderboard
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#302630] sm:text-5xl">
+            Live Leaderboard
           </h1>
 
-          <p className="text-sm text-muted-foreground sm:text-base">
-            Track team performance and competition results.
+          <p className="text-sm text-[#746873] sm:text-base">
+            Track official team performance, completed round marks, and final standings.
           </p>
 
           {data && (
-            <span className="inline-flex rounded-full border px-3 py-1 text-sm">
-              {isFinal ? "Final Results Published" : "Round 1 Results"}
+            <span className="inline-flex rounded-full border border-[#D9468D]/25 bg-[#FCE7F1] px-4 py-1 text-xs font-bold text-[#BE3477]">
+              {isFinal ? "Final Results Published" : "Round 1 Official Results"}
             </span>
           )}
         </header>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E7DCE4] pb-4">
+          <p className="text-xs font-medium text-[#746873]">
             {lastUpdated
               ? `Last updated: ${lastUpdated.toLocaleTimeString()}`
               : "Loading latest results..."}
             {" · "}
-            Refreshes every 10 seconds
+            <span className="font-semibold text-[#BE3477]">Refreshes every 10 seconds</span>
           </p>
 
-        
-<button
-  type="button"
-  onClick={() => void loadLeaderboard()}
-  disabled={refreshing}
-  aria-live="polite"
-  className="inline-flex min-w-32 items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted disabled:cursor-wait disabled:opacity-60"
->
-  {refreshing && (
-    <span
-      aria-hidden="true"
-      className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-    />
-  )}
-  {refreshing ? "Refreshing..." : "Refresh"}
-</button>
-
+          <div className="flex items-center gap-3">
+            <a
+              href="/"
+              className="text-xs font-semibold text-[#746873] hover:text-[#BE3477] transition-colors"
+            >
+              ← Back to home
+            </a>
+            <button
+              type="button"
+              onClick={() => void loadLeaderboard()}
+              disabled={refreshing}
+              aria-live="polite"
+              className="inline-flex min-w-32 items-center justify-center gap-2 rounded-xl border border-[#E7DCE4] bg-white px-4 py-2 text-xs font-bold text-[#302630] shadow-xs transition hover:border-[#D9468D]/40 hover:bg-[#FAF6F8] hover:text-[#BE3477] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+            >
+              {refreshing && (
+                <span
+                  aria-hidden="true"
+                  className="size-3.5 animate-spin rounded-full border-2 border-[#BE3477] border-t-transparent"
+                />
+              )}
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
         </div>
 
         {loading && !data && (
-          <div className="rounded-xl border p-10 text-center">
-            Loading leaderboard...
+          <div className="glass-panel rounded-3xl p-10 text-center border border-white/80 shadow-xs text-sm text-[#746873]">
+            Loading leaderboard standings...
           </div>
         )}
 
         {error && (
           <div
             role="alert"
-            className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-600"
+            className="rounded-2xl border border-red-500/25 bg-red-50/85 p-4 text-sm font-medium text-red-800 shadow-xs"
           >
             {error}
             {data && " Showing the last successfully loaded results."}
@@ -196,41 +204,41 @@ useEffect(() => {
 
         {data && (
           <>
-            <section className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border p-5">
-                <p className="text-sm text-muted-foreground">
+            <section className="grid gap-4 sm:grid-cols-3 animate-fade-in-up">
+              <div className="glass-panel rounded-3xl p-5 border border-white/80 shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">
                   Registered Teams
                 </p>
-                <p className="mt-2 text-3xl font-bold">
+                <p className="mt-2 text-3xl font-extrabold text-[#302630]">
                   {data.teams.length}
                 </p>
               </div>
 
-              <div className="rounded-xl border p-5">
-                <p className="text-sm text-muted-foreground">
+              <div className="glass-panel rounded-3xl p-5 border border-white/80 shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">
                   Current Stage
                 </p>
-                <p className="mt-2 text-xl font-semibold">
+                <p className="mt-2 text-xl font-bold text-[#BE3477]">
                   {isFinal ? "Final Results" : "Round 1"}
                 </p>
               </div>
 
-              <div className="rounded-xl border p-5">
-                <p className="text-sm text-muted-foreground">
+              <div className="glass-panel rounded-3xl p-5 border border-white/80 shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">
                   Round 1 Maximum
                 </p>
-                <p className="mt-2 text-3xl font-bold">
+                <p className="mt-2 text-3xl font-extrabold text-[#302630]">
                   {data.round1MaxMarks}
                 </p>
               </div>
             </section>
 
-            <section className="overflow-hidden rounded-xl border">
-              <div className="border-b px-5 py-4">
-                <h2 className="text-lg font-semibold">
+            <section className="glass-panel overflow-hidden rounded-3xl border border-white/80 shadow-xs animate-fade-in-up animation-delay-75">
+              <div className="border-b border-[#E7DCE4] bg-white/70 px-6 py-4">
+                <h2 className="text-lg font-bold text-[#302630]">
                   {isFinal ? "Final Standings" : "Round 1 Standings"}
                 </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-0.5 text-xs text-[#746873]">
                   {isFinal
                     ? "Round scores, combined results, and selection status."
                     : "All registered teams ranked by Round 1 performance."}
@@ -239,48 +247,32 @@ useEffect(() => {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-muted/50">
+                  <thead className="bg-[#F1E9EF]/60 text-xs font-bold uppercase tracking-wider text-[#746873]">
                     <tr>
-                      <th className="whitespace-nowrap px-4 py-3">Rank</th>
-                      <th className="whitespace-nowrap px-4 py-3">
-                        Team
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3">
-                        Round 1 Score
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3">
-                        Round 1 %
-                      </th>
-                      <th className="whitespace-nowrap px-4 py-3">
-  Round 1 Correct Time
-</th>
+                      <th className="whitespace-nowrap px-4 py-3.5">Rank</th>
+                      <th className="whitespace-nowrap px-4 py-3.5">Team</th>
+                      <th className="whitespace-nowrap px-4 py-3.5">Round 1 Score</th>
+                      <th className="whitespace-nowrap px-4 py-3.5">Round 1 %</th>
+                      <th className="whitespace-nowrap px-4 py-3.5">Round 1 Correct Time</th>
 
                       {isFinal && (
                         <>
-                          <th className="whitespace-nowrap px-4 py-3">
-                            Round 2 Score
-                          </th>
-                          <th className="whitespace-nowrap px-4 py-3">
-                            Round 2 %
-                          </th>
-                          <th className="whitespace-nowrap px-4 py-3">
-                            Combined
-                          </th>
-                          <th className="whitespace-nowrap px-4 py-3">
-                            Status
-                          </th>
+                          <th className="whitespace-nowrap px-4 py-3.5">Round 2 Score</th>
+                          <th className="whitespace-nowrap px-4 py-3.5">Round 2 %</th>
+                          <th className="whitespace-nowrap px-4 py-3.5">Combined</th>
+                          <th className="whitespace-nowrap px-4 py-3.5">Status</th>
                         </>
                       )}
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-[#E7DCE4]/70 bg-white/40">
                     {data.teams.map((team) => (
                       <tr
                         key={team.teamId}
-                        className="transition-colors hover:bg-muted/30"
+                        className="transition-colors hover:bg-white/70"
                       >
-                        <td className="whitespace-nowrap px-4 py-4 font-semibold">
+                        <td className="whitespace-nowrap px-4 py-4 font-bold text-[#302630]">
                           {team.rank === 1
                             ? "🥇 1"
                             : team.rank === 2
@@ -290,46 +282,47 @@ useEffect(() => {
                                 : team.rank}
                         </td>
 
-                        <td className="whitespace-nowrap px-4 py-4 font-medium">
+                        <td className="whitespace-nowrap px-4 py-4 font-bold text-[#302630]">
                           {team.teamName}
                         </td>
 
-                        <td className="whitespace-nowrap px-4 py-4 tabular-nums">
+                        <td className="whitespace-nowrap px-4 py-4 font-medium tabular-nums text-[#302630]">
                           {team.round1Score} / {team.round1MaxMarks}
                         </td>
 
-                        <td className="whitespace-nowrap px-4 py-4 tabular-nums">
+                        <td className="whitespace-nowrap px-4 py-4 font-medium tabular-nums text-[#302630]">
                           {formatNumber(team.round1Percent)}%
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3">
-  {formatTime(team.totalCorrectMs)}
-  {isFinal && (team as FinalTeam).timeDecided && (
-    <span className="ml-2 inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-xs text-amber-600">
-      Rank decided by time
-    </span>
-  )}
-  {isFinal && (team as FinalTeam).unresolvedTie && (
-    <span className="ml-2 inline-flex rounded-full border border-red-500/40 bg-red-500/10 px-2 py-1 text-xs text-red-600">
-      Manual review required
-    </span>
-  )}
-</td>
+
+                        <td className="whitespace-nowrap px-4 py-4 text-xs font-medium text-[#746873]">
+                          {formatTime(team.totalCorrectMs)}
+                          {isFinal && (team as FinalTeam).timeDecided && (
+                            <span className="ml-2 inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                              Rank decided by time
+                            </span>
+                          )}
+                          {isFinal && (team as FinalTeam).unresolvedTie && (
+                            <span className="ml-2 inline-flex rounded-full border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-[11px] font-semibold text-red-700">
+                              Manual review required
+                            </span>
+                          )}
+                        </td>
 
                         {isFinal && (
                           <>
-                            <td className="whitespace-nowrap px-4 py-4 tabular-nums">
+                            <td className="whitespace-nowrap px-4 py-4 tabular-nums text-[#302630]">
                               {(team as FinalTeam).round2Score} /{" "}
                               {(team as FinalTeam).round2MaxMarks}
                             </td>
 
-                            <td className="whitespace-nowrap px-4 py-4 tabular-nums">
+                            <td className="whitespace-nowrap px-4 py-4 tabular-nums text-[#302630]">
                               {formatNumber(
                                 (team as FinalTeam).round2Percent,
                               )}
                               %
                             </td>
 
-                            <td className="whitespace-nowrap px-4 py-4 font-semibold tabular-nums">
+                            <td className="whitespace-nowrap px-4 py-4 font-extrabold tabular-nums text-[#BE3477]">
                               {formatNumber(
                                 (team as FinalTeam).combined,
                               )}
@@ -337,10 +330,10 @@ useEffect(() => {
 
                             <td className="whitespace-nowrap px-4 py-4">
                               <span
-                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                className={`inline-flex rounded-full px-3 py-0.5 text-xs font-bold ${
                                   (team as FinalTeam).status === "Selected"
-                                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                                    : "bg-muted text-muted-foreground"
+                                    ? "bg-emerald-500/15 text-emerald-800"
+                                    : "bg-[#F1E9EF] text-[#746873]"
                                 }`}
                               >
                                 {(team as FinalTeam).status}
@@ -354,8 +347,8 @@ useEffect(() => {
                     {data.teams.length === 0 && (
                       <tr>
                         <td
-                          colSpan={isFinal ? 8 : 4}
-                          className="px-4 py-10 text-center text-muted-foreground"
+                          colSpan={isFinal ? 9 : 5}
+                          className="px-4 py-10 text-center text-xs text-[#746873]"
                         >
                           No teams are available yet.
                         </td>
@@ -368,7 +361,7 @@ useEffect(() => {
           </>
         )}
 
-        <footer className="text-center text-xs text-muted-foreground">
+        <footer className="text-center text-xs font-medium text-[#746873] border-t border-[#E7DCE4] pt-6">
           Blueprint to Live · Official Competition Results
         </footer>
       </div>

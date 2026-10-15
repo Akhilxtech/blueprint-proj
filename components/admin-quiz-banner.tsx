@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -41,22 +40,26 @@ export default function AdminQuizBanner() {
     };
   }, []);
 
-if (
-  !status ||
-  status.run?.status !== "RUNNING" ||
-  status.phase === "ENDED"
-) {
-  return null;
-}
+  if (
+    !status ||
+    status.run?.status !== "RUNNING" ||
+    status.phase === "ENDED"
+  ) {
+    return null;
+  }
+
   return (
     <div
       role="status"
-      className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200"
+      className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-900 shadow-sm backdrop-blur-md animate-fade-in"
     >
-      <span aria-hidden="true">●</span>
-      <span className="font-semibold">Quiz in progress</span>
-      <span className="text-emerald-100/80">
-        Current phase: {status.phase}
+      <span className="relative flex size-2.5">
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+        <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
+      </span>
+      <span className="font-semibold tracking-tight">Quiz in progress</span>
+      <span className="text-emerald-800/80">
+        Current phase: <span className="font-medium text-emerald-900">{status.phase}</span>
       </span>
     </div>
   );

@@ -1,7 +1,7 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import ConfirmDialog from "@/components/confirm-dialog";
 
 type Settings = {
   weightRound1: number;
@@ -45,12 +45,16 @@ type Snapshot = {
   publishFinalResults: boolean;
 };
 
-const panel = "rounded-2xl border border-white/10 bg-zinc-900 p-5";
-const button =
-  "rounded-lg border border-white/15 px-3 py-2 text-sm font-medium transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
-const field =
-  "rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-pink-500";
-  function formatCorrectTime(ms: number) {
+type DialogState = {
+  open: boolean;
+  title: string;
+  description: React.ReactNode;
+  confirmLabel: string;
+  destructive?: boolean;
+  onConfirm: () => void;
+};
+
+function formatCorrectTime(ms: number) {
   return `${(ms / 1000).toFixed(3)} s`;
 }
 
@@ -64,23 +68,31 @@ export default function Round2Dashboard() {
   const [weightRound1, setWeightRound1] = useState(40);
   const [weightRound2, setWeightRound2] = useState(60);
   const [finalistCount, setFinalistCount] = useState(10);
-const [cutoffTieTeams, setCutoffTieTeams] = useState<
-  {
-    teamId: string;
-    teamName: string;
-    rank: number;
-    combined: number;
-    round2Percent: number;
-    round1Percent: number;
-    sectionC: number;
-    totalCorrectMs: number;
-    whyRankedHere: string;
-  }[]
->([]);
+  const [cutoffTieTeams, setCutoffTieTeams] = useState<
+    {
+      teamId: string;
+      teamName: string;
+      rank: number;
+      combined: number;
+      round2Percent: number;
+      round1Percent: number;
+      sectionC: number;
+      totalCorrectMs: number;
+      whyRankedHere: string;
+    }[]
+  >([]);
   const [questionMaxMarks, setQuestionMaxMarks] = useState<number[]>(
     Array(10).fill(10),
   );
   const [draftMarks, setDraftMarks] = useState<Record<string, string>>({});
+
+  const [confirmState, setConfirmState] = useState<DialogState>({
+    open: false,
+    title: "",
+    description: null,
+    confirmLabel: "Confirm",
+    onConfirm: () => {},
+  });
 
   const refresh = useCallback(async () => {
     try {
@@ -117,14 +129,15 @@ const [cutoffTieTeams, setCutoffTieTeams] = useState<
 
   const rows = snapshot?.rows ?? [];
   const pendingMarksCount = Object.keys(draftMarks).filter((key) => {
-  const [teamId, questionNoText] = key.split("-");
-  const questionNo = Number(questionNoText);
+    const [teamId, questionNoText] = key.split("-");
+    const questionNo = Number(questionNoText);
 
-  const row = rows.find((item) => item.teamId === teamId);
-  if (!row) return false;
+    const row = rows.find((item) => item.teamId === teamId);
+    if (!row) return false;
 
-  return draftMarks[key] !== String(row.marks[questionNo - 1]);
-}).length;
+    return draftMarks[key] !== String(row.marks[questionNo - 1]);
+  }).length;
+
   const round2MaxMarks = questionMaxMarks.reduce((a, b) => a + b, 0);
   const sectionAMax = questionMaxMarks.slice(0, 4).reduce((a, b) => a + b, 0);
   const sectionBMax = questionMaxMarks.slice(4, 7).reduce((a, b) => a + b, 0);
@@ -138,93 +151,88 @@ const [cutoffTieTeams, setCutoffTieTeams] = useState<
   const finalists = visibleRows.filter((row) => row.isFinalist);
   const otherTeams = visibleRows.filter((row) => !row.isFinalist);
 
-  
-const saveAllMarks = async () => {
-  if (!snapshot) return;
+  const saveAllMarks = async () => {
+    if (!snapshot) return;
 
-  const changes: {
-    teamId: string;
-    questionNo: number;
-    marks: number;
-  }[] = [];
+    const changes: {
+      teamId: string;
+      questionNo: number;
+      marks: number;
+    }[] = [];
 
-  for (const row of rows) {
-    for (let index = 0; index < row.marks.length; index++) {
-      const questionNo = index + 1;
-      const key = `${row.teamId}-${questionNo}`;
-      const rawValue = draftMarks[key];
+    for (const row of rows) {
+      for (let index = 0; index < row.marks.length; index++) {
+        const questionNo = index + 1;
+        const key = `${row.teamId}-${questionNo}`;
+        const rawValue = draftMarks[key];
 
-      if (rawValue === undefined) continue;
+        if (rawValue === undefined) continue;
 
-      if (rawValue.trim() === "") {
-        setError(
-          `Marks cannot be empty for ${row.teamName}, Q${questionNo}.`,
-        );
-        return;
-      }
+        if (rawValue.trim() === "") {
+          setError(
+            `Marks cannot be empty for ${row.teamName}, Q${questionNo}.`,
+          );
+          return;
+        }
 
-      const marks = Number(rawValue);
-      const maximum = questionMaxMarks[index];
+        const marks = Number(rawValue);
+        const maximum = questionMaxMarks[index];
 
-      if (
-        !Number.isInteger(marks) ||
-        marks < 0 ||
-        marks > maximum
-      ) {
-        setError(
-          `${row.teamName}, Q${questionNo}: enter a whole number from 0 to ${maximum}.`,
-        );
-        return;
-      }
+        if (!Number.isInteger(marks) || marks < 0 || marks > maximum) {
+          setError(
+            `${row.teamName}, Q${questionNo}: enter a whole number from 0 to ${maximum}.`,
+          );
+          return;
+        }
 
-      if (marks !== row.marks[index]) {
-        changes.push({
-          teamId: row.teamId,
-          questionNo,
-          marks,
-        });
+        if (marks !== row.marks[index]) {
+          changes.push({
+            teamId: row.teamId,
+            questionNo,
+            marks,
+          });
+        }
       }
     }
-  }
 
-  if (changes.length === 0) {
-    setNotice("No mark changes to save.");
+    if (changes.length === 0) {
+      setNotice("No mark changes to save.");
+      setError("");
+      return;
+    }
+
+    setSaving("batch");
     setError("");
-    return;
-  }
+    setNotice("");
 
-  setSaving("batch");
-  setError("");
-  setNotice("");
+    try {
+      const response = await fetch("/api/admin/round2/marks/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ marks: changes }),
+      });
 
-  try {
-    const response = await fetch("/api/admin/round2/marks/batch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ marks: changes }),
-    });
+      const payload = await response.json();
 
-    const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Could not save all marks.");
+      }
 
-    if (!response.ok) {
-      throw new Error(payload.error ?? "Could not save all marks.");
+      setNotice(
+        `Successfully saved ${payload.savedCount} mark entries. Rankings updated.`,
+      );
+
+      await refresh();
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not save all marks. Your drafts have been retained.",
+      );
+    } finally {
+      setSaving(null);
     }
-
-    setNotice(
-      `Successfully saved ${payload.savedCount} mark entries. Rankings updated.`,
-    );
-
-    await refresh();
-  } catch (cause) {
-    setError(
-      cause instanceof Error
-        ? cause.message
-        : "Could not save all marks. Your drafts have been retained.",
-    );
-  } finally {
-    setSaving(null);
-  }
-};
+  };
 
   const saveSettings = async () => {
     if (
@@ -283,33 +291,25 @@ const saveAllMarks = async () => {
     }
   };
 
-  const selectFinalists = async () => {
-   
+  const executeSelectFinalists = async () => {
+    setSaving("finalists");
+    setError("");
+    setNotice("");
+    setCutoffTieTeams([]);
 
-    const confirmed = window.confirm(
-      `Select the top ${snapshot?.finalistCount ?? finalistCount} teams as finalists? This replaces the current selection.`,
-    );
-    if (!confirmed) return;
-
-   setSaving("finalists");
-setError("");
-setNotice("");
-setCutoffTieTeams([]);
     try {
       const response = await fetch("/api/admin/round2/finalists", {
         method: "POST",
       });
       const payload = await response.json();
 
-      
-if (!response.ok) {
-  if (payload.code === "FINALIST_CUTOFF_TIE") {
-    setCutoffTieTeams(payload.tiedTeams ?? []);
-  }
+      if (!response.ok) {
+        if (payload.code === "FINALIST_CUTOFF_TIE") {
+          setCutoffTieTeams(payload.tiedTeams ?? []);
+        }
 
-  throw new Error(payload.error ?? "Could not select finalists.");
-}
-
+        throw new Error(payload.error ?? "Could not select finalists.");
+      }
 
       await refresh();
       setNotice(
@@ -326,76 +326,72 @@ if (!response.ok) {
     }
   };
 
-
-const resetRound2Scores = async () => {
-  const confirmed = window.confirm(
-    "Reset all Round 2 marks? This cannot be undone. Round 1 scores, team registrations, scoring settings, and finalist selections will remain unchanged.",
-  );
-
-  if (!confirmed) return;
-
-  setSaving("reset");
-  setError("");
-  setNotice("");
-
-  try {
-    const response = await fetch("/api/admin/round2/reset", {
-      method: "POST",
+  const handleSelectFinalists = () => {
+    setConfirmState({
+      open: true,
+      title: "Select Finalists",
+      description: `Select the top ${snapshot?.finalistCount ?? finalistCount} teams as finalists? This replaces the current selection with the latest ranking.`,
+      confirmLabel: "Select Finalists",
+      destructive: false,
+      onConfirm: () => {
+        setConfirmState((prev) => ({ ...prev, open: false }));
+        void executeSelectFinalists();
+      },
     });
+  };
 
-    const payload = await response.json();
-
-    if (!response.ok) {
-      throw new Error(payload.error ?? "Could not reset Round 2 scores.");
-    }
-
-    await refresh();
-
-    setNotice(
-      `Round 2 reset complete. ${payload.deletedMarks} saved marks cleared. Existing finalist selections remain unchanged until you select finalists again.`,
-    );
-  } catch (cause) {
-    setError(
-      cause instanceof Error
-        ? cause.message
-        : "Could not reset Round 2 scores.",
-    );
-  } finally {
-    setSaving(null);
-  }
-};
-
-
-async function toggleFinalResults() {
-  if (!snapshot) return;
-
-  const nextPublished = !snapshot.publishFinalResults;
-
-  if (
-    nextPublished &&
-    snapshot.resetAwaitingReevaluation
-  ) {
-    setError(
-      "Complete Round 2 re-evaluation before publishing results.",
-    );
-    return;
-  }
-
-  const confirmed = window.confirm(
-    nextPublished
-      ? "Publish final results? Participants will see Round 2 marks and selection status."
-      : "Unpublish final results? Participants will return to the Round 1 leaderboard.",
-  );
-
-  if (!confirmed) return;
-
-  try {
+  const executeResetRound2Scores = async () => {
+    setSaving("reset");
     setError("");
     setNotice("");
 
-    const response = await fetch(
-      "/api/admin/round2/publish",
-      {
+    try {
+      const response = await fetch("/api/admin/round2/reset", {
+        method: "POST",
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Could not reset Round 2 scores.");
+      }
+
+      await refresh();
+
+      setNotice(
+        `Round 2 reset complete. ${payload.deletedMarks} saved marks cleared. Existing finalist selections remain unchanged until you select finalists again.`,
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not reset Round 2 scores.",
+      );
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleResetRound2Scores = () => {
+    setConfirmState({
+      open: true,
+      title: "Reset Round 2 Scores",
+      description: "Reset all Round 2 marks? This cannot be undone. Round 1 scores, team registrations, scoring settings, and finalist selections will remain unchanged.",
+      confirmLabel: "Reset Scores",
+      destructive: true,
+      onConfirm: () => {
+        setConfirmState((prev) => ({ ...prev, open: false }));
+        void executeResetRound2Scores();
+      },
+    });
+  };
+
+  const executeToggleFinalResults = async (nextPublished: boolean) => {
+    try {
+      setError("");
+      setNotice("");
+
+      const response = await fetch("/api/admin/round2/publish", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -403,29 +399,47 @@ async function toggleFinalResults() {
         body: JSON.stringify({
           published: nextPublished,
         }),
-      },
-    );
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        data.error ?? "Could not update publication status.",
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not update publication status.");
+      }
+
+      setNotice(data.message);
+      await refresh();
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Something went wrong.",
       );
     }
+  };
 
-    setNotice(data.message);
-    await refresh();
-  } catch (error) {
-    setError(
-      error instanceof Error
-        ? error.message
-        : "Something went wrong.",
-    );
-  }
-}
+  const handleToggleFinalResults = () => {
+    if (!snapshot) return;
 
+    const nextPublished = !snapshot.publishFinalResults;
 
+    if (nextPublished && snapshot.resetAwaitingReevaluation) {
+      setError("Complete Round 2 re-evaluation before publishing results.");
+      return;
+    }
+
+    setConfirmState({
+      open: true,
+      title: nextPublished ? "Publish Final Results" : "Unpublish Final Results",
+      description: nextPublished
+        ? "Publish final results? Participants will see Round 2 marks and their selection status."
+        : "Unpublish final results? Participants will return to the Round 1 leaderboard.",
+      confirmLabel: nextPublished ? "Publish Results" : "Unpublish Results",
+      destructive: !nextPublished,
+      onConfirm: () => {
+        setConfirmState((prev) => ({ ...prev, open: false }));
+        void executeToggleFinalResults(nextPublished);
+      },
+    });
+  };
 
   const toggleFinalist = async (row: Round2Row) => {
     setSaving(row.teamId);
@@ -537,60 +551,64 @@ async function toggleFinalResults() {
   const finalistTotal = rows.filter((row) => row.isFinalist).length;
 
   const renderTable = (tableRows: Round2Row[], title: string) => (
-
-    
-
-    
-
-
-
-    <section className={panel}>
+    <section className="glass-card p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">{title}</h2>
-        <span className="text-sm text-zinc-400">{tableRows.length} teams</span>
+        <h2 className="text-lg font-bold tracking-tight text-foreground">{title}</h2>
+        <span className="rounded-full bg-pink-50 border border-pink-200/70 px-2.5 py-0.5 text-xs font-semibold text-primary">
+          {tableRows.length} teams
+        </span>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs">
         <table className="w-full min-w-[1700px] border-collapse text-left text-sm">
-          <thead className="bg-black/30 text-xs uppercase tracking-wide text-zinc-400">
+          <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted">
             <tr>
-              <th className="px-3 py-3">Rank</th>
-              <th className="px-3 py-3">Team</th>
+              <th className="px-3.5 py-3">Rank</th>
+              <th className="px-3.5 py-3">Team</th>
               {questionMaxMarks.map((maximum, index) => (
                 <th key={index} className="px-2 py-3 text-center">
                   Q{index + 1}
-                  <span className="block normal-case">/{maximum}</span>
+                  <span className="block normal-case text-muted font-normal text-[10px]">
+                    /{maximum}
+                  </span>
                 </th>
               ))}
-              <th className="px-3 py-3">A</th>
-              <th className="px-3 py-3">B</th>
-              <th className="px-3 py-3">C</th>
-              <th className="px-3 py-3">R2 raw</th>
+              <th className="px-3 py-3">Sec A</th>
+              <th className="px-3 py-3">Sec B</th>
+              <th className="px-3 py-3">Sec C</th>
+              <th className="px-3 py-3">R2 Raw</th>
               <th className="px-3 py-3">R2 %</th>
-         <th className="px-3 py-3">R1 raw</th>
-<th className="px-3 py-3">R1 %</th>
-<th className="px-3 py-3">R1 correct time</th>
+              <th className="px-3 py-3">R1 Raw</th>
+              <th className="px-3 py-3">R1 %</th>
+              <th className="px-3 py-3">R1 Correct Time</th>
               <th className="px-3 py-3">Combined</th>
               <th className="px-3 py-3">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-neutral-light">
             {tableRows.map((row) => (
-              <tr key={row.teamId} className="hover:bg-white/[0.025]">
-                <td className="px-3 py-3 font-semibold">
+              <tr key={row.teamId} className="hover:bg-neutral-50/60 transition-colors">
+                <td className="px-3.5 py-3 font-bold text-foreground">
                   {row.rank}
-                  {row.cutLineTie && <span className="ml-1 text-amber-300">⚠</span>}
+                  {row.cutLineTie && (
+                    <span className="ml-1 text-amber-500" title="Cut-line tie">
+                      ⚠
+                    </span>
+                  )}
                 </td>
-                <td className="max-w-52 truncate px-3 py-3 font-medium" title={row.teamName}>
+                <td
+                  className="max-w-52 truncate px-3.5 py-3 font-semibold text-foreground"
+                  title={row.teamName}
+                >
                   {row.teamName}
                 </td>
                 {row.marks.map((mark, index) => {
                   const key = `${row.teamId}-${index + 1}`;
                   return (
-                    <td key={index} className="px-1 py-2">
+                    <td key={index} className="px-1.5 py-2 text-center">
                       <input
                         aria-label={`${row.teamName} question ${index + 1} marks`}
-                        className="w-16 rounded-md border border-white/10 bg-black/30 px-2 py-2 text-center outline-none focus:border-pink-500"
+                        className="w-14 rounded-lg border border-neutral-light bg-[#FAF7F9] px-1.5 py-1 text-center text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                         type="number"
                         min={0}
                         max={questionMaxMarks[index]}
@@ -603,80 +621,80 @@ async function toggleFinalResults() {
                             [key]: event.target.value,
                           }))
                         }
-                        
                       />
                     </td>
                   );
                 })}
-                <td className="px-3 py-3">{row.sectionA}/{row.sectionAMax}</td>
-                <td className="px-3 py-3">{row.sectionB}/{row.sectionBMax}</td>
-                <td className="px-3 py-3">{row.sectionC}/{row.sectionCMax}</td>
-                <td className="px-3 py-3 font-semibold">
+                <td className="px-3 py-3 tabular-nums text-muted font-medium">
+                  {row.sectionA}/{row.sectionAMax}
+                </td>
+                <td className="px-3 py-3 tabular-nums text-muted font-medium">
+                  {row.sectionB}/{row.sectionBMax}
+                </td>
+                <td className="px-3 py-3 tabular-nums text-muted font-medium">
+                  {row.sectionC}/{row.sectionCMax}
+                </td>
+                <td className="px-3 py-3 font-bold tabular-nums text-foreground">
                   {row.round2Total}/{row.round2MaxMarks}
                 </td>
-                <td className="px-3 py-3">{row.round2Percent.toFixed(2)}%</td>
-                <td className="px-3 py-3">
+                <td className="px-3 py-3 tabular-nums text-foreground font-medium">
+                  {row.round2Percent.toFixed(2)}%
+                </td>
+                <td className="px-3 py-3 tabular-nums text-muted">
                   {row.round1Score}/{row.round1MaxMarks}
                 </td>
-              
-<td className="px-3 py-3">{row.round1Percent.toFixed(2)}%</td>
-
-<td className="px-3 py-3 whitespace-nowrap">
-  <div>{formatCorrectTime(row.totalCorrectMs)}</div>
-
-  {row.whyRankedHere.includes(
-    "lower Round 1 correct-answer time decided the order",
-  ) && (
-    <span className="mt-1 inline-block rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs text-amber-200">
-      Rank decided by time
-    </span>
-  )}
-
-  {row.suddenDeathTie && (
-    <span className="mt-1 inline-block rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-200">
-      {row.cutLineTie
-        ? "Manual review: cutoff tie"
-        : "Exact tie: review"}
-    </span>
-  )}
-</td>
-
-<td className="px-3 py-3 font-semibold text-pink-300">
-  {row.combined.toFixed(2)}%
-</td>
-
-              
-<td className="px-3 py-3">
-  {snapshot?.resetAwaitingReevaluation ? (
-    <span className="inline-block rounded-md border border-amber-500/30 px-2 py-1 text-xs font-medium text-amber-200">
-      Pending re-evaluation
-    </span>
-  ) : (
-    <button
-      className={
-        row.isFinalist
-          ? "rounded-md bg-pink-600 px-2 py-1 text-xs font-semibold"
-          : button
-      }
-      disabled={saving !== null}
-      onClick={() => void toggleFinalist(row)}
-    >
-      {row.isFinalist ? "Remove finalist" : "Select finalist"}
-    </button>
-  )}
-
-  {row.suddenDeathTie && (
-    <span className="mt-1 block text-xs text-amber-300">
-      {row.cutLineTie ? "Cutoff tie" : "Exact tie"}
-    </span>
-  )}
-</td>
-
+                <td className="px-3 py-3 tabular-nums text-foreground">
+                  {row.round1Percent.toFixed(2)}%
+                </td>
+                <td className="px-3 py-3 whitespace-nowrap">
+                  <div className="tabular-nums text-xs font-medium text-foreground">
+                    {formatCorrectTime(row.totalCorrectMs)}
+                  </div>
+                  {row.whyRankedHere.includes(
+                    "lower Round 1 correct-answer time decided the order",
+                  ) && (
+                    <span className="mt-1 inline-block rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+                      Decided by time
+                    </span>
+                  )}
+                  {row.suddenDeathTie && (
+                    <span className="mt-1 inline-block rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-800">
+                      {row.cutLineTie ? "Cutoff tie" : "Exact tie"}
+                    </span>
+                  )}
+                </td>
+                <td className="px-3 py-3 font-extrabold tabular-nums text-primary">
+                  {row.combined.toFixed(2)}%
+                </td>
+                <td className="px-3 py-3">
+                  {snapshot?.resetAwaitingReevaluation ? (
+                    <span className="inline-block rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                      Pending re-evaluation
+                    </span>
+                  ) : (
+                    <button
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold shadow-2xs transition active:scale-[0.98] ${
+                        row.isFinalist
+                          ? "border border-pink-200 bg-pink-50 text-primary hover:bg-pink-100"
+                          : "border border-neutral-light bg-white text-foreground hover:bg-neutral-50 hover:border-neutral"
+                      }`}
+                      disabled={saving !== null}
+                      onClick={() => void toggleFinalist(row)}
+                    >
+                      {row.isFinalist ? "Remove finalist" : "Select finalist"}
+                    </button>
+                  )}
+                  {row.suddenDeathTie && (
+                    <span className="mt-1 block text-xs font-medium text-amber-600">
+                      {row.cutLineTie ? "Cutoff tie" : "Exact tie"}
+                    </span>
+                  )}
+                </td>
               </tr>
             ))}
             {tableRows.length === 0 && (
               <tr>
-                <td colSpan={25} className="px-3 py-8 text-center text-zinc-500">
+                <td colSpan={25} className="px-4 py-10 text-center text-sm text-muted">
                   No teams in this list.
                 </td>
               </tr>
@@ -689,158 +707,202 @@ async function toggleFinalResults() {
 
   return (
     <section className="mx-auto max-w-[1800px] space-y-6">
+      {/* Header */}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-widest text-pink-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
             Administration
           </p>
-          <h1 className="mt-2 text-3xl font-bold">Round 2 Evaluation</h1>
-          <p className="mt-2 text-sm text-zinc-400">
-            Dynamic marks, transparent calculations, and separate finalist results.
+          <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            Round 2 Evaluation
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            Dynamic marks entry, transparent score synthesis, and finalist shortlisting.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button className={button} onClick={() => void refresh()} disabled={loading}>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            className="rounded-xl border border-neutral-light bg-white/80 px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-white hover:border-neutral active:scale-[0.98] disabled:opacity-50"
+            onClick={() => void refresh()}
+            disabled={loading}
+          >
             {loading ? "Loading..." : "Refresh"}
           </button>
-          <button className={button} onClick={exportCsv} disabled={!rows.length}>
+          <button
+            className="rounded-xl border border-neutral-light bg-white/80 px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-white hover:border-neutral active:scale-[0.98] disabled:opacity-50"
+            onClick={exportCsv}
+            disabled={!rows.length}
+          >
             Export CSV
           </button>
-
-
-<button
-  type="button"
-  onClick={toggleFinalResults}
-  disabled={
-    !snapshot ||
-    (snapshot.resetAwaitingReevaluation &&
-      !snapshot.publishFinalResults)
-  }
-  className="rounded-md bg-pink-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
->
-  {snapshot?.publishFinalResults
-    ? "Unpublish Final Results"
-    : "Publish Final Results"}
-</button>
-
+          <button
+            type="button"
+            onClick={handleToggleFinalResults}
+            disabled={
+              !snapshot ||
+              (snapshot.resetAwaitingReevaluation && !snapshot.publishFinalResults)
+            }
+            className={`rounded-xl px-4 py-2 text-sm font-semibold transition shadow-sm active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
+              snapshot?.publishFinalResults
+                ? "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                : "bg-primary text-white hover:bg-primary-hover"
+            }`}
+          >
+            {snapshot?.publishFinalResults
+              ? "Unpublish Final Results"
+              : "Publish Final Results"}
+          </button>
         </div>
       </header>
 
+      {/* Alerts */}
       {error && (
-        <div role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+        <div
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+        >
           {error}
         </div>
       )}
 
-{cutoffTieTeams.length > 0 && (
-  <section
-    role="alert"
-    className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4"
-  >
-    <h2 className="font-semibold text-amber-200">
-      Finalist cutoff tie requires manual review
-    </h2>
-
-    <p className="mt-1 text-sm text-zinc-300">
-      Automatic selection was blocked. Review these teams before
-      manually finalizing the shortlist. Existing finalist selections
-      have not been changed by the blocked request.
-    </p>
-
-    <div className="mt-4 overflow-x-auto">
-      <table className="w-full min-w-[850px] text-left text-sm">
-        <thead className="text-zinc-400">
-          <tr>
-            <th className="p-2">Team</th>
-            <th className="p-2">Rank</th>
-            <th className="p-2">Combined</th>
-            <th className="p-2">Round 2 %</th>
-            <th className="p-2">Round 1 %</th>
-            <th className="p-2">Section C</th>
-            <th className="p-2">Correct-answer time</th>
-            <th className="p-2">Comparison</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {cutoffTieTeams.map((team) => (
-            <tr key={team.teamId} className="border-t border-white/10">
-              <td className="p-2 font-medium">{team.teamName}</td>
-              <td className="p-2">{team.rank}</td>
-              <td className="p-2">{team.combined.toFixed(2)}</td>
-              <td className="p-2">{team.round2Percent.toFixed(2)}%</td>
-              <td className="p-2">{team.round1Percent.toFixed(2)}%</td>
-              <td className="p-2">{team.sectionC}</td>
-              <td className="p-2">
-                {(team.totalCorrectMs / 1000).toFixed(2)} s
-              </td>
-              <td className="p-2">{team.whyRankedHere}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </section>
-)}
-
       {notice && (
-        <div role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300">
+        <div
+          role="status"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+        >
           {notice}
         </div>
       )}
+
       {snapshot?.cutLineTie && (
-        <div role="alert" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-200">
+        <div
+          role="alert"
+          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+        >
           A tie crosses the finalist cutoff. Review the tie-break decision before confirming the shortlist.
         </div>
       )}
 
+      {cutoffTieTeams.length > 0 && (
+        <section
+          role="alert"
+          className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5"
+        >
+          <h2 className="font-bold text-amber-900">
+            Finalist cutoff tie requires manual review
+          </h2>
+          <p className="mt-1 text-sm text-amber-800">
+            Automatic selection was blocked. Review these teams before manually finalizing the shortlist. Existing finalist selections have not been changed by the blocked request.
+          </p>
+
+          <div className="mt-4 overflow-x-auto rounded-xl border border-amber-200 bg-white">
+            <table className="w-full min-w-[850px] text-left text-sm">
+              <thead className="border-b border-amber-200 bg-amber-100/50 text-xs font-semibold uppercase tracking-wider text-amber-900">
+                <tr>
+                  <th className="p-3">Team</th>
+                  <th className="p-3">Rank</th>
+                  <th className="p-3">Combined</th>
+                  <th className="p-3">Round 2 %</th>
+                  <th className="p-3">Round 1 %</th>
+                  <th className="p-3">Section C</th>
+                  <th className="p-3">Correct Time</th>
+                  <th className="p-3">Comparison</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-amber-100">
+                {cutoffTieTeams.map((team) => (
+                  <tr key={team.teamId} className="hover:bg-amber-50/30">
+                    <td className="p-3 font-semibold text-foreground">{team.teamName}</td>
+                    <td className="p-3 font-medium">{team.rank}</td>
+                    <td className="p-3 font-bold text-primary">{team.combined.toFixed(2)}</td>
+                    <td className="p-3">{team.round2Percent.toFixed(2)}%</td>
+                    <td className="p-3">{team.round1Percent.toFixed(2)}%</td>
+                    <td className="p-3">{team.sectionC}</td>
+                    <td className="p-3">{(team.totalCorrectMs / 1000).toFixed(2)} s</td>
+                    <td className="p-3 text-xs text-muted">{team.whyRankedHere}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* Metric Stat Cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Registered teams", value: snapshot?.totalTeams ?? "—" },
-          { label: "Current finalists", value: finalistTotal },
-          { label: "Target finalists", value: snapshot?.finalistCount ?? finalistCount },
-          { label: "Round 2 maximum marks", value: round2MaxMarks },
+          { label: "Registered Teams", value: snapshot?.totalTeams ?? "—" },
+          { label: "Current Finalists", value: finalistTotal },
+          { label: "Target Finalists", value: snapshot?.finalistCount ?? finalistCount },
+          { label: "Round 2 Max Marks", value: round2MaxMarks },
         ].map((item) => (
-          <div key={item.label} className={panel}>
-            <p className="text-sm text-zinc-400">{item.label}</p>
-            <p className="mt-2 text-3xl font-bold">{item.value}</p>
+          <div key={item.label} className="glass-card p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+              {item.label}
+            </p>
+            <p className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">
+              {item.value}
+            </p>
           </div>
         ))}
       </div>
 
-      <section className={panel}>
-        <h2 className="text-lg font-semibold">Scoring configuration</h2>
-        <p className="mt-1 text-sm text-zinc-400">
-          Round 1 percentage = earned marks / active quiz maximum × 100.
-          Round 2 percentage = Round 2 earned marks / configured Round 2 maximum × 100.
-          Combined score = Round 1 percentage × Round 1 weight + Round 2 percentage × Round 2 weight.
+      {/* Scoring Configuration Panel */}
+      <section className="glass-card p-6">
+        <h2 className="text-lg font-bold tracking-tight text-foreground">
+          Scoring Configuration
+        </h2>
+        <p className="mt-0.5 text-sm text-muted">
+          Round 1 % = earned / active max × 100. Round 2 % = earned / configured max × 100. Combined = R1% × Weight + R2% × Weight.
         </p>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <label className="space-y-2 text-sm">
-            <span className="block text-zinc-300">Round 1 weight (%)</span>
-            <input className={`${field} w-full`} type="number" min={0} max={100} value={weightRound1} onChange={(event) => setWeightRound1(Number(event.target.value))} />
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <label className="space-y-1.5 text-sm">
+            <span className="font-semibold text-foreground">Round 1 Weight (%)</span>
+            <input
+              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              type="number"
+              min={0}
+              max={100}
+              value={weightRound1}
+              onChange={(event) => setWeightRound1(Number(event.target.value))}
+            />
           </label>
-          <label className="space-y-2 text-sm">
-            <span className="block text-zinc-300">Round 2 weight (%)</span>
-            <input className={`${field} w-full`} type="number" min={0} max={100} value={weightRound2} onChange={(event) => setWeightRound2(Number(event.target.value))} />
+          <label className="space-y-1.5 text-sm">
+            <span className="font-semibold text-foreground">Round 2 Weight (%)</span>
+            <input
+              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              type="number"
+              min={0}
+              max={100}
+              value={weightRound2}
+              onChange={(event) => setWeightRound2(Number(event.target.value))}
+            />
           </label>
-          <label className="space-y-2 text-sm">
-            <span className="block text-zinc-300">Number of finalists</span>
-            <input className={`${field} w-full`} type="number" min={1} max={500} value={finalistCount} onChange={(event) => setFinalistCount(Number(event.target.value))} />
+          <label className="space-y-1.5 text-sm">
+            <span className="font-semibold text-foreground">Number of Finalists</span>
+            <input
+              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              type="number"
+              min={1}
+              max={500}
+              value={finalistCount}
+              onChange={(event) => setFinalistCount(Number(event.target.value))}
+            />
           </label>
         </div>
 
-        <h3 className="mt-6 font-semibold">Maximum marks per question</h3>
-        <p className="mt-1 text-sm text-zinc-400">
-          Change each maximum to match the marking scheme. The total and section maximums update immediately.
+        <h3 className="mt-6 font-bold text-foreground">Maximum Marks per Question</h3>
+        <p className="mt-0.5 text-sm text-muted">
+          Change each maximum to match the marking scheme. Total and section maximums update immediately.
         </p>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5 lg:grid-cols-10">
+
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-5 lg:grid-cols-10">
           {questionMaxMarks.map((maximum, index) => (
-            <label key={index} className="space-y-2 text-sm">
-              <span className="block text-zinc-300">Q{index + 1}</span>
+            <label key={index} className="space-y-1 text-center text-xs">
+              <span className="font-semibold text-muted">Q{index + 1}</span>
               <input
-                className={`${field} w-full`}
+                className="w-full rounded-xl border border-neutral-light bg-white px-2 py-1.5 text-center text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 type="number"
                 min={1}
                 max={10000}
@@ -858,164 +920,187 @@ async function toggleFinalResults() {
           ))}
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-4">
+        <div className="mt-5 grid gap-3 sm:grid-cols-4">
           {[
-            { label: "Section A maximum", value: sectionAMax },
-            { label: "Section B maximum", value: sectionBMax },
-            { label: "Section C maximum", value: sectionCMax },
-            { label: "Total maximum", value: round2MaxMarks },
+            { label: "Section A Maximum", value: sectionAMax },
+            { label: "Section B Maximum", value: sectionBMax },
+            { label: "Section C Maximum", value: sectionCMax },
+            { label: "Total Maximum", value: round2MaxMarks },
           ].map((item) => (
-            <div key={item.label} className="rounded-lg border border-white/10 bg-black/20 p-3">
-              <p className="text-xs text-zinc-400">{item.label}</p>
-              <p className="mt-1 text-xl font-semibold">{item.value}</p>
+            <div
+              key={item.label}
+              className="rounded-xl border border-neutral-light bg-white/70 p-3 shadow-2xs"
+            >
+              <p className="text-xs font-medium text-muted">{item.label}</p>
+              <p className="mt-0.5 text-lg font-bold text-foreground">{item.value}</p>
             </div>
           ))}
         </div>
 
-        <button
-          className="mt-5 rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-500 disabled:opacity-50"
-          onClick={() => void saveSettings()}
-          disabled={saving !== null}
-        >
-          {saving === "settings" ? "Saving..." : "Save scoring settings"}
-        </button>
-        <p className={`mt-3 text-xs ${weightRound1 + weightRound2 === 100 ? "text-zinc-500" : "text-amber-300"}`}>
-          Weights total: {weightRound1 + weightRound2}%
-        </p>
+        <div className="mt-5 flex flex-wrap items-center gap-4">
+          <button
+            className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
+            onClick={() => void saveSettings()}
+            disabled={saving !== null}
+          >
+            {saving === "settings" ? "Saving..." : "Save scoring settings"}
+          </button>
+          <span
+            className={`text-xs font-semibold ${
+              weightRound1 + weightRound2 === 100
+                ? "text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200"
+                : "text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200"
+            }`}
+          >
+            Weights total: {weightRound1 + weightRound2}%
+          </span>
+        </div>
       </section>
 
-      <section className={panel}>
-        <h2 className="text-lg font-semibold">Ranking and team search</h2>
-        <p className="mt-1 text-sm text-zinc-400">
-         Marks remain as drafts until you click Save All Marks.
-Maximum marks are validated before saving.
-        </p>
-        <input
-          className={`${field} mt-4 w-full sm:max-w-md`}
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search teams..."
-          aria-label="Search teams"
-        />
+      {/* Mark Entry & Search Card */}
+      <section className="glass-card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-bold tracking-tight text-foreground">
+              Mark Entry & Search
+            </h2>
+            <p className="mt-0.5 text-sm text-muted">
+              Changes stay as drafts until saved. Rankings update after all changes are saved successfully.
+            </p>
+            <p
+              aria-live="polite"
+              className={`mt-2 text-xs font-semibold ${
+                pendingMarksCount > 0
+                  ? "text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200 inline-block"
+                  : "text-muted"
+              }`}
+            >
+              {pendingMarksCount > 0
+                ? `⚡ ${pendingMarksCount} unsaved mark change${pendingMarksCount > 1 ? "s" : ""}`
+                : "All marks saved"}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              className="w-full sm:w-64 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none placeholder:text-muted transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search teams..."
+              aria-label="Search teams"
+            />
+            <button
+              type="button"
+              className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={saving !== null || pendingMarksCount === 0}
+              onClick={() => void saveAllMarks()}
+            >
+              {saving === "batch" ? "Saving all marks..." : "Save All Marks"}
+            </button>
+          </div>
+        </div>
+
         {loading && !snapshot && (
-          <p className="py-10 text-center text-sm text-zinc-400">Loading Round 2...</p>
+          <div className="py-12 text-center text-sm text-muted">
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+            <p>Loading Round 2...</p>
+          </div>
         )}
       </section>
 
-   
+      {snapshot && (
+        <>
+          {snapshot.resetAwaitingReevaluation && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <h2 className="font-bold text-amber-900">
+                Round 2 reset: re-evaluation pending
+              </h2>
+              <p className="mt-1 text-sm text-amber-800">
+                All teams are shown together. Existing finalist labels are unchanged until you finish re-evaluation and select finalists again.
+              </p>
+            </div>
+          )}
 
-{snapshot && (
-  <>
-    {snapshot.resetAwaitingReevaluation && (
-      <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-        <h2 className="font-semibold text-amber-200">
-          Round 2 reset: re-evaluation pending
-        </h2>
-        <p className="mt-1 text-sm text-zinc-300">
-          All teams are shown together. Existing finalist labels are
-          unchanged until you finish re-evaluation and select finalists
-          again.
-        </p>
-      </div>
-    )}
+          {snapshot.resetAwaitingReevaluation ? (
+            renderTable(visibleRows, "All teams")
+          ) : (
+            <>
+              {renderTable(finalists, "Selected Finalists")}
+              {renderTable(otherTeams, "Other Teams")}
+            </>
+          )}
+        </>
+      )}
 
-    <section className={`${panel} mb-4`}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Shortlist Management Controls */}
+      <section className="glass-card flex flex-wrap items-center justify-between gap-4 p-6">
         <div>
-          <h2 className="text-lg font-semibold">Mark entry</h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            Changes stay as drafts until you save them.
-            Rankings update after all changes are saved successfully.
-          </p>
-
-          <p
-            aria-live="polite"
-            className={`mt-2 text-sm ${
-              pendingMarksCount > 0
-                ? "text-amber-300"
-                : "text-zinc-400"
-            }`}
-          >
-            {pendingMarksCount > 0
-              ? `${pendingMarksCount} unsaved mark changes`
-              : "All marks saved"}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          className="rounded-lg bg-pink-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={saving !== null || pendingMarksCount === 0}
-          onClick={() => void saveAllMarks()}
-        >
-          {saving === "batch"
-            ? "Saving all marks..."
-            : "Save All Marks"}
-        </button>
-      </div>
-    </section>
-
-    {snapshot.resetAwaitingReevaluation ? (
-      renderTable(visibleRows, "All teams")
-    ) : (
-      <>
-        {renderTable(finalists, "Selected finalists")}
-        {renderTable(otherTeams, "Other teams")}
-      </>
-    )}
-  </>
-)}
-
-
-
-      <section className={`${panel} flex flex-wrap items-center justify-between gap-4`}>
-        <div>
-          <h2 className="font-semibold">Select top-ranked finalists</h2>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h2 className="text-base font-bold text-foreground">
+            Select Top-Ranked Finalists
+          </h2>
+          <p className="mt-0.5 text-sm text-muted">
             Replaces the current finalist list using the latest saved ranking. Review ties before confirming.
           </p>
         </div>
-       
-<div className="flex flex-wrap gap-3">
-  <button
-    className="rounded-lg border border-red-500/40 px-4 py-3 text-sm font-semibold text-red-300 transition hover:bg-red-500/10 disabled:opacity-50"
-    onClick={() => void resetRound2Scores()}
-    disabled={saving !== null || !snapshot}
-  >
-    {saving === "reset" ? "Resetting..." : "Reset Round 2 Scores"}
-  </button>
 
-  <button
-    className="rounded-lg bg-pink-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-pink-500 disabled:opacity-50"
-    onClick={() => void selectFinalists()}
-    disabled={saving !== null || !snapshot || rows.length === 0}
-  >
-    {saving === "finalists"
-      ? "Selecting..."
-      : `Select top ${snapshot?.finalistCount ?? finalistCount}`}
-  </button>
-</div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50"
+            onClick={handleResetRound2Scores}
+            disabled={saving !== null || !snapshot}
+          >
+            {saving === "reset" ? "Resetting..." : "Reset Round 2 Scores"}
+          </button>
 
+          <button
+            className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
+            onClick={handleSelectFinalists}
+            disabled={saving !== null || !snapshot || rows.length === 0}
+          >
+            {saving === "finalists"
+              ? "Selecting..."
+              : `Select top ${snapshot?.finalistCount ?? finalistCount}`}
+          </button>
+        </div>
       </section>
 
-      <section className={panel}>
-        <h2 className="font-semibold">Ranking and tie-break details</h2>
-        <p className="mt-1 text-sm text-zinc-400">
-          Ranking priority: combined score, Round 2 percentage, Round 1 percentage, Section C raw score, then lower Round 1 correct-answer time. Exact ties require review.
+      {/* Tie Break Info */}
+      <section className="glass-card p-6">
+        <h2 className="text-base font-bold text-foreground">
+          Ranking & Tie-Break Details
+        </h2>
+        <p className="mt-0.5 text-sm text-muted">
+          Ranking priority: Combined score &gt; Round 2 % &gt; Round 1 % &gt; Section C raw score &gt; Lower Round 1 correct-answer time. Exact ties require manual review.
         </p>
         <div className="mt-4 space-y-2">
-          {rows.filter((row) => row.suddenDeathTie).map((row) => (
-            <div key={row.teamId} className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-sm">
-              <span className="font-medium">{row.teamName}</span>
-              <span className="text-zinc-400"> · Rank {row.rank} · </span>
-              <span className="text-amber-200">{row.whyRankedHere}</span>
-            </div>
-          ))}
+          {rows
+            .filter((row) => row.suddenDeathTie)
+            .map((row) => (
+              <div
+                key={row.teamId}
+                className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm"
+              >
+                <span className="font-semibold text-foreground">{row.teamName}</span>
+                <span className="text-muted"> · Rank {row.rank} · </span>
+                <span className="font-medium text-amber-900">{row.whyRankedHere}</span>
+              </div>
+            ))}
           {!rows.some((row) => row.suddenDeathTie) && (
-            <p className="text-sm text-zinc-500">No exact ties detected.</p>
+            <p className="text-sm text-muted italic">No exact ties detected.</p>
           )}
         </div>
       </section>
+
+      {/* Reusable Confirm Dialog */}
+      <ConfirmDialog
+        open={confirmState.open}
+        title={confirmState.title}
+        description={confirmState.description}
+        confirmLabel={confirmState.confirmLabel}
+        destructive={confirmState.destructive}
+        onConfirm={confirmState.onConfirm}
+        onCancel={() => setConfirmState((prev) => ({ ...prev, open: false }))}
+      />
     </section>
   );
 }

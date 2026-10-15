@@ -10,13 +10,15 @@ export default async function SettingsPage() {
   const settings = await getSettings();
 
   return (
-    <section className="space-y-6">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-widest text-violet-400">
+    <section className="space-y-6 animate-fade-in-up">
+      <div className="mb-2">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
           Administration
         </p>
-        <h1 className="mt-3 text-3xl font-bold">Quiz Settings</h1>
-        <p className="mt-2 text-sm text-zinc-400">
+        <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] sm:text-3xl">
+          Quiz Settings
+        </h1>
+        <p className="mt-1 text-sm text-[#4E404C]">
           Configure default question durations and quiz timing parameters.
         </p>
       </div>

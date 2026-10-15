@@ -1,8 +1,8 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
 import Papa from "papaparse";
+import ConfirmDialog from "@/components/confirm-dialog";
 
 type Hint = {
   title: string;
@@ -26,6 +26,15 @@ type Statement = {
 };
 
 type StatementForm = Omit<Statement, "id" | "_count">;
+
+type DialogState = {
+  open: boolean;
+  title: string;
+  description: React.ReactNode;
+  confirmLabel: string;
+  destructive?: boolean;
+  onConfirm: () => void;
+};
 
 const emptyForm: StatementForm = {
   title: "",
@@ -63,8 +72,7 @@ const sampleRow = {
   description:
     "Create an application that helps students find campus information and services.",
   constraints: "The application must be usable on mobile devices.",
-  deliverables:
-    "Working application; README; deployment URL",
+  deliverables: "Working application; README; deployment URL",
   maxTeams: "",
   enabled: "true",
   displayOrder: "1",
@@ -77,9 +85,9 @@ const sampleRow = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-white placeholder:text-zinc-500";
+  "w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
 const buttonClass =
-  "rounded-lg border border-white/10 px-4 py-2 text-sm hover:bg-white/5 disabled:opacity-50";
+  "rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50";
 
 function downloadCsvTemplate() {
   const csv = Papa.unparse({
@@ -113,10 +121,7 @@ function validateCsvRows(rows: Record<string, unknown>[]) {
       "constraints",
       "deliverables",
     ]) {
-      if (
-        typeof row[field] !== "string" ||
-        !String(row[field]).trim()
-      ) {
+      if (typeof row[field] !== "string" || !String(row[field]).trim()) {
         errors.push(`Row ${rowNumber}: ${field} is required.`);
       }
     }
@@ -124,8 +129,7 @@ function validateCsvRows(rows: Record<string, unknown>[]) {
     if (
       row.maxTeams !== undefined &&
       String(row.maxTeams).trim() !== "" &&
-      (!Number.isInteger(Number(row.maxTeams)) ||
-        Number(row.maxTeams) < 1)
+      (!Number.isInteger(Number(row.maxTeams)) || Number(row.maxTeams) < 1)
     ) {
       errors.push(
         `Row ${rowNumber}: maxTeams must be a positive integer or empty.`,
@@ -145,13 +149,9 @@ function validateCsvRows(rows: Record<string, unknown>[]) {
 
     if (
       row.enabled !== undefined &&
-      !["true", "false", ""].includes(
-        String(row.enabled).trim().toLowerCase(),
-      )
+      !["true", "false", ""].includes(String(row.enabled).trim().toLowerCase())
     ) {
-      errors.push(
-        `Row ${rowNumber}: enabled must be true or false.`,
-      );
+      errors.push(`Row ${rowNumber}: enabled must be true or false.`);
     }
 
     if (row.hints !== undefined && String(row.hints).trim()) {
@@ -174,9 +174,7 @@ function validateCsvRows(rows: Record<string, unknown>[]) {
           );
         }
       } catch {
-        errors.push(
-          `Row ${rowNumber}: hints contains invalid JSON.`,
-        );
+        errors.push(`Row ${rowNumber}: hints contains invalid JSON.`);
       }
     }
   });
@@ -208,8 +206,7 @@ function convertCsvRow(row: Record<string, unknown>, index: number) {
         ? true
         : String(row.enabled).trim().toLowerCase() === "true",
     displayOrder:
-      row.displayOrder === undefined ||
-      String(row.displayOrder).trim() === ""
+      row.displayOrder === undefined || String(row.displayOrder).trim() === ""
         ? index
         : Number(row.displayOrder),
     hints,
@@ -227,6 +224,19 @@ export default function StatementsManager() {
   const [csvRows, setCsvRows] = useState<Record<string, unknown>[]>([]);
   const [csvErrors, setCsvErrors] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
+
+  // Modal dialog states
+  const [confirmState, setConfirmState] = useState<DialogState>({
+    open: false,
+    title: "",
+    description: null,
+    confirmLabel: "Confirm",
+    onConfirm: () => {},
+  });
+
+  const [deleteAllModalOpen, setDeleteAllModalOpen] = useState(false);
+  const [typedConfirmation, setTypedConfirmation] = useState("");
+  const [deletingAll, setDeletingAll] = useState(false);
 
   const loadStatements = useCallback(async () => {
     try {
@@ -250,19 +260,19 @@ export default function StatementsManager() {
   }, []);
 
   useEffect(() => {
-  const initial = window.setTimeout(() => {
-    void loadStatements();
-  }, 0);
+    const initial = window.setTimeout(() => {
+      void loadStatements();
+    }, 0);
 
-  const interval = window.setInterval(() => {
-    void loadStatements();
-  }, 5000);
+    const interval = window.setInterval(() => {
+      void loadStatements();
+    }, 5000);
 
-  return () => {
-    window.clearTimeout(initial);
-    window.clearInterval(interval);
-  };
-}, [loadStatements]);
+    return () => {
+      window.clearTimeout(initial);
+      window.clearInterval(interval);
+    };
+  }, [loadStatements]);
 
   function updateForm<K extends keyof StatementForm>(
     key: K,
@@ -341,7 +351,7 @@ export default function StatementsManager() {
     }
   }
 
-  async function deleteStatement(statement: Statement) {
+  function handleDeleteStatement(statement: Statement) {
     if (statement._count?.selections) {
       setError(
         "This statement has selected teams. Reset or reassign those selections before deleting it.",
@@ -349,20 +359,26 @@ export default function StatementsManager() {
       return;
     }
 
-    if (
-      !window.confirm(
-        `Delete "${statement.title}" permanently? Its deliverable progress will also be deleted.`,
-      )
-    ) {
-      return;
-    }
+    setConfirmState({
+      open: true,
+      title: `Delete "${statement.title}"`,
+      description: `Delete "${statement.title}" permanently? Its deliverable progress will also be cleared.`,
+      confirmLabel: "Delete Statement",
+      destructive: true,
+      onConfirm: () => {
+        setConfirmState((prev) => ({ ...prev, open: false }));
+        void executeDeleteStatement(statement.id);
+      },
+    });
+  }
 
+  async function executeDeleteStatement(statementId: string) {
     setError("");
     setMessage("");
 
     try {
       const response = await fetch(
-        `/api/admin/round3/statements/${statement.id}`,
+        `/api/admin/round3/statements/${statementId}`,
         { method: "DELETE" },
       );
       const data = await response.json();
@@ -380,24 +396,19 @@ export default function StatementsManager() {
     }
   }
 
-  async function deleteAllStatements() {
+  function openDeleteAllModal() {
     if (!statements.length) {
       setError("There are no problem statements to delete.");
       return;
     }
+    setTypedConfirmation("");
+    setDeleteAllModalOpen(true);
+  }
 
-    const confirmed = window.confirm(
-      "Delete ALL problem statements? This also deletes every team's Round 3 selection and all deliverable progress. Teams, participants, and deployment submissions will remain. This cannot be undone.",
-    );
-
-    if (!confirmed) return;
-
-    const typedConfirmation = window.prompt(
-      'Type DELETE ALL to confirm deletion of all problem statements and Round 3 selections.',
-    );
-
+  async function executeDeleteAllStatements() {
     if (typedConfirmation !== "DELETE ALL") return;
 
+    setDeletingAll(true);
     setError("");
     setMessage("");
 
@@ -413,6 +424,7 @@ export default function StatementsManager() {
       }
 
       resetForm();
+      setDeleteAllModalOpen(false);
       setMessage(
         `Deleted ${data.statementsDeleted} statements, ${data.selectionsDeleted} selections, and ${data.progressDeleted} progress records.`,
       );
@@ -422,6 +434,8 @@ export default function StatementsManager() {
       setError(
         err instanceof Error ? err.message : "Bulk deletion failed.",
       );
+    } finally {
+      setDeletingAll(false);
     }
   }
 
@@ -438,10 +452,9 @@ export default function StatementsManager() {
       skipEmptyLines: "greedy",
       complete(results) {
         const parsedRows = results.data;
-const parseErrors = results.errors.map(
-  (item) =>
-    `CSV line ${(item.row ?? 0) + 2}: ${item.message}`,
-);
+        const parseErrors = results.errors.map(
+          (item) => `CSV line ${(item.row ?? 0) + 2}: ${item.message}`,
+        );
 
         const fields = results.meta.fields ?? [];
         const missingFields = csvFields.filter(
@@ -473,17 +486,23 @@ const parseErrors = results.errors.map(
     });
   }
 
-  async function importCsv() {
+  function handleImportCsv() {
     if (csvErrors.length || !csvRows.length) return;
 
-    if (
-      !window.confirm(
-        `Import ${csvRows.length} problem statements? These will be added to the existing statements; existing statements will not be replaced.`,
-      )
-    ) {
-      return;
-    }
+    setConfirmState({
+      open: true,
+      title: "Import Problem Statements",
+      description: `Import ${csvRows.length} problem statements? These will be added to existing statements. Existing statements will not be replaced.`,
+      confirmLabel: `Import ${csvRows.length} Statements`,
+      destructive: false,
+      onConfirm: () => {
+        setConfirmState((prev) => ({ ...prev, open: false }));
+        void executeImportCsv();
+      },
+    });
+  }
 
+  async function executeImportCsv() {
     setImporting(true);
     setError("");
     setMessage("");
@@ -491,14 +510,11 @@ const parseErrors = results.errors.map(
     try {
       const statementsToImport = csvRows.map(convertCsvRow);
 
-      const response = await fetch(
-        "/api/admin/round3/statements/import",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ statements: statementsToImport }),
-        },
-      );
+      const response = await fetch("/api/admin/round3/statements/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ statements: statementsToImport }),
+      });
 
       const data = await response.json();
 
@@ -526,11 +542,7 @@ const parseErrors = results.errors.map(
     ]);
   }
 
-  function updateHint(
-    index: number,
-    field: keyof Hint,
-    value: string,
-  ) {
+  function updateHint(index: number, field: keyof Hint, value: string) {
     updateForm(
       "hints",
       form.hints.map((hint, hintIndex) =>
@@ -547,23 +559,25 @@ const parseErrors = results.errors.map(
   }
 
   return (
-    <div className="mt-10 space-y-8">
+    <div className="mt-8 space-y-8">
       <div>
-        <h2 className="text-2xl font-bold">Problem Statements</h2>
-        <p className="mt-2 text-sm text-zinc-400">
-          Create, edit, import, and manage Round 3 problem statements and hints.
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          Problem Statements
+        </h2>
+        <p className="mt-1 text-sm text-muted">
+          Create, edit, import, and manage Round 3 problem statements, constraints, deliverables, and hints.
         </p>
       </div>
 
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between"
         >
-          {error}
+          <span>{error}</span>
           <button
             type="button"
-            className="ml-3 underline"
+            className="text-xs font-semibold text-red-700 underline hover:no-underline ml-3"
             onClick={() => setError("")}
           >
             Dismiss
@@ -572,18 +586,19 @@ const parseErrors = results.errors.map(
       )}
 
       {message && (
-        <p role="status" className="text-sm text-emerald-400">
+        <div
+          role="status"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+        >
           {message}
-        </p>
+        </div>
       )}
 
-      <section
-        id="round3-statement-form"
-        className="rounded-2xl border border-white/10 bg-zinc-900 p-6"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold">
-            {editingId ? "Edit problem statement" : "Create problem statement"}
+      {/* Statement Form */}
+      <section id="round3-statement-form" className="glass-card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light pb-4">
+          <h3 className="text-lg font-bold tracking-tight text-foreground">
+            {editingId ? "Edit Problem Statement" : "Create Problem Statement"}
           </h3>
 
           {editingId && (
@@ -595,8 +610,8 @@ const parseErrors = results.errors.map(
 
         <form onSubmit={saveStatement} className="mt-5 space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-2 text-sm">
-              <span>Title *</span>
+            <label className="space-y-1.5 text-sm">
+              <span className="font-semibold text-foreground">Title *</span>
               <input
                 required
                 className={inputClass}
@@ -605,8 +620,8 @@ const parseErrors = results.errors.map(
               />
             </label>
 
-            <label className="space-y-2 text-sm">
-              <span>Domain *</span>
+            <label className="space-y-1.5 text-sm">
+              <span className="font-semibold text-foreground">Domain *</span>
               <input
                 required
                 className={inputClass}
@@ -616,15 +631,13 @@ const parseErrors = results.errors.map(
               />
             </label>
 
-            <label className="space-y-2 text-sm">
-              <span>Difficulty *</span>
+            <label className="space-y-1.5 text-sm">
+              <span className="font-semibold text-foreground">Difficulty *</span>
               <select
                 required
                 className={inputClass}
                 value={form.difficulty}
-                onChange={(event) =>
-                  updateForm("difficulty", event.target.value)
-                }
+                onChange={(event) => updateForm("difficulty", event.target.value)}
               >
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
@@ -633,8 +646,10 @@ const parseErrors = results.errors.map(
               </select>
             </label>
 
-            <label className="space-y-2 text-sm">
-              <span>Maximum teams (blank = unlimited)</span>
+            <label className="space-y-1.5 text-sm">
+              <span className="font-semibold text-foreground">
+                Maximum Teams (blank = unlimited)
+              </span>
               <input
                 type="number"
                 min={1}
@@ -649,8 +664,8 @@ const parseErrors = results.errors.map(
               />
             </label>
 
-            <label className="space-y-2 text-sm">
-              <span>Display order</span>
+            <label className="space-y-1.5 text-sm">
+              <span className="font-semibold text-foreground">Display Order</span>
               <input
                 type="number"
                 min={0}
@@ -662,20 +677,21 @@ const parseErrors = results.errors.map(
               />
             </label>
 
-            <label className="flex items-center gap-3 text-sm">
+            <label className="flex items-center gap-3 text-sm pt-6 cursor-pointer">
               <input
                 type="checkbox"
                 checked={form.enabled}
-                onChange={(event) =>
-                  updateForm("enabled", event.target.checked)
-                }
+                onChange={(event) => updateForm("enabled", event.target.checked)}
+                className="h-4 w-4 rounded border-neutral-light text-primary focus:ring-primary"
               />
-              Statement enabled for selection
+              <span className="font-semibold text-foreground">
+                Statement enabled for selection
+              </span>
             </label>
           </div>
 
-          <label className="block space-y-2 text-sm">
-            <span>Short description *</span>
+          <label className="block space-y-1.5 text-sm">
+            <span className="font-semibold text-foreground">Short Description *</span>
             <textarea
               required
               rows={2}
@@ -687,63 +703,64 @@ const parseErrors = results.errors.map(
             />
           </label>
 
-          <label className="block space-y-2 text-sm">
-            <span>Full description *</span>
+          <label className="block space-y-1.5 text-sm">
+            <span className="font-semibold text-foreground">Full Description *</span>
             <textarea
               required
               rows={5}
               className={inputClass}
               value={form.description}
-              onChange={(event) =>
-                updateForm("description", event.target.value)
-              }
+              onChange={(event) => updateForm("description", event.target.value)}
             />
           </label>
 
-          <label className="block space-y-2 text-sm">
-            <span>Constraints *</span>
+          <label className="block space-y-1.5 text-sm">
+            <span className="font-semibold text-foreground">Constraints *</span>
             <textarea
               required
               rows={3}
               className={inputClass}
               value={form.constraints}
-              onChange={(event) =>
-                updateForm("constraints", event.target.value)
-              }
+              onChange={(event) => updateForm("constraints", event.target.value)}
             />
           </label>
 
-          <label className="block space-y-2 text-sm">
-            <span>Deliverables *</span>
+          <label className="block space-y-1.5 text-sm">
+            <span className="font-semibold text-foreground">Deliverables *</span>
             <textarea
               required
               rows={3}
               className={inputClass}
               value={form.deliverables}
-              onChange={(event) =>
-                updateForm("deliverables", event.target.value)
-              }
+              onChange={(event) => updateForm("deliverables", event.target.value)}
             />
           </label>
 
-          <div className="space-y-4">
+          <div className="space-y-4 rounded-xl border border-neutral-light bg-[#FAF7F9] p-5">
             <div className="flex items-center justify-between gap-3">
-              <h4 className="font-semibold">Hints</h4>
+              <div>
+                <h4 className="font-bold text-foreground">Hints</h4>
+                <p className="text-xs text-muted">
+                  Add progressive hints released to participants during Round 3.
+                </p>
+              </div>
               <button type="button" className={buttonClass} onClick={addHint}>
-                Add hint
+                + Add hint
               </button>
             </div>
 
             {form.hints.map((hint, index) => (
               <div
                 key={index}
-                className="space-y-3 rounded-xl border border-white/10 p-4"
+                className="space-y-3 rounded-xl border border-neutral-light bg-white p-4 shadow-2xs"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-medium">Hint {index + 1}</span>
+                  <span className="text-sm font-bold text-foreground">
+                    Hint {index + 1}
+                  </span>
                   <button
                     type="button"
-                    className="text-sm text-red-300 hover:text-red-200"
+                    className="text-xs font-semibold text-red-600 hover:text-red-700"
                     onClick={() => removeHint(index)}
                   >
                     Remove
@@ -772,12 +789,16 @@ const parseErrors = results.errors.map(
                 />
               </div>
             ))}
+
+            {form.hints.length === 0 && (
+              <p className="text-xs text-muted italic">No hints added yet.</p>
+            )}
           </div>
 
           <button
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold hover:bg-violet-500 disabled:opacity-50"
+            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
           >
             {saving
               ? "Saving..."
@@ -788,11 +809,13 @@ const parseErrors = results.errors.map(
         </form>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-zinc-900 p-6">
-        <h3 className="text-lg font-semibold">CSV import</h3>
-        <p className="mt-2 text-sm text-zinc-400">
-          Download the template, fill in your statements, then preview and
-          validate the CSV before importing. The import is additive.
+      {/* CSV Import */}
+      <section className="glass-card p-6">
+        <h3 className="text-lg font-bold tracking-tight text-foreground">
+          CSV Import
+        </h3>
+        <p className="mt-1 text-sm text-muted">
+          Download the template, fill in your statements, and preview validation before importing. Imports are additive.
         </p>
 
         <div className="mt-4 flex flex-wrap gap-3">
@@ -804,7 +827,7 @@ const parseErrors = results.errors.map(
             Download CSV template
           </button>
 
-          <label className="cursor-pointer rounded-lg border border-white/10 px-4 py-2 text-sm hover:bg-white/5">
+          <label className="cursor-pointer rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98]">
             Choose CSV file
             <input
               type="file"
@@ -819,35 +842,35 @@ const parseErrors = results.errors.map(
         </div>
 
         {csvRows.length > 0 && (
-          <div className="mt-5 space-y-3">
-            <p className="text-sm">
+          <div className="mt-5 space-y-4">
+            <p className="text-sm font-semibold text-foreground">
               Preview: {csvRows.length} statement(s)
             </p>
 
             {csvErrors.length > 0 ? (
-              <div className="max-h-64 space-y-2 overflow-auto rounded-xl border border-red-500/30 bg-red-500/5 p-4">
-                <p className="font-semibold text-red-300">
+              <div className="max-h-64 space-y-1.5 overflow-auto rounded-xl border border-red-200 bg-red-50 p-4">
+                <p className="font-bold text-red-800">
                   Fix these problems before importing:
                 </p>
                 {csvErrors.map((item, index) => (
-                  <p key={index} className="text-sm text-red-200">
+                  <p key={index} className="text-xs text-red-700">
                     {item}
                   </p>
                 ))}
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-white/10">
+              <div className="overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs">
                 <table className="w-full min-w-[700px] text-left text-sm">
-                  <thead className="bg-zinc-950 text-zinc-400">
+                  <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted">
                     <tr>
                       <th className="p-3">Title</th>
                       <th className="p-3">Domain</th>
                       <th className="p-3">Difficulty</th>
-                      <th className="p-3">Max teams</th>
+                      <th className="p-3">Max Teams</th>
                       <th className="p-3">Hints</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-neutral-light">
                     {csvRows.slice(0, 10).map((row, index) => {
                       let hintCount = 0;
 
@@ -860,19 +883,14 @@ const parseErrors = results.errors.map(
                       }
 
                       return (
-                        <tr
-                          key={index}
-                          className="border-t border-white/10"
-                        >
-                          <td className="p-3">{String(row.title ?? "")}</td>
-                          <td className="p-3">{String(row.domain ?? "")}</td>
-                          <td className="p-3">
-                            {String(row.difficulty ?? "")}
-                          </td>
-                          <td className="p-3">
+                        <tr key={index} className="hover:bg-neutral-50/60 transition-colors">
+                          <td className="p-3 font-semibold text-foreground">{String(row.title ?? "")}</td>
+                          <td className="p-3 text-muted">{String(row.domain ?? "")}</td>
+                          <td className="p-3 text-foreground">{String(row.difficulty ?? "")}</td>
+                          <td className="p-3 text-muted">
                             {String(row.maxTeams ?? "") || "Unlimited"}
                           </td>
-                          <td className="p-3">{hintCount}</td>
+                          <td className="p-3 font-medium text-foreground">{hintCount}</td>
                         </tr>
                       );
                     })}
@@ -880,7 +898,7 @@ const parseErrors = results.errors.map(
                 </table>
 
                 {csvRows.length > 10 && (
-                  <p className="p-3 text-xs text-zinc-400">
+                  <p className="p-3 text-xs text-muted border-t border-neutral-light bg-[#FAF7F9]">
                     Showing first 10 rows of {csvRows.length}.
                   </p>
                 )}
@@ -891,12 +909,10 @@ const parseErrors = results.errors.map(
               <button
                 type="button"
                 disabled={importing || csvErrors.length > 0}
-                onClick={() => void importCsv()}
-                className="rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold hover:bg-violet-500 disabled:opacity-50"
+                onClick={handleImportCsv}
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
               >
-                {importing
-                  ? "Importing..."
-                  : `Import ${csvRows.length} statement(s)`}
+                {importing ? "Importing..." : `Import ${csvRows.length} statement(s)`}
               </button>
 
               <button
@@ -915,67 +931,75 @@ const parseErrors = results.errors.map(
         )}
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-zinc-900 p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Existing Statements List */}
+      <section className="glass-card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light pb-4">
           <div>
-            <h3 className="text-lg font-semibold">Existing statements</h3>
-            <p className="mt-1 text-sm text-zinc-400">
-              {statements.length} statement(s)
+            <h3 className="text-lg font-bold tracking-tight text-foreground">
+              Existing Statements
+            </h3>
+            <p className="text-sm text-muted">
+              {statements.length} statement{statements.length === 1 ? "" : "s"} configured
             </p>
           </div>
 
           <button
             type="button"
-            className="rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50"
             disabled={!statements.length}
-            onClick={() => void deleteAllStatements()}
+            onClick={openDeleteAllModal}
           >
             Delete all problem statements
           </button>
         </div>
 
         {loading ? (
-          <p className="mt-5 text-sm text-zinc-400">Loading statements...</p>
+          <div className="py-10 text-center text-sm text-muted">
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+            <p>Loading statements...</p>
+          </div>
         ) : statements.length === 0 ? (
-          <p className="mt-5 text-sm text-zinc-400">
-            No problem statements have been created.
+          <p className="py-10 text-center text-sm text-muted">
+            No problem statements have been created yet.
           </p>
         ) : (
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 space-y-3.5">
             {statements.map((statement) => (
               <article
                 key={statement.id}
-                className="rounded-xl border border-white/10 p-4"
+                className="rounded-xl border border-neutral-light bg-white p-4.5 shadow-2xs hover:shadow-soft transition space-y-3"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-semibold">{statement.title}</h4>
-                    <p className="mt-1 text-sm text-zinc-400">
-                      {statement.domain} · {statement.difficulty}
+                    <h4 className="font-bold text-foreground text-base">
+                      {statement.title}
+                    </h4>
+                    <p className="mt-0.5 text-xs font-medium text-muted">
+                      {statement.domain} · <span className="text-primary font-semibold">{statement.difficulty}</span>
                     </p>
-                    <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-300">
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/80 leading-relaxed">
                       {statement.shortDescription}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                      <span className="rounded-full bg-zinc-800 px-2.5 py-1">
+                      <span className="rounded-full bg-pink-50 border border-pink-200/60 px-2.5 py-0.5 font-semibold text-primary">
                         {statement._count?.selections ?? 0} selected team(s)
                       </span>
-                      <span className="rounded-full bg-zinc-800 px-2.5 py-1">
+                      <span className="rounded-full bg-neutral-100 border border-neutral-light px-2.5 py-0.5 text-muted font-medium">
                         {statement.hints.length} hint(s)
                       </span>
                       <span
-                        className={`rounded-full px-2.5 py-1 ${
+                        className={`rounded-full px-2.5 py-0.5 font-medium ${
                           statement.enabled
-                            ? "bg-emerald-500/10 text-emerald-300"
-                            : "bg-zinc-800 text-zinc-400"
+                            ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                            : "border border-neutral-light bg-neutral-100 text-muted"
                         }`}
                       >
-                        {statement.enabled ? "Enabled" : "Disabled"}
+                        {statement.enabled ? "● Enabled" : "○ Disabled"}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       className={buttonClass}
@@ -992,8 +1016,8 @@ const parseErrors = results.errors.map(
                           ? "Reset or reassign its teams first."
                           : "Delete statement"
                       }
-                      className="rounded-lg border border-red-500/30 px-3 py-2 text-sm text-red-300 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
-                      onClick={() => void deleteStatement(statement)}
+                      className="rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                      onClick={() => handleDeleteStatement(statement)}
                     >
                       Delete
                     </button>
@@ -1004,6 +1028,71 @@ const parseErrors = results.errors.map(
           </div>
         )}
       </section>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        open={confirmState.open}
+        title={confirmState.title}
+        description={confirmState.description}
+        confirmLabel={confirmState.confirmLabel}
+        destructive={confirmState.destructive}
+        onConfirm={confirmState.onConfirm}
+        onCancel={() => setConfirmState((prev) => ({ ...prev, open: false }))}
+      />
+
+      {/* Typed Delete All Modal */}
+      {deleteAllModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-all-title"
+            className="w-full max-w-md rounded-2xl border border-white/80 bg-white/95 p-6 shadow-2xl backdrop-blur-md"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wider text-red-600">
+              High Risk Administrative Action
+            </p>
+            <h3 id="delete-all-title" className="mt-1 text-xl font-bold text-foreground">
+              Delete All Problem Statements
+            </h3>
+            <p className="mt-2 text-sm text-muted leading-relaxed">
+              This permanently deletes every problem statement, every team&apos;s Round 3 selection, and all deliverable progress. Team records, participants, and deployment submissions will remain intact. This cannot be undone.
+            </p>
+
+            <div className="mt-4 space-y-2">
+              <label htmlFor="delete-all-input" className="block text-xs font-semibold text-foreground">
+                Type <span className="text-red-600 font-mono">DELETE ALL</span> to confirm:
+              </label>
+              <input
+                id="delete-all-input"
+                className="w-full rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-mono text-foreground outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                value={typedConfirmation}
+                onChange={(e) => setTypedConfirmation(e.target.value)}
+                placeholder="DELETE ALL"
+              />
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse justify-end gap-2.5 sm:flex-row">
+              <button
+                type="button"
+                className={buttonClass}
+                onClick={() => setDeleteAllModalOpen(false)}
+                disabled={deletingAll}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={typedConfirmation !== "DELETE ALL" || deletingAll}
+                onClick={() => void executeDeleteAllStatements()}
+              >
+                {deletingAll ? "Deleting..." : "Permanently Delete All"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

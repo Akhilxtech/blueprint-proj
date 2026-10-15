@@ -17,7 +17,7 @@ export default function EstimatedEnd({
   });
 
   return (
-    <p className="mt-2 text-xl font-semibold">
+    <p className="mt-2 text-2xl font-black text-[#BE3477]">
       {formattedTime}
     </p>
   );

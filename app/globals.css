@@ -1,26 +1,144 @@
 @import "tailwindcss";
+@config "../tailwind.config.ts";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F7F2F5;
+  --foreground: #302630;
+  --foreground-secondary: #4E404C;
+  --primary: #D9468D;
+  --primary-deep: #BE3477;
+  --primary-accent: #FCE7F1;
+  --border: #E7DCE4;
+  --card: rgba(255, 255, 255, 0.58);
+  --card-border: rgba(255, 255, 255, 0.72);
+  --card-solid: #ffffff;
+  --muted: #4E404C;
+  --muted-foreground: #4E404C;
+  --neutral-light: #E7DCE4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-primary: var(--primary);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-accent: var(--primary-accent);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-neutral-light: var(--neutral-light);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.text-muted {
+  color: #4E404C !important;
+}
+
+.text-2xs {
+  font-size: 0.6875rem !important;
+  line-height: 0.95rem !important;
+}
+
+::placeholder {
+  color: #6E5F6C !important;
+  opacity: 1 !important;
+}
+
+/* Glassmorphism Surface Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 30px rgba(78, 40, 62, 0.05);
+}
+
+.glass-panel-interactive {
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 4px 20px rgba(78, 40, 62, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-interactive:hover {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(217, 70, 141, 0.35);
+  box-shadow: 0 12px 36px rgba(190, 52, 119, 0.08);
+  transform: translateY(-2px);
+}
+
+.glass-surface-solid {
+  background: #ffffff;
+  border: 1px solid #E7DCE4;
+  box-shadow: 0 4px 16px rgba(78, 40, 62, 0.03);
+}
+
+/* Micro-interaction & Motion Classes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUpSubtle {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUpSubtle 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animation-delay-75 {
+  animation-delay: 75ms;
+}
+
+.animation-delay-150 {
+  animation-delay: 150ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
 }

@@ -571,7 +571,7 @@ setError("");
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+          className="rounded-2xl border border-red-500/25 bg-red-50/80 p-4 text-sm font-medium text-red-800 shadow-xs"
         >
           {error}
         </div>
@@ -580,7 +580,7 @@ setError("");
       {notice && (
         <div
           role="status"
-          className="rounded-xl border border-violet-500/30 bg-violet-500/10 p-4 text-sm text-violet-200"
+          className="rounded-2xl border border-[#D9468D]/30 bg-[#FCE7F1]/85 p-4 text-sm font-medium text-[#BE3477] shadow-xs"
         >
           {notice}
         </div>
@@ -590,16 +590,16 @@ setError("");
         state.team.quizStatus === "ELIMINATED" && (
           <div
             role="alert"
-            className="rounded-xl border border-red-500/40 bg-red-500/10 p-5"
+            className="rounded-3xl border border-red-500/35 bg-red-50/90 p-6 shadow-sm"
           >
-            <h2 className="text-lg font-bold text-red-300">
+            <h2 className="text-lg font-bold text-red-700">
               Team eliminated
             </h2>
-            <p className="mt-2 text-sm leading-6 text-red-200">
+            <p className="mt-2 text-sm leading-6 text-red-800">
               Your team has been eliminated from the quiz and cannot submit
               further answers.
             </p>
-            <p className="mt-2 text-sm text-red-200">
+            <p className="mt-2 text-sm font-semibold text-red-700">
               Tab-switch warnings: {state.team.warningCount}
               {state.team.maxWarnings > 0
                 ? ` / ${state.team.maxWarnings}`
@@ -609,14 +609,24 @@ setError("");
         )}
 
       {!rulesAccepted && (
-        <div className="rounded-2xl border border-white/10 bg-zinc-900 p-6">
-          <p className="mt-3 text-sm leading-6 text-zinc-400">
+        <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-[#FCE7F1] px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+              Rules & Instructions
+            </span>
+          </div>
+
+          <h2 className="mt-2 text-xl font-bold text-[#302630]">
+            Review Competition Rules
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-[#746873]">
             Please read the following quiz rules carefully before continuing.
             Your team must be marked ready by the administrator before it can
             be included in the quiz roster.
           </p>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-6 space-y-3">
             {[
               {
                 icon: BookX,
@@ -666,16 +676,16 @@ setError("");
               return (
                 <div
                   key={rule.title}
-                  className="flex items-start gap-3 rounded-xl border border-white/10 bg-zinc-950 p-4"
+                  className="flex items-start gap-3.5 rounded-2xl border border-[#E7DCE4] bg-white/80 p-4 shadow-xs"
                 >
-                  <div className="rounded-lg bg-violet-500/10 p-2 text-violet-300">
-                    <Icon size={20} aria-hidden="true" />
+                  <div className="rounded-xl bg-[#FCE7F1] p-2.5 text-[#BE3477]">
+                    <Icon size={18} aria-hidden="true" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-medium text-zinc-100">
+                    <h3 className="text-sm font-bold text-[#302630]">
                       {rule.title}
                     </h3>
-                    <p className="mt-1 text-sm leading-6 text-zinc-400">
+                    <p className="mt-0.5 text-xs leading-5 text-[#746873]">
                       {rule.description}
                     </p>
                   </div>
@@ -684,60 +694,75 @@ setError("");
             })}
           </div>
 
-          <p className="mt-3 text-sm leading-6 text-zinc-400">
+          <p className="mt-5 text-xs leading-5 text-[#746873]">
             Follow the event rules. Your team must be ready before the
             administrator can include it in the quiz roster. Your team&apos;s
             first submitted answer for each question is final.
           </p>
 
-          <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm text-zinc-200">
+          <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm font-medium text-[#302630]">
             <input
               type="checkbox"
               checked={rulesChecked}
               onChange={(event) => setRulesChecked(event.target.checked)}
-              className="mt-1 size-4 accent-violet-500"
+              className="mt-0.5 size-4 rounded accent-[#BE3477] focus:ring-[#D9468D]"
             />
-            <span>I have read and agree to the quiz rules.</span>
+            <span>I have read and agree to the competition rules.</span>
           </label>
 
           <button
             type="button"
             onClick={() => void acceptRules()}
             disabled={!rulesChecked || acceptingRules}
-            className="mt-5 rounded-lg bg-violet-500 px-5 py-3 text-sm font-semibold hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-6 rounded-xl bg-[#BE3477] px-6 py-3 text-sm font-bold text-white shadow-sm transition-all duration-150 hover:bg-[#a62a66] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9468D] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {acceptingRules ? "Accepting..." : "Accept & Continue"}
           </button>
         </div>
       )}
 
-      <div className="rounded-2xl border border-white/10 bg-zinc-900 p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      {/* Main Quiz Status & Interaction Container */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xs">
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#E7DCE4]/70 pb-5">
           <div>
-            <p className="text-sm text-zinc-400">Quiz status</p>
-            <h2 className="mt-1 text-2xl font-semibold">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">
+              Quiz Status
+            </p>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-[#302630]">
               {state?.phase ?? "Connecting..."}
             </h2>
           </div>
 
           {state && (
             <div className="text-right">
-              <p className="text-sm text-zinc-400">Team status</p>
-              <p className="mt-1 font-medium">
-                {!state.team.onRoster
-                  ? "Not on roster"
-                  : state.team.quizStatus}
+              <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">
+                Team Status
               </p>
+              <div className="mt-1">
+                <span
+                  className={`inline-flex items-center rounded-full px-3 py-0.5 text-xs font-bold ${
+                    !state.team.onRoster
+                      ? "bg-[#F1E9EF] text-[#746873]"
+                      : state.team.quizStatus === "ACTIVE"
+                        ? "bg-emerald-500/15 text-emerald-700"
+                        : "bg-red-500/15 text-red-700"
+                  }`}
+                >
+                  {!state.team.onRoster
+                    ? "Not on roster"
+                    : state.team.quizStatus}
+                </span>
+              </div>
 
               {state.team.onRoster && (
-                <p className="mt-2 text-sm text-zinc-400">
+                <p className="mt-2 text-xs text-[#746873]">
                   Tab-switch warnings:{" "}
                   <span
                     className={
                       state.team.maxWarnings > 0 &&
                       state.team.warningCount >= state.team.maxWarnings
-                        ? "font-semibold text-red-300"
-                        : "font-semibold text-amber-300"
+                        ? "font-bold text-red-600"
+                        : "font-bold text-amber-600"
                     }
                   >
                     {state.team.warningCount}
@@ -752,33 +777,51 @@ setError("");
         </div>
 
         {state?.phase === "NOT_STARTED" && (
-          <p className="mt-5 text-zinc-400">
-            The quiz has not started yet. Stay on this page while the
-            administrator prepares the quiz.
-          </p>
+          <div className="mt-6 text-center py-6">
+            <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[#FCE7F1] text-[#BE3477] text-xl">
+              ⏳
+            </span>
+            <h3 className="mt-3 text-lg font-bold text-[#302630]">
+              Waiting for Quiz Start
+            </h3>
+            <p className="mt-2 text-sm text-[#746873]">
+              The quiz has not started yet. Stay on this screen while the
+              administrator finalizes the roster and initiates the countdown.
+            </p>
+          </div>
         )}
 
         {state?.phase === "COUNTDOWN" && (
-          <div className="mt-6 text-center">
-            <p className="text-sm text-zinc-400">Quiz starts in</p>
-            <p className="mt-2 text-6xl font-bold tabular-nums">
+          <div className="mt-6 py-6 text-center">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#D9468D]">
+              Quiz begins in
+            </p>
+            <p className="mt-2 text-6xl sm:text-7xl font-extrabold tabular-nums text-[#BE3477]">
               {displaySeconds}
+            </p>
+            <p className="mt-2 text-xs text-[#746873]">
+              Get ready with your team.
             </p>
           </div>
         )}
 
         {state?.phase === "PAUSED" && (
-          <p className="mt-5 text-amber-300">
-            The quiz is paused. Wait for the administrator to resume.
-          </p>
+          <div className="mt-6 rounded-2xl border border-amber-500/25 bg-amber-50/80 p-5 text-center">
+            <p className="text-sm font-bold text-amber-800">
+              The quiz is currently paused.
+            </p>
+            <p className="mt-1 text-xs text-amber-700">
+              Please wait for the administrator to resume the timer.
+            </p>
+          </div>
         )}
 
         {state?.phase === "GAP" && (
-          <div className="mt-6 rounded-xl border border-violet-500/20 bg-violet-500/5 p-5 text-center">
-            <p className="text-sm font-medium text-violet-300">
+          <div className="mt-6 rounded-2xl border border-[#D9468D]/25 bg-[#FCE7F1]/70 p-6 text-center">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
               Question complete
             </p>
-            <p className="mt-2 text-2xl font-bold tabular-nums text-white">
+            <p className="mt-2 text-3xl font-extrabold tabular-nums text-[#302630]">
               {Math.ceil(
                 Math.max(
                   0,
@@ -788,42 +831,56 @@ setError("");
               )}
               s
             </p>
-            <p className="mt-2 text-sm text-zinc-400">
-              Get ready for the next question.
+            <p className="mt-1 text-xs text-[#746873]">
+              Next question will load automatically.
             </p>
           </div>
         )}
 
         {state?.phase === "ENDED" && (
-          <div className="mt-5">
-            <h3 className="text-xl font-semibold">Quiz ended</h3>
+          <div className="mt-6 text-center py-6">
+            <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-700 text-xl">
+              ✓
+            </span>
+            <h3 className="mt-3 text-xl font-bold text-[#302630]">Quiz completed</h3>
             {state.verdict && (
-              <p className="mt-3 text-sm text-zinc-300">
+              <p className="mt-2 text-sm text-[#746873]">
                 Your final answer was{" "}
-                {state.verdict.isCorrect ? "correct" : "incorrect"}.
+                <strong className={state.verdict.isCorrect ? "text-emerald-700 font-bold" : "text-red-700 font-bold"}>
+                  {state.verdict.isCorrect ? "correct" : "incorrect"}
+                </strong>.
               </p>
             )}
+            <p className="mt-2 text-xs text-[#746873]">
+              Thank you for participating! Review the leaderboard for updated standings.
+            </p>
           </div>
         )}
 
         {state?.phase === "QUESTION" && (
           <div className="mt-6">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-sm text-zinc-400">
+              <span className="rounded-full bg-[#F1E9EF] px-3 py-1 text-xs font-bold text-[#746873]">
                 Question {state.index + 1} of {state.total}
-              </p>
+              </span>
 
               <p
                 role="timer"
                 aria-label={`${displaySeconds} seconds remaining`}
-                className={`text-2xl font-bold tabular-nums ${timerTextColor}`}
+                className={`text-2xl font-black tabular-nums ${
+                  displaySeconds <= 5
+                    ? "text-red-600"
+                    : displaySeconds <= 15
+                      ? "text-amber-600"
+                      : "text-[#BE3477]"
+                }`}
               >
                 {displaySeconds}s
               </p>
             </div>
 
             <div
-              className="mt-4 h-2 overflow-hidden rounded-full bg-white/10"
+              className="mt-3.5 h-2.5 overflow-hidden rounded-full bg-[#E7DCE4]"
               role="progressbar"
               aria-label="Question time remaining"
               aria-valuemin={0}
@@ -831,34 +888,42 @@ setError("");
               aria-valuenow={Math.round(timerProgress)}
             >
               <div
-                className={`h-full rounded-full transition-[width] duration-200 ${timerUrgency}`}
+                className={`h-full rounded-full transition-[width] duration-200 ${
+                  displaySeconds <= 5
+                    ? "bg-red-500"
+                    : displaySeconds <= 15
+                      ? "bg-amber-400"
+                      : "bg-[#BE3477]"
+                }`}
                 style={{ width: `${timerProgress}%` }}
               />
             </div>
 
             {!state.team.onRoster ? (
-              <p className="mt-6 text-amber-300">
+              <p className="mt-6 text-sm font-semibold text-amber-700">
                 Your team is not in the frozen quiz roster.
               </p>
             ) : state.team.quizStatus === "ELIMINATED" ? (
-              <p className="mt-6 text-red-300">
+              <p className="mt-6 text-sm font-semibold text-red-600">
                 Your team has been eliminated from the quiz.
               </p>
             ) : !visibleQuestion ? (
-              <p className="mt-6 text-zinc-400">Loading question...</p>
+              <p className="mt-6 text-sm text-[#746873]">Loading question...</p>
             ) : (
               <div className="mt-6">
-                <h3 className="whitespace-pre-wrap text-xl font-semibold leading-8">
-                  {visibleQuestion.text}
-                </h3>
+                <div className="rounded-2xl border border-[#E7DCE4] bg-white p-5 sm:p-6 shadow-xs">
+                  <h3 className="whitespace-pre-wrap text-lg sm:text-xl font-bold leading-8 text-[#302630]">
+                    {visibleQuestion.text}
+                  </h3>
 
-                {visibleQuestion.code && (
-                  <pre className="mt-4 overflow-x-auto rounded-lg border border-white/10 bg-zinc-950 p-4 text-sm">
-                    <code>{visibleQuestion.code}</code>
-                  </pre>
-                )}
+                  {visibleQuestion.code && (
+                    <pre className="mt-4 overflow-x-auto rounded-xl border border-[#E7DCE4] bg-[#F1E9EF]/60 p-4 font-mono text-sm text-[#302630]">
+                      <code>{visibleQuestion.code}</code>
+                    </pre>
+                  )}
+                </div>
 
-                <div className="mt-6 grid gap-3">
+                <div className="mt-5 grid gap-3">
                   {visibleQuestion.options.map((option) => {
                     const selected = displayedOptionId === option.id;
                     const locked = displayedOptionId !== null;
@@ -873,20 +938,28 @@ setError("");
                           state.team.quizStatus !== "ACTIVE"
                         }
                         onClick={() => void submitAnswer(option.id)}
-                        className={`rounded-xl border p-4 text-left transition ${
+                        className={`group relative flex items-start gap-3.5 rounded-2xl border p-4 sm:p-4.5 text-left transition-all duration-150 shadow-xs ${
                           selected
-                            ? "border-violet-400 bg-violet-500/15"
-                            : "border-white/10 bg-zinc-950 hover:border-violet-400/60"
-                        } disabled:cursor-not-allowed disabled:opacity-80`}
+                            ? "border-[#D9468D] bg-[#FCE7F1]/80 ring-1 ring-[#D9468D]"
+                            : "border-[#E7DCE4] bg-white hover:border-[#D9468D]/40 hover:bg-[#FAF6F8] hover:shadow-sm"
+                        } disabled:cursor-not-allowed disabled:opacity-85`}
                       >
-                        <span className="font-semibold">
-                          {option.label}.
-                        </span>{" "}
-                        <span className="whitespace-pre-wrap">
+                        <span
+                          className={`flex size-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-colors ${
+                            selected
+                              ? "bg-[#BE3477] text-white"
+                              : "border border-[#E7DCE4] bg-[#F1E9EF] text-[#746873]"
+                          }`}
+                        >
+                          {option.label}
+                        </span>
+
+                        <span className="min-w-0 flex-1 whitespace-pre-wrap text-sm leading-6 text-[#302630] font-medium">
                           {option.content}
                         </span>
+
                         {selected && (
-                          <span className="ml-2 text-sm text-violet-300">
+                          <span className="rounded-full bg-[#BE3477] px-2.5 py-0.5 text-xs font-bold text-white">
                             Locked
                           </span>
                         )}
@@ -898,8 +971,9 @@ setError("");
                 {submitting && (
                   <p
                     role="status"
-                    className="mt-4 text-sm text-violet-300"
+                    className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#BE3477]"
                   >
+                    <span className="size-3 animate-spin rounded-full border-2 border-[#BE3477] border-t-transparent" />
                     Saving your answer…
                   </p>
                 )}
@@ -907,16 +981,16 @@ setError("");
                 {displayedOptionId &&
                   !submitting &&
                   !answerNeedsRetry && (
-                    <p className="mt-4 text-sm text-zinc-400">
-                      Your team&apos;s answer is locked. You cannot change it.
+                    <p className="mt-4 text-xs font-medium text-[#746873]">
+                      ✓ Your team&apos;s answer is locked. You cannot change it.
                     </p>
                   )}
 
                 {answerNeedsRetry &&
                   effectiveSelectedOptionId &&
                   !lockedOptionId && (
-                    <div className="mt-4 space-y-3">
-                      <p role="alert" className="text-sm text-amber-300">
+                    <div className="mt-4 space-y-3 rounded-2xl border border-amber-500/25 bg-amber-50/80 p-4">
+                      <p role="alert" className="text-xs font-medium text-amber-800">
                         We could not confirm that the answer was saved. Your
                         selection is retained. Retry the same answer; you
                         cannot change it.
@@ -927,7 +1001,7 @@ setError("");
                           void submitAnswer(effectiveSelectedOptionId)
                         }
                         disabled={submitting}
-                        className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-400/20 disabled:opacity-50"
+                        className="rounded-xl border border-amber-500/30 bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-amber-600 disabled:opacity-50"
                       >
                         Retry saving answer
                       </button>
@@ -941,55 +1015,58 @@ setError("");
 
       {state?.verdict && state.phase !== "ENDED" && (
         <div
-          className={`rounded-xl border p-4 ${
+          className={`rounded-2xl border p-4 text-sm font-semibold shadow-xs ${
             state.verdict.isCorrect
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-              : "border-red-500/30 bg-red-500/10 text-red-300"
+              ? "border-emerald-500/30 bg-emerald-50/90 text-emerald-800"
+              : "border-red-500/30 bg-red-50/90 text-red-800"
           }`}
         >
           Previous question:{" "}
-          {state.verdict.isCorrect ? "Correct answer" : "Incorrect answer"}
+          {state.verdict.isCorrect ? "Correct answer ✓" : "Incorrect answer ✗"}
         </div>
       )}
 
-      {/* Overlay leaves the timer and quiz visible behind the warning. */}
+      {/* Tab Warning Overlay */}
       {warningModal && state?.team.quizStatus !== "ELIMINATED" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#302630]/40 backdrop-blur-sm p-4">
           <div
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="tab-warning-title"
             aria-describedby="tab-warning-description"
-            className="w-full max-w-md rounded-2xl border border-amber-400/30 bg-zinc-900 p-6 shadow-2xl"
+            className="w-full max-w-md rounded-3xl border border-amber-400/40 bg-white/95 p-6 sm:p-7 shadow-2xl animate-fade-in"
           >
             <div className="flex items-center gap-3">
-              <TriangleAlert
-                className="text-amber-300"
-                size={28}
-                aria-hidden="true"
-              />
-              <h2
-                id="tab-warning-title"
-                className="text-xl font-bold text-amber-200"
-              >
-                Warning {warningModal.warningCount} of{" "}
-                {warningModal.maxWarnings}
-              </h2>
+              <span className="flex size-10 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600">
+                <TriangleAlert size={22} aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-amber-600">
+                  Tab Switch Violation
+                </p>
+                <h2
+                  id="tab-warning-title"
+                  className="text-lg font-bold text-[#302630]"
+                >
+                  Warning {warningModal.warningCount} of{" "}
+                  {warningModal.maxWarnings}
+                </h2>
+              </div>
             </div>
 
             <p
               id="tab-warning-description"
-              className="mt-4 text-sm leading-6 text-zinc-200"
+              className="mt-4 text-sm leading-6 text-[#746873]"
             >
               You left the quiz screen. After {warningModal.maxWarnings}{" "}
-              warnings your team will be eliminated.
+              warnings your team will be eliminated from the competition.
             </p>
 
             <button
               type="button"
               autoFocus
               onClick={() => setWarningModal(null)}
-              className="mt-6 w-full rounded-lg bg-amber-400 px-4 py-3 font-semibold text-zinc-950 hover:bg-amber-300"
+              className="mt-6 w-full rounded-xl bg-amber-500 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-amber-600 active:scale-[0.98]"
             >
               I understand
             </button>

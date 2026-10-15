@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -55,11 +54,6 @@ type ResultsData = {
   responses: ResponseRow[];
 };
 
-const panel =
-  "rounded-2xl border border-white/10 bg-zinc-900 p-5";
-const button =
-  "rounded-lg border border-white/15 px-3 py-2 text-sm font-medium transition hover:bg-white/10";
-
 function formatTime(ms: number) {
   const seconds = Math.max(0, Math.floor(ms / 1000));
   const minutes = Math.floor(seconds / 60);
@@ -98,20 +92,20 @@ export default function ResultsDashboard() {
     }
   }, []);
 
-useEffect(() => {
-  const initialRefresh = window.setTimeout(() => {
-    void refresh();
-  }, 0);
+  useEffect(() => {
+    const initialRefresh = window.setTimeout(() => {
+      void refresh();
+    }, 0);
 
-  const interval = window.setInterval(() => {
-    void refresh();
-  }, 2500);
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 2500);
 
-  return () => {
-    window.clearTimeout(initialRefresh);
-    window.clearInterval(interval);
-  };
-}, [refresh]);
+    return () => {
+      window.clearTimeout(initialRefresh);
+      window.clearInterval(interval);
+    };
+  }, [refresh]);
 
   const teamById = useMemo(
     () => new Map((data?.teams ?? []).map((team) => [team.id, team])),
@@ -188,21 +182,24 @@ useEffect(() => {
 
   return (
     <section className="mx-auto max-w-7xl space-y-6">
+      {/* Header */}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-widest text-pink-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
             Administration
           </p>
-          <h1 className="mt-2 text-3xl font-bold">Quiz Results</h1>
-          <p className="mt-2 text-sm text-zinc-400">
-            Rankings, answer breakdowns and question analysis.
+          <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            Quiz Results
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            Rankings, answer breakdowns, and question-level performance analysis.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
-            className={button}
+            className="rounded-xl border border-neutral-light bg-white/80 px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-white hover:border-neutral active:scale-[0.98] disabled:opacity-50"
             onClick={() => void refresh()}
             disabled={loading}
           >
@@ -211,76 +208,93 @@ useEffect(() => {
 
           <a
             href="/api/admin/results/export"
-            className="inline-flex items-center rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-500"
+            className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98]"
           >
             Download CSV
           </a>
         </div>
       </header>
 
+      {/* Summary Stat Card */}
       {data && (
-        <div className={panel}>
-          <p className="text-sm text-zinc-400">Quiz questions</p>
-          <p className="mt-2 text-3xl font-bold">{data.slots.length}</p>
-          <p className="mt-1 text-xs text-zinc-500">
-            Ranking follows score, total correct-answer time, and fastest-correct count.
-          </p>
+        <div className="glass-card p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                Total Quiz Questions
+              </p>
+              <p className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">
+                {data.slots.length}
+              </p>
+            </div>
+            <div className="rounded-xl border border-pink-200/60 bg-pink-50/50 px-4 py-2.5 text-xs text-muted max-w-md">
+              <span className="font-semibold text-foreground">Ranking Criteria:</span>{" "}
+              Total score, lowest correct-answer cumulative time, and fastest-correct response count.
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Error Banner */}
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
         >
           {error}
         </div>
       )}
 
-      <div className={panel}>
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      {/* Team Ranking Card */}
+      <div className="glass-card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">Team ranking</h2>
-            <p className="mt-1 text-sm text-zinc-400">
-              Select a team to inspect its answers.
+            <h2 className="text-lg font-bold tracking-tight text-foreground">
+              Team Ranking
+            </h2>
+            <p className="mt-0.5 text-sm text-muted">
+              Select a team to inspect individual question responses and response times.
             </p>
           </div>
 
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search teams..."
-            aria-label="Search results by team"
-            className="rounded-lg border border-white/15 bg-black/20 px-3 py-2 text-sm outline-none focus:border-pink-500"
-          />
+          <div className="w-full sm:w-72">
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search teams..."
+              aria-label="Search results by team"
+              className="w-full rounded-xl border border-neutral-light bg-white/90 px-3.5 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
+            />
+          </div>
         </div>
 
         {loading && !data ? (
-          <p className="py-10 text-center text-sm text-zinc-400">
-            Loading results...
-          </p>
+          <div className="py-12 text-center text-sm text-muted">
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+            <p>Loading results...</p>
+          </div>
         ) : visibleRanking.length === 0 ? (
-          <p className="py-10 text-center text-sm text-zinc-400">
+          <p className="py-12 text-center text-sm text-muted">
             No ranking entries found.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs">
             <table className="w-full min-w-[950px] text-left text-sm">
-              <thead className="border-b border-white/10 text-xs uppercase tracking-wide text-zinc-400">
+              <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted">
                 <tr>
-                  <th className="px-3 py-3">Rank</th>
-                  <th className="px-3 py-3">Team</th>
-                  <th className="px-3 py-3">Score</th>
-                  <th className="px-3 py-3">Round 1 %</th>
-                  <th className="px-3 py-3">Correct time</th>
-                  <th className="px-3 py-3">Fastest correct</th>
-                  <th className="px-3 py-3">Warnings</th>
-                  <th className="px-3 py-3">Status</th>
-                  <th className="px-3 py-3">Details</th>
+                  <th className="px-4 py-3">Rank</th>
+                  <th className="px-4 py-3">Team</th>
+                  <th className="px-4 py-3">Score</th>
+                  <th className="px-4 py-3">Round 1 %</th>
+                  <th className="px-4 py-3">Correct Time</th>
+                  <th className="px-4 py-3">Fastest Correct</th>
+                  <th className="px-4 py-3">Warnings</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Details</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-neutral-light">
                 {visibleRanking.map((entry) => {
                   const team = teamById.get(entry.teamId);
                   const rank =
@@ -289,40 +303,73 @@ useEffect(() => {
                     ) ?? -1) + 1;
 
                   return (
-                    <tr key={entry.teamId}>
-                      <td className="px-3 py-4 font-semibold">
-                        {rank === 1 ? "🥇 1" : rank === 2 ? "🥈 2" : rank === 3 ? "🥉 3" : rank}
+                    <tr
+                      key={entry.teamId}
+                      className="transition-colors hover:bg-neutral-50/60"
+                    >
+                      <td className="px-4 py-3.5">
+                        {rank === 1 ? (
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-amber-200/80 bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-700">
+                            🥇 1
+                          </span>
+                        ) : rank === 2 ? (
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700">
+                            🥈 2
+                          </span>
+                        ) : rank === 3 ? (
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-amber-300/60 bg-amber-100/60 px-2 py-0.5 text-xs font-bold text-amber-800">
+                            🥉 3
+                          </span>
+                        ) : (
+                          <span className="font-semibold text-foreground pl-1">
+                            {rank}
+                          </span>
+                        )}
                       </td>
-                      <td className="px-3 py-4">
-                        <p className="font-semibold">{entry.teamName}</p>
-                        <p className="mt-1 text-xs text-zinc-500">
+                      <td className="px-4 py-3.5">
+                        <p className="font-semibold text-foreground">
+                          {entry.teamName}
+                        </p>
+                        <p className="text-xs text-muted">
                           {team?.participants.length ?? 0} members
                         </p>
                       </td>
-                      <td className="px-3 py-4 font-semibold tabular-nums">
+                      <td className="px-4 py-3.5 font-bold tabular-nums text-foreground">
                         {entry.score}
                       </td>
-                      <td className="px-3 py-4 tabular-nums">
+                      <td className="px-4 py-3.5 tabular-nums text-foreground">
                         {entry.round1Percent.toFixed(2)}%
                       </td>
-                      <td className="px-3 py-4 tabular-nums">
+                      <td className="px-4 py-3.5 tabular-nums text-muted">
                         {formatTime(entry.totalCorrectMs)}
                       </td>
-                      <td className="px-3 py-4 tabular-nums">
+                      <td className="px-4 py-3.5 tabular-nums text-foreground">
                         {entry.fastestCorrectCount}
                       </td>
-                      <td className="px-3 py-4">
-                        {team?.warningCount ?? 0}
+                      <td className="px-4 py-3.5">
+                        {(team?.warningCount ?? 0) > 0 ? (
+                          <span className="inline-flex items-center rounded-md bg-amber-50 border border-amber-200 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                            {team?.warningCount}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted">0</span>
+                        )}
                       </td>
-                      <td className="px-3 py-4">
-                        {team?.quizStatus === "ELIMINATED"
-                          ? "⛔ Eliminated"
-                          : "✓ Active"}
+                      <td className="px-4 py-3.5">
+                        {team?.quizStatus === "ELIMINATED" ? (
+                          <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-medium text-rose-700">
+                            ⛔ Eliminated
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                            ✓ Active
+                          </span>
+                        )}
                       </td>
-                      <td className="px-3 py-4">
+                      <td className="px-4 py-3.5 text-right">
                         <button
                           type="button"
-                          className={button}
+                          className="rounded-lg border border-pink-200 bg-pink-50/80 px-3 py-1.5 text-xs font-semibold text-primary shadow-2xs transition hover:bg-pink-100 hover:border-pink-300 active:scale-[0.98]"
                           onClick={() => setSelectedTeamId(entry.teamId)}
                         >
                           View answers
@@ -337,66 +384,76 @@ useEffect(() => {
         )}
       </div>
 
-      <div className={panel}>
-        <h2 className="text-lg font-semibold">Question analysis</h2>
-        <p className="mt-1 text-sm text-zinc-400">
-          Correct-answer percentage is calculated from recorded responses.
-        </p>
+      {/* Question Analysis Card */}
+      <div className="glass-card p-6">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight text-foreground">
+            Question Analysis
+          </h2>
+          <p className="mt-0.5 text-sm text-muted">
+            Answer correctness rates and option distribution across all recorded submissions.
+          </p>
+        </div>
 
         {!questionAnalysis.length ? (
-          <p className="py-8 text-sm text-zinc-400">
+          <p className="py-8 text-center text-sm text-muted">
             No quiz questions are available yet.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs">
             <table className="w-full min-w-[850px] text-left text-sm">
-              <thead className="border-b border-white/10 text-xs uppercase tracking-wide text-zinc-400">
+              <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted">
                 <tr>
-                  <th className="px-3 py-3">Question</th>
-                  <th className="px-3 py-3">Answered</th>
-                  <th className="px-3 py-3">Correct</th>
-                  <th className="px-3 py-3">% Correct</th>
-                  <th className="px-3 py-3">Option distribution</th>
-                  <th className="px-3 py-3">Fastest correct team</th>
+                  <th className="px-4 py-3">Question</th>
+                  <th className="px-4 py-3">Answered</th>
+                  <th className="px-4 py-3">Correct</th>
+                  <th className="px-4 py-3">% Correct</th>
+                  <th className="px-4 py-3">Option Distribution</th>
+                  <th className="px-4 py-3">Fastest Correct Team</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-neutral-light">
                 {questionAnalysis.map((question, index) => (
-                  <tr key={question.questionId} className="align-top">
-                    <td className="max-w-xs px-3 py-4">
-                      <p className="font-medium">
-                        Q{index + 1} · {question.type}
+                  <tr key={question.questionId} className="align-top hover:bg-neutral-50/60 transition-colors">
+                    <td className="max-w-xs px-4 py-3.5">
+                      <p className="font-semibold text-foreground">
+                        Q{index + 1} · <span className="text-primary font-medium text-xs">{question.type}</span>
                       </p>
-                      <p className="mt-1 line-clamp-3 text-xs text-zinc-400">
+                      <p className="mt-1 line-clamp-3 text-xs text-muted">
                         {question.text}
                       </p>
                     </td>
-                    <td className="px-3 py-4 tabular-nums">
+                    <td className="px-4 py-3.5 tabular-nums text-foreground font-medium">
                       {question.answered}
                     </td>
-                    <td className="px-3 py-4 tabular-nums">
+                    <td className="px-4 py-3.5 tabular-nums text-emerald-700 font-medium">
                       {question.correct}
                     </td>
-                    <td className="px-3 py-4 tabular-nums">
-                      {question.percentCorrect.toFixed(1)}%
+                    <td className="px-4 py-3.5 tabular-nums">
+                      <span className="font-semibold text-foreground">
+                        {question.percentCorrect.toFixed(1)}%
+                      </span>
                     </td>
-                    <td className="px-3 py-4">
-                      <div className="flex flex-wrap gap-2">
+                    <td className="px-4 py-3.5">
+                      <div className="flex flex-wrap gap-1.5">
                         {question.distribution.map((option) => (
                           <span
                             key={option.label}
-                            className="rounded-md border border-white/10 px-2 py-1 text-xs"
+                            className="inline-flex items-center rounded-md border border-neutral-light bg-[#FAF7F9] px-2 py-0.5 text-xs font-medium text-foreground"
                           >
-                            {option.label}: {option.count}
+                            <span className="font-semibold text-primary mr-1">
+                              {option.label}:
+                            </span>
+                            {option.count}
                           </span>
                         ))}
                       </div>
                     </td>
-                    <td className="px-3 py-4">
-                      <p>{question.fastestTeam}</p>
+                    <td className="px-4 py-3.5">
+                      <p className="font-medium text-foreground">{question.fastestTeam}</p>
                       {question.fastestMs !== null && (
-                        <p className="mt-1 text-xs text-zinc-400">
+                        <p className="mt-0.5 text-xs text-muted">
                           {formatTime(question.fastestMs)}
                         </p>
                       )}
@@ -409,50 +466,54 @@ useEffect(() => {
         )}
       </div>
 
+      {/* Team Answers Modal */}
       {selectedTeam && selectedTeamId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
           <section
             role="dialog"
             aria-modal="true"
             aria-labelledby="team-detail-title"
-            className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl"
+            className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/80 bg-white/95 p-6 shadow-2xl backdrop-blur-md"
           >
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-neutral-light pb-4">
               <div>
-                <h2 id="team-detail-title" className="text-xl font-bold">
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                  Team Response Audit
+                </p>
+                <h2 id="team-detail-title" className="mt-1 text-xl font-bold text-foreground">
                   {selectedTeam.name}
                 </h2>
-                <p className="mt-1 text-sm text-zinc-400">
-                  Answer details for each quiz question.
+                <p className="mt-0.5 text-sm text-muted">
+                  Recorded responses, answer speed, and accuracy for each quiz slot.
                 </p>
               </div>
 
               <button
                 type="button"
-                className={button}
+                className="rounded-xl border border-neutral-light bg-white px-3.5 py-1.5 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-100 active:scale-[0.98]"
                 onClick={() => setSelectedTeamId(null)}
               >
                 Close
               </button>
             </div>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-5 space-y-3.5">
               {selectedAnswers.map(({ slot, response }, index) => (
                 <article
                   key={slot.questionId}
-                  className="rounded-xl border border-white/10 p-4"
+                  className="rounded-xl border border-neutral-light bg-[#FAF7F9] p-4.5"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="font-semibold">
+                    <h3 className="font-bold text-foreground">
                       Question {index + 1}
                     </h3>
                     <span
-                      className={`rounded-full px-3 py-1 text-xs ${
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                         response?.isCorrect
-                          ? "bg-emerald-500/15 text-emerald-300"
+                          ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
                           : response
-                            ? "bg-red-500/15 text-red-300"
-                            : "bg-zinc-700 text-zinc-300"
+                            ? "border border-rose-200 bg-rose-50 text-rose-700"
+                            : "border border-neutral-200 bg-neutral-100 text-muted"
                       }`}
                     >
                       {response
@@ -463,25 +524,25 @@ useEffect(() => {
                     </span>
                   </div>
 
-                  <p className="mt-3 whitespace-pre-wrap text-sm text-zinc-300">
+                  <p className="mt-2.5 whitespace-pre-wrap text-sm text-foreground leading-relaxed">
                     {slot.text}
                   </p>
 
                   {response ? (
-                    <div className="mt-3 rounded-lg bg-black/20 p-3 text-sm">
-                      <p>
-                        <span className="text-zinc-400">Chosen option:</span>{" "}
-                        {response.optionLabel}
+                    <div className="mt-3.5 rounded-xl border border-neutral-light bg-white p-3.5 text-sm">
+                      <p className="text-muted">
+                        <span className="font-semibold text-foreground">Chosen Option:</span>{" "}
+                        <span className="font-bold text-primary">{response.optionLabel}</span>
                       </p>
-                      <p className="mt-1 whitespace-pre-wrap">
+                      <p className="mt-1 whitespace-pre-wrap font-medium text-foreground">
                         {response.optionContent}
                       </p>
-                      <p className="mt-2 text-xs text-zinc-400">
-                        Response time: {formatTime(response.responseMs)}
+                      <p className="mt-2.5 text-xs text-muted border-t border-neutral-light/70 pt-2">
+                        Response time: <span className="font-semibold text-foreground">{formatTime(response.responseMs)}</span>
                       </p>
                     </div>
                   ) : (
-                    <p className="mt-3 text-sm text-zinc-400">
+                    <p className="mt-3 text-sm text-muted italic">
                       No answer was recorded for this question.
                     </p>
                   )}

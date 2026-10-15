@@ -1,114 +1,22 @@
-
-// import { Suspense } from "react";
-// import Link from "next/link";
-// import { requireParticipant } from "@/lib/auth-helper";
-// import { prisma } from "@/lib/db";
-// import SignOutButton from "@/components/sign-out-button";
-// import ParticipantQuiz from "./participant-quiz";
-
-// function PlayPageFallback() {
-//   return (
-//     <main className="min-h-screen bg-zinc-950 px-6 py-12 text-white">
-//       <div className="mx-auto max-w-3xl">
-//         <p className="text-sm text-violet-400">Blueprint to Live</p>
-//         <h1 className="mt-1 text-3xl font-bold">
-//           Participant Dashboard
-//         </h1>
-//         <p className="mt-8 text-zinc-400">Loading your dashboard...</p>
-//       </div>
-//     </main>
-//   );
-// }
-
-// async function ParticipantDashboard() {
-//   const { session, participant, team } = await requireParticipant();
-
-//   const teamMembers = await prisma.participant.findMany({
-//     where: { teamId: participant.teamId },
-//     select: { name: true, email: true },
-//     orderBy: { name: "asc" },
-//   });
-
-//   return (
-//     <main className="min-h-screen bg-zinc-950 px-6 py-12 text-white">
-//       <div className="mx-auto max-w-3xl">
-//         <header className="flex items-center justify-between gap-4">
-//           <div>
-//             <p className="text-sm text-violet-400">Blueprint to Live</p>
-//             <h1 className="mt-1 text-3xl font-bold">
-//               Participant Dashboard
-//             </h1>
-//           </div>
-//           <SignOutButton />
-//         </header>
-
-//         <section className="mt-10 rounded-2xl border border-white/10 bg-zinc-900 p-6">
-//           <p className="text-sm text-zinc-400">Welcome</p>
-//           <h2 className="mt-2 text-2xl font-semibold">
-//             {participant.name}
-//           </h2>
-//           <p className="mt-1 text-zinc-400">{session.user.email}</p>
-//         </section>
-
-//         <section className="mt-6 rounded-2xl border border-white/10 bg-zinc-900 p-6">
-//           <p className="text-sm text-zinc-400">Your team</p>
-//           <h2 className="mt-2 text-xl font-semibold">{team.name}</h2>
-
-//           <ul className="mt-5 divide-y divide-white/10">
-//             {teamMembers.map((member) => (
-//               <li
-//                 key={member.email}
-//                 className="py-3 first:pt-0 last:pb-0"
-//               >
-//                 <p className="font-medium">{member.name}</p>
-//                 <p className="mt-1 text-sm text-zinc-400">
-//                   {member.email}
-//                 </p>
-//               </li>
-//             ))}
-//           </ul>
-//         </section>
-
-//         <ParticipantQuiz initialRulesAccepted={team.rulesAcceptedAt !== null} />
-
-//         <p className="mt-8 text-sm text-zinc-500">
-//           Event information and activities will appear here when they
-//           are available.
-//         </p>
-
-//         <Link
-//           href="/"
-//           className="mt-4 inline-block text-sm text-violet-400 hover:text-violet-300"
-//         >
-//           Back to home
-//         </Link>
-//       </div>
-//     </main>
-//   );
-// }
-
-// export default function PlayPage() {
-//   return (
-//     <Suspense fallback={<PlayPageFallback />}>
-//       <ParticipantDashboard />
-//     </Suspense>
-//   );
-// }
-
-
 import { Suspense } from "react";
 import Link from "next/link";
 import { requireParticipant } from "@/lib/auth-helper";
 import SignOutButton from "@/components/sign-out-button";
+import { ArrowRight, Trophy, Code2, Users } from "lucide-react";
 
 export const instant = false;
 
 function ParticipantHubFallback() {
   return (
-    <main className="min-h-screen bg-zinc-950 px-6 py-12 text-white">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-bold">Participant Dashboard</h1>
-        <p className="mt-4 text-zinc-400">
+    <main className="min-h-screen bg-[#F7F2F5] px-6 py-12 text-[#302630]">
+      <div className="mx-auto max-w-5xl animate-fade-in">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9468D]">
+          Blueprint to Live
+        </p>
+        <h1 className="mt-2 text-3xl font-extrabold text-[#302630]">
+          Participant Dashboard
+        </h1>
+        <p className="mt-4 text-sm text-[#746873]">
           Loading your participant dashboard...
         </p>
       </div>
@@ -120,70 +28,137 @@ async function ParticipantHub() {
   const { session, participant, team } = await requireParticipant();
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-6 py-10 text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#F7F2F5] px-6 py-10 text-[#302630]">
+      {/* Decorative ambient glows */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 right-1/4 -z-10 h-[450px] w-[600px] rounded-full bg-[radial-gradient(circle,rgba(217,70,141,0.12)_0%,rgba(247,242,245,0)_70%)] blur-3xl"
+      />
+
       <div className="mx-auto max-w-5xl">
-        <header className="mb-10 flex items-center justify-between gap-4">
+        <header className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-[#E7DCE4] pb-6">
           <div>
-            <p className="text-sm text-violet-400">Blueprint to Live</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9468D]">
+              Blueprint to Live
+            </p>
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-[#302630]">
               Participant Dashboard
             </h1>
-            <p className="mt-2 text-zinc-400">
-              Welcome, {participant.name}
-            </p>
-            <p className="mt-1 text-sm text-zinc-500">
-              {session.user.email}
+            <p className="mt-1 text-sm text-[#746873]">
+              Welcome back, <strong className="font-semibold text-[#302630]">{participant.name}</strong>
+              {" · "}
+              <span className="text-xs text-[#746873]/80">{session.user.email}</span>
             </p>
           </div>
 
-          <SignOutButton />
+          <div className="flex items-center gap-3">
+            <Link
+              href="/leaderboard"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E7DCE4] bg-white/70 px-3.5 py-2 text-xs font-semibold text-[#746873] shadow-xs backdrop-blur-md transition hover:border-[#D9468D]/40 hover:bg-white hover:text-[#BE3477]"
+            >
+              <Trophy className="size-3.5 text-[#BE3477]" />
+              Leaderboard
+            </Link>
+            <SignOutButton />
+          </div>
         </header>
 
-        <section className="mb-8 rounded-xl border border-white/10 bg-zinc-900 p-6">
-          <p className="text-sm text-zinc-400">Your Team</p>
-          <h2 className="mt-2 text-xl font-semibold">{team.name}</h2>
-          <p className="mt-2 text-sm text-zinc-400">
-            Choose a round below to continue your event.
+        {/* Team Information Card */}
+        <section className="glass-panel mb-8 rounded-3xl p-6 sm:p-7 shadow-xs border border-white/80 animate-fade-in-up">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">
+                Your Registered Team
+              </p>
+              <h2 className="mt-1 text-2xl font-bold text-[#302630]">
+                {team.name}
+              </h2>
+            </div>
+            <span className="flex size-10 items-center justify-center rounded-2xl bg-[#FCE7F1] text-[#BE3477]">
+              <Users className="size-5" />
+            </span>
+          </div>
+          <p className="mt-2 text-sm text-[#746873]">
+            Select an active competition round below to continue your event participation.
           </p>
         </section>
 
-        <section>
-          <h2 className="mb-4 text-2xl font-semibold">Available Rounds</h2>
+        {/* Available Rounds Section */}
+        <section className="animate-fade-in-up animation-delay-75">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold tracking-tight text-[#302630]">
+              Available Rounds
+            </h2>
+            <span className="text-xs font-semibold text-[#746873]">
+              Select a round to enter
+            </span>
+          </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <Link
               href="/play/round1"
-              className="rounded-xl border border-white/10 bg-zinc-900 p-6 transition hover:border-violet-400/50"
+              className="glass-panel-interactive group relative flex flex-col justify-between rounded-3xl p-7 shadow-xs border border-white/80"
             >
-              <p className="text-sm font-medium text-violet-400">ROUND 1</p>
-              <h3 className="mt-2 text-xl font-bold">Warm-Up Rally</h3>
-              <p className="mt-3 leading-6 text-zinc-400">
-                Enter the quiz and answer the questions with your team.
-              </p>
-              <p className="mt-6 font-semibold">Enter Round 1 →</p>
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full bg-[#FCE7F1] px-3 py-1 text-xs font-bold tracking-wider text-[#BE3477]">
+                    ROUND 1
+                  </span>
+                  <span className="text-xs font-semibold text-[#746873]">
+                    Synchronized Quiz
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-[#302630] transition-colors group-hover:text-[#BE3477]">
+                  Warm-Up Rally
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-[#746873]">
+                  Enter the live synchronous quiz and submit your team&apos;s answers before the countdown expires.
+                </p>
+              </div>
+
+              <div className="mt-8 flex items-center gap-2 text-sm font-bold text-[#BE3477]">
+                <span>Enter Round 1</span>
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+              </div>
             </Link>
 
             <Link
               href="/play/round3"
-              className="rounded-xl border border-white/10 bg-zinc-900 p-6 transition hover:border-violet-400/50"
+              className="glass-panel-interactive group relative flex flex-col justify-between rounded-3xl p-7 shadow-xs border border-white/80"
             >
-              <p className="text-sm font-medium text-violet-400">ROUND 3</p>
-              <h3 className="mt-2 text-xl font-bold">Final Build-Off</h3>
-              <p className="mt-3 leading-6 text-zinc-400">
-                Access your problem statement and work on your solution.
-              </p>
-              <p className="mt-6 font-semibold">Enter Round 3 →</p>
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full bg-[#FCE7F1] px-3 py-1 text-xs font-bold tracking-wider text-[#BE3477]">
+                    ROUND 3
+                  </span>
+                  <span className="text-xs font-semibold text-[#746873]">
+                    Finalist Build
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-[#302630] transition-colors group-hover:text-[#BE3477]">
+                  Final Build-Off
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-[#746873]">
+                  Select your problem statement, access hints, develop your solution, and submit deployment deliverables.
+                </p>
+              </div>
+
+              <div className="mt-8 flex items-center gap-2 text-sm font-bold text-[#BE3477]">
+                <span>Enter Round 3</span>
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+              </div>
             </Link>
           </div>
         </section>
 
-        <footer className="mt-10 border-t border-white/10 pt-6">
+        <footer className="mt-12 border-t border-[#E7DCE4] pt-6 flex items-center justify-between text-xs text-[#746873]">
           <Link
             href="/"
-            className="text-sm text-violet-400 hover:text-violet-300"
+            className="font-semibold text-[#746873] hover:text-[#BE3477] transition-colors"
           >
-            Back to home
+            ← Back to home
           </Link>
+          <span>Blueprint to Live · Participant Portal</span>
         </footer>
       </div>
     </main>

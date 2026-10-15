@@ -1,9 +1,9 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
 import StatementsManager from "./statements-manager";
 import TeamsManager from "./teams-manager";
+import ConfirmDialog from "@/components/confirm-dialog";
 
 type WindowInfo = {
   isOpen: boolean;
@@ -16,6 +16,15 @@ type WindowName = "selection" | "submission";
 type WindowsResponse = {
   selection: WindowInfo;
   submission: WindowInfo;
+};
+
+type DialogState = {
+  open: boolean;
+  title: string;
+  description: React.ReactNode;
+  confirmLabel: string;
+  destructive?: boolean;
+  onConfirm: () => void;
 };
 
 function formatDeadline(deadline: string | null) {
@@ -67,6 +76,14 @@ export default function Round3Dashboard() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [, setClock] = useState(0);
+
+  const [confirmState, setConfirmState] = useState<DialogState>({
+    open: false,
+    title: "",
+    description: null,
+    confirmLabel: "Confirm",
+    onConfirm: () => {},
+  });
 
   const loadWindows = useCallback(async () => {
     try {
@@ -144,7 +161,6 @@ export default function Round3Dashboard() {
       }
 
       if (action === "setDuration") {
-        // Release the editing lock after a successful save.
         setEditingDuration((current) => (current === name ? null : current));
       }
 
@@ -162,83 +178,105 @@ export default function Round3Dashboard() {
     }
   }
 
+  function handleCloseWindow(name: WindowName, title: string) {
+    setConfirmState({
+      open: true,
+      title: `Close ${title}`,
+      description: `Close the ${title.toLowerCase()} now? Teams will no longer be able to make changes.`,
+      confirmLabel: "Close Window",
+      destructive: true,
+      onConfirm: () => {
+        setConfirmState((prev) => ({ ...prev, open: false }));
+        void performAction(name, "close");
+      },
+    });
+  }
+
   function renderWindow(name: WindowName, title: string) {
     const info = windows?.[name];
 
     return (
-      <section className="rounded-2xl border border-white/10 bg-zinc-900 p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">{title}</h2>
+      <section className="glass-card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light pb-4">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">{title}</h2>
 
           <span
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
               info?.isOpen
-                ? "bg-emerald-500/10 text-emerald-400"
-                : "bg-zinc-800 text-zinc-400"
+                ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border border-neutral-light bg-neutral-100 text-muted"
             }`}
           >
-            {info?.isOpen ? "Open" : "Closed"}
+            {info?.isOpen ? "● Open" : "○ Closed"}
           </span>
         </div>
 
-        <p className="mt-4 text-sm text-zinc-400">Configured duration</p>
+        <div className="mt-5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+            Configured Duration (Minutes)
+          </p>
 
-        <div className="mt-2 flex flex-wrap gap-3">
-          <input
-            type="number"
-            min={1}
-            max={1440}
-            value={durations[name]}
-            onFocus={() => setEditingDuration(name)}
-            onBlur={() =>
-              setEditingDuration((current) =>
-                current === name ? null : current,
-              )
-            }
-            onChange={(event) =>
-              setDurations((current) => ({
-                ...current,
-                [name]: event.target.value,
-              }))
-            }
-            className="w-32 rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm"
-            aria-label={`${title} duration in minutes`}
-          />
-
-          <button
-            type="button"
-            disabled={busy !== null}
-            onClick={() => {
-              const value = Number(durations[name]);
-
-              if (
-                !Number.isInteger(value) ||
-                value < 1 ||
-                value > 1440
-              ) {
-                setError("Duration must be between 1 and 1440 minutes.");
-                return;
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <input
+              type="number"
+              min={1}
+              max={1440}
+              value={durations[name]}
+              onFocus={() => setEditingDuration(name)}
+              onBlur={() =>
+                setEditingDuration((current) =>
+                  current === name ? null : current,
+                )
               }
+              onChange={(event) =>
+                setDurations((current) => ({
+                  ...current,
+                  [name]: event.target.value,
+                }))
+              }
+              className="w-32 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              aria-label={`${title} duration in minutes`}
+            />
 
-              void performAction(name, "setDuration", {
-                durationMinutes: value,
-              });
-            }}
-            className="rounded-lg border border-white/10 px-4 py-2 text-sm hover:bg-white/5 disabled:opacity-50"
-          >
-            Save duration
-          </button>
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => {
+                const value = Number(durations[name]);
+
+                if (
+                  !Number.isInteger(value) ||
+                  value < 1 ||
+                  value > 1440
+                ) {
+                  setError("Duration must be between 1 and 1440 minutes.");
+                  return;
+                }
+
+                void performAction(name, "setDuration", {
+                  durationMinutes: value,
+                });
+              }}
+              className="rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50"
+            >
+              Save duration
+            </button>
+          </div>
         </div>
 
-        <div className="mt-5 rounded-xl border border-white/10 bg-zinc-950 p-4">
-          <p className="text-sm text-zinc-400">Deadline</p>
-          <p className="mt-1 font-medium">
+        <div className="mt-5 rounded-xl border border-neutral-light bg-[#FAF7F9] p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+            Deadline
+          </p>
+          <p className="mt-1 font-semibold text-foreground">
             {formatDeadline(info?.deadline ?? null)}
           </p>
 
-          <p className="mt-3 text-sm text-zinc-400">Remaining time</p>
-          <p className="mt-1 font-mono text-2xl font-semibold">
-           {remainingTime(info?.deadline ?? null, info?.isOpen ?? false)}
+          <p className="mt-3.5 text-xs font-semibold uppercase tracking-wider text-muted">
+            Remaining Time
+          </p>
+          <p className="mt-1 font-mono text-2xl sm:text-3xl font-extrabold tracking-tight text-primary">
+            {remainingTime(info?.deadline ?? null, info?.isOpen ?? false)}
           </p>
         </div>
 
@@ -247,14 +285,8 @@ export default function Round3Dashboard() {
             <button
               type="button"
               disabled={busy !== null}
-              onClick={() => {
-                if (
-                  window.confirm(`Close the ${title.toLowerCase()} now?`)
-                ) {
-                  void performAction(name, "close");
-                }
-              }}
-              className="rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+              onClick={() => handleCloseWindow(name, title)}
+              className="rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50"
             >
               Close window
             </button>
@@ -278,19 +310,19 @@ export default function Round3Dashboard() {
                   durationMinutes: value,
                 });
               }}
-              className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold hover:bg-violet-500 disabled:opacity-50"
+              className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
             >
               Open window
             </button>
           )}
         </div>
 
-        <div className="mt-5 border-t border-white/10 pt-5">
-          <label className="text-sm text-zinc-400">
-            Adjust remaining time in minutes
+        <div className="mt-5 border-t border-neutral-light pt-5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted">
+            Adjust Remaining Time in Minutes
           </label>
 
-          <div className="mt-2 flex flex-wrap gap-3">
+          <div className="mt-2 flex flex-wrap items-center gap-3">
             <input
               type="number"
               min={-1440}
@@ -302,7 +334,7 @@ export default function Round3Dashboard() {
                   [name]: event.target.value,
                 }))
               }
-              className="w-32 rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm"
+              className="w-32 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               aria-label={`${title} time adjustment`}
             />
 
@@ -325,14 +357,14 @@ export default function Round3Dashboard() {
 
                 void performAction(name, "adjustTime", { minutes });
               }}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm hover:bg-white/5 disabled:opacity-50"
+              className="rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50"
             >
               Apply adjustment
             </button>
           </div>
 
-          <p className="mt-2 text-xs text-zinc-500">
-            Positive values extend the window. Negative values reduce the time.
+          <p className="mt-2 text-xs text-muted">
+            Positive values extend the window. Negative values reduce the remaining time.
           </p>
         </div>
       </section>
@@ -340,28 +372,33 @@ export default function Round3Dashboard() {
   }
 
   return (
-    <div>
-      <p className="text-sm font-medium uppercase tracking-widest text-violet-400">
-        Administration
-      </p>
+    <div className="mx-auto max-w-7xl space-y-6">
+      {/* Header */}
+      <header>
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+          Administration
+        </p>
 
-      <h1 className="mt-3 text-3xl font-bold">Round 3 Control Room</h1>
+        <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          Round 3 Control Room
+        </h1>
 
-      <p className="mt-3 max-w-3xl leading-7 text-zinc-400">
-        Manage problem selection and deployment submission independently.
-        Window changes are enforced by the server.
-      </p>
+        <p className="mt-1 text-sm text-muted max-w-3xl">
+          Manage problem statement selection and deployment submission windows independently. Window changes are enforced server-side in real time.
+        </p>
+      </header>
 
+      {/* Error & Status Alerts */}
       {error && (
         <div
           role="alert"
-          className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between"
         >
-          {error}
+          <span>{error}</span>
           <button
             type="button"
             onClick={() => setError("")}
-            className="ml-3 underline"
+            className="text-xs font-semibold text-red-700 underline hover:no-underline ml-3"
           >
             Dismiss
           </button>
@@ -369,21 +406,43 @@ export default function Round3Dashboard() {
       )}
 
       {message && (
-        <p role="status" className="mt-4 text-sm text-emerald-400">
+        <div
+          role="status"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+        >
           {message}
-        </p>
-      )}
-
-      {loading && !windows ? (
-        <p className="mt-8 text-zinc-400">Loading Round 3 controls...</p>
-      ) : (
-        <div className="mt-8 grid gap-6 xl:grid-cols-2">
-          {renderWindow("selection", "Problem selection")}
-          {renderWindow("submission", "Deployment submission")}
         </div>
       )}
 
-<StatementsManager />
-<TeamsManager />    </div>
+      {/* Control Windows */}
+      {loading && !windows ? (
+        <div className="py-12 text-center text-sm text-muted">
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+          <p>Loading Round 3 controls...</p>
+        </div>
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-2">
+          {renderWindow("selection", "Problem Selection")}
+          {renderWindow("submission", "Deployment Submission")}
+        </div>
+      )}
+
+      {/* Statements Manager */}
+      <StatementsManager />
+
+      {/* Teams Manager */}
+      <TeamsManager />
+
+      {/* Confirmation Modal */}
+      <ConfirmDialog
+        open={confirmState.open}
+        title={confirmState.title}
+        description={confirmState.description}
+        confirmLabel={confirmState.confirmLabel}
+        destructive={confirmState.destructive}
+        onConfirm={confirmState.onConfirm}
+        onCancel={() => setConfirmState((prev) => ({ ...prev, open: false }))}
+      />
+    </div>
   );
 }

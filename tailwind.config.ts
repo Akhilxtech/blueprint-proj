@@ -12,7 +12,7 @@ export default {
         'pink-bg': '#F7F2F5',
         'pink-bg-secondary': '#F1E9EF',
         'pink-text': '#302630',
-        'pink-text-secondary': '#746873',
+        'pink-text-secondary': '#4E404C',
         'pink-primary': '#D9468D',
         'pink-deep': '#BE3477',
         'pink-accent': '#FCE7F1',

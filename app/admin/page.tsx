@@ -1,43 +1,90 @@
+import Link from "next/link";
+import { Users, Radio, Trophy, Activity, Sparkles, Code2, ArrowRight } from "lucide-react";
 
 export default function AdminDashboardPage() {
+  const cards = [
+    {
+      title: "Teams & Participants",
+      description: "Review registered teams, add members, or import roster CSVs.",
+      href: "/admin/teams",
+      icon: Users,
+    },
+    {
+      title: "Quiz Control Room",
+      description: "Manage prestart countdowns, pause/resume, and synchronized question flow.",
+      href: "/admin/quiz",
+      icon: Radio,
+    },
+    {
+      title: "Live Monitor",
+      description: "Track real-time team connections, quiz participation, and tab-switch warnings.",
+      href: "/admin/monitor",
+      icon: Activity,
+    },
+    {
+      title: "Official Results",
+      description: "Inspect Round 1 scores, ties, and export CSV reports.",
+      href: "/admin/results",
+      icon: Trophy,
+    },
+    {
+      title: "Round 2 Evaluations",
+      description: "Assign Round 2 marks, break ties, and select finalists.",
+      href: "/admin/round-2",
+      icon: Sparkles,
+    },
+    {
+      title: "Round 3 Build-Off",
+      description: "Configure problem statements, selection windows, and review EC2 submissions.",
+      href: "/admin/round-3",
+      icon: Code2,
+    },
+  ];
+
   return (
-    <section>
-      <p className="text-sm font-medium uppercase tracking-widest text-violet-400">
-        Administration
-      </p>
+    <section className="animate-fade-in-up">
+      <div className="border-b border-[#E7DCE4] pb-6">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9468D]">
+          Administration Portal
+        </p>
 
-      <h1 className="mt-3 text-3xl font-bold">Dashboard</h1>
+        <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-[#302630]">
+          Console Dashboard
+        </h1>
 
-      <p className="mt-3 max-w-2xl leading-7 text-zinc-400">
-        Welcome to the Blueprint to Live admin console. Manage teams and
-        prepare event rounds from the navigation menu.
-      </p>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#4E404C]">
+          Welcome to the Blueprint to Live administrator control center. Select any module below or use the sidebar navigation.
+        </p>
+      </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {[
-          {
-            title: "Teams",
-            description: "Review registered teams and their members.",
-          },
-          {
-            title: "Quiz Control",
-            description: "A placeholder for future event controls.",
-          },
-          {
-            title: "Results",
-            description: "A placeholder for future results and reporting.",
-          },
-        ].map((item) => (
-          <article
-            key={item.title}
-            className="rounded-xl border border-white/10 bg-zinc-900 p-5"
-          >
-            <h2 className="font-semibold">{item.title}</h2>
-            <p className="mt-2 text-sm leading-6 text-zinc-400">
-              {item.description}
-            </p>
-          </article>
-        ))}
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {cards.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.title}
+              href={item.href}
+              className="glass-panel-interactive group flex flex-col justify-between rounded-3xl p-6 border border-white/80 shadow-xs"
+            >
+              <div>
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-[#FCE7F1] text-[#BE3477] transition-transform duration-200 group-hover:scale-105">
+                  <Icon className="size-5" />
+                </div>
+                <h2 className="mt-4 text-base font-bold text-[#302630] transition-colors group-hover:text-[#BE3477]">
+                  {item.title}
+                </h2>
+                <p className="mt-1.5 text-xs leading-5 text-[#4E404C]">
+                  {item.description}
+                </p>
+              </div>
+
+              <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#BE3477]">
+                <span>Manage</span>
+                <ArrowRight className="size-3.5 transition-transform duration-150 group-hover:translate-x-1" />
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

@@ -1,8 +1,8 @@
-
 "use client";
 
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+import { AlertCircle } from "lucide-react";
 
 export default function NotRegisteredPage() {
   async function handleSignOut() {
@@ -11,34 +11,39 @@ export default function NotRegisteredPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-6 py-12 text-white">
-      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900 p-8 text-center shadow-2xl">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/10 text-2xl text-amber-400">
-          !
+    <main className="flex min-h-screen items-center justify-center bg-[#F7F2F5] px-6 py-12 text-[#302630]">
+      <section className="glass-panel w-full max-w-md rounded-3xl p-8 text-center shadow-[0_24px_80px_rgba(78,40,62,0.12)] border border-white/80 animate-fade-in-up">
+        <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600">
+          <AlertCircle className="size-8" />
         </div>
 
-        <h1 className="text-2xl font-bold">Registration Not Found</h1>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9468D]">
+          Notice
+        </p>
 
-        <p className="mt-4 leading-7 text-zinc-300">
+        <h1 className="mt-2 text-2xl font-bold text-[#302630]">
+          Registration Not Found
+        </h1>
+
+        <p className="mt-3 text-sm leading-6 text-[#746873]">
           This Google account is not associated with an event registration.
-          Please use the email address you registered with or contact the event
-          organizers for assistance.
+          Please sign in with the email address your team registered with or contact the ISE event organizers for assistance.
         </p>
 
         <button
           type="button"
           onClick={handleSignOut}
-          className="mt-7 w-full rounded-lg bg-white px-4 py-3 font-semibold text-zinc-950 transition hover:bg-zinc-200"
+          className="mt-6 w-full rounded-xl bg-[#BE3477] px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-[#a62a66] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9468D]"
         >
           Sign out and try another account
         </button>
 
         <Link
-  href="/"
-  className="mt-5 inline-block text-sm text-violet-400 hover:text-violet-300"
->
-  Back to home
-</Link>
+          href="/"
+          className="mt-5 inline-block text-xs font-semibold text-[#746873] hover:text-[#BE3477] transition-colors"
+        >
+          ← Back to home
+        </Link>
       </section>
     </main>
   );

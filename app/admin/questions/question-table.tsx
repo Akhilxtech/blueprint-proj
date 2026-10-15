@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   deleteQuestion,
   reorderQuestion,
@@ -72,6 +73,10 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
   const [editingQuestion, setEditingQuestion] =
     useState<QuestionRow | null>(null);
 
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState<QuestionRow | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
   function openCreateEditor() {
     setEditingQuestion(null);
     setEditorOpen(true);
@@ -99,13 +104,13 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
         const result = await action();
 
         if (!result.success) {
-          window.alert(result.message ?? "Operation failed.");
+          setAlertMessage(result.message ?? "Operation failed.");
           return;
         }
 
         router.refresh();
       } catch {
-        window.alert(
+        setAlertMessage(
           "Something went wrong. Please check your connection and try again.",
         );
       } finally {
@@ -114,37 +119,33 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
     });
   }
 
+  const [isDeletingAll, startDeleteTransition] = useTransition();
 
+  function requestDeleteAllQuestions() {
+    setShowDeleteAllConfirm(true);
+  }
 
-const [isDeletingAll, startDeleteTransition] = useTransition();
+  function handleConfirmDeleteAll() {
+    setShowDeleteAllConfirm(false);
+    startDeleteTransition(async () => {
+      try {
+        const result = await deleteAllQuestions();
 
-function handleDeleteAllQuestions() {
-  const confirmed = window.confirm(
-    "Delete ALL questions and their options? This cannot be undone.",
-  );
+        if (!result.success) {
+          setAlertMessage(result.message);
+          return;
+        }
 
-  if (!confirmed) return;
-
-  startDeleteTransition(async () => {
-    try {
-      const result = await deleteAllQuestions();
-
-      if (!result.success) {
-        window.alert(result.message);
-        return;
+        router.refresh();
+      } catch (error) {
+        setAlertMessage(
+          error instanceof Error
+            ? error.message
+            : "Failed to delete questions.",
+        );
       }
-
-      window.alert(result.message);
-      router.refresh();
-    } catch (error) {
-      window.alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete questions.",
-      );
-    }
-  });
-}
+    });
+  }
 
   function handleSaveTime(question: QuestionRow, rawValue: string) {
     const trimmed = rawValue.trim();
@@ -161,7 +162,7 @@ function handleDeleteAllQuestions() {
     const seconds = Number(trimmed);
 
     if (!Number.isInteger(seconds) || seconds < 1 || seconds > 3600) {
-      window.alert("Enter a whole number between 1 and 3600 seconds.");
+      setAlertMessage("Enter a whole number between 1 and 3600 seconds.");
       return;
     }
 
@@ -176,7 +177,7 @@ function handleDeleteAllQuestions() {
     const marks = Number(rawValue.trim());
 
     if (!Number.isInteger(marks) || marks < 1 || marks > 100) {
-      window.alert("Enter a whole number between 1 and 100.");
+      setAlertMessage("Enter a whole number between 1 and 100.");
       return;
     }
 
@@ -187,14 +188,15 @@ function handleDeleteAllQuestions() {
     );
   }
 
-  function handleConfirmDelete(question: QuestionRow) {
-    const confirmed = window.confirm(
-      `Delete question ${question.position}? This cannot be undone.`,
-    );
+  function requestDeleteQuestion(question: QuestionRow) {
+    setQuestionToDelete(question);
+  }
 
-    if (!confirmed) return;
-
-    executeAction(question.id, () => deleteQuestion(question.id));
+  function handleConfirmDeleteQuestion() {
+    if (!questionToDelete) return;
+    const target = questionToDelete;
+    setQuestionToDelete(null);
+    executeAction(target.id, () => deleteQuestion(target.id));
   }
 
   const initialQuestion = editingQuestion
@@ -223,94 +225,83 @@ function handleDeleteAllQuestions() {
 
   return (
     <>
-      <section className="overflow-hidden rounded-xl border bg-card text-card-foreground">
-        {/* <div className="flex items-center justify-between gap-4 border-b p-4">
-          <div>
-            <h2 className="font-semibold">Question bank</h2>
-            <p className="text-sm text-muted-foreground">
-              Leave time blank to use the default duration for the question
-              type.
-            </p>
+      <section className="overflow-hidden rounded-2xl border border-white/70 bg-white/70 shadow-sm backdrop-blur-md">
+        <div className="space-y-4 border-b border-[#E7DCE4] p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-bold text-[#302630]">Question bank</h2>
+              <p className="mt-0.5 text-xs text-[#4E404C]">
+                Leave time blank to use the default duration for the question type.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={requestDeleteAllQuestions}
+                disabled={isDeletingAll || questions.length === 0}
+                className="rounded-xl border border-rose-300 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {isDeletingAll ? "Deleting..." : "Delete all questions"}
+              </button>
+
+              <button
+                type="button"
+                onClick={openCreateEditor}
+                className="rounded-xl bg-[#BE3477] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all"
+              >
+                + Add question
+              </button>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={openCreateEditor}
-            disabled={isPending}
-            className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-          >
-            Add question
-          </button>
-        </div> */
-        
+          <QuestionCsvImport />
+        </div>
 
-          <div className="space-y-4 border-b p-4">
-  <div className="flex items-center justify-between gap-4">
-    <div>
-      <h2 className="font-semibold">Question bank</h2>
-      <p className="text-sm text-muted-foreground">
-        Leave time blank to use the default duration for the question type.
-      </p>
-    </div>
-
-    <div className="flex items-center gap-2">
-  <button
-    type="button"
-    onClick={handleDeleteAllQuestions}
-    disabled={isDeletingAll || questions.length === 0}
-    className="rounded-md border border-red-500 px-3 py-2 text-sm text-red-500 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    {isDeletingAll ? "Deleting..." : "Delete all questions"}
-  </button>
-
-  <button
-    type="button"
-    onClick={openCreateEditor}
-    className="rounded-md border px-3 py-2 text-sm"
-  >
-    Add question
-  </button>
-</div>
-  </div>
-
-  <QuestionCsvImport />
-</div>
-
-        }
-
-
+        {alertMessage && (
+          <div className="mx-5 mt-4 flex items-center justify-between rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+            <span>{alertMessage}</span>
+            <button
+              type="button"
+              onClick={() => setAlertMessage(null)}
+              className="text-amber-800 hover:text-amber-950 font-bold"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {questions.length === 0 ? (
           <div className="p-12 text-center">
-            <p className="font-medium text-foreground">No questions yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Create your first question to get started.
+            <p className="font-bold text-[#302630]">No questions yet</p>
+            <p className="mt-1 text-xs text-[#4E404C]">
+              Create your first question or import via CSV to get started.
             </p>
             <button
               type="button"
               onClick={openCreateEditor}
-              className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground"
+              className="mt-4 rounded-xl bg-[#BE3477] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] transition-all"
             >
               Create question
             </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1000px] text-left text-sm">
-              <thead className="bg-muted/50 text-muted-foreground">
+            <table className="w-full min-w-[1000px] text-left text-xs">
+              <thead className="border-b border-[#E7DCE4] bg-[#F1E9EF]/80 text-[#4E404C]">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Position</th>
-                  <th className="px-4 py-3 font-medium">Question</th>
-                  <th className="px-4 py-3 font-medium">Type</th>
-                  <th className="px-4 py-3 font-medium">Time (sec)</th>
-                  <th className="px-4 py-3 font-medium">Marks</th>
-                  <th className="px-4 py-3 font-medium">Included</th>
-                  <th className="px-4 py-3 font-medium">Order</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Position</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Question</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Type</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Time (sec)</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Marks</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Included</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Order</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-[#E7DCE4] bg-white/60">
                 {questions.map((question, index) => {
                   const isRowBusy =
                     isPending && activeActionId === question.id;
@@ -318,28 +309,28 @@ function handleDeleteAllQuestions() {
                   return (
                     <tr
                       key={question.id}
-                      className={`transition-opacity ${
+                      className={`hover:bg-[#FCE7F1]/20 transition-opacity ${
                         !question.included ? "opacity-50" : ""
                       }`}
                     >
-                      <td className="px-4 py-3 font-mono text-muted-foreground">
-                        {question.position}
+                      <td className="px-4 py-3 font-mono font-bold text-[#BE3477]">
+                        #{question.position}
                       </td>
 
                       <td className="max-w-[280px] px-4 py-3">
                         <p
-                          className="truncate font-medium text-foreground"
+                          className="truncate font-bold text-[#302630]"
                           title={question.text}
                         >
                           {question.text}
                         </p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
+                        <p className="mt-0.5 text-xs text-[#4E404C]">
                           {question.options.length} options
                         </p>
                       </td>
 
                       <td className="px-4 py-3">
-                        <span className="inline-flex rounded-md border px-2 py-0.5 text-xs font-medium">
+                        <span className="inline-flex rounded-full border border-[#D9468D]/20 bg-[#FCE7F1] px-2.5 py-0.5 text-xs font-bold text-[#BE3477]">
                           {question.type}
                         </span>
                       </td>
@@ -364,7 +355,7 @@ function handleDeleteAllQuestions() {
                               event.currentTarget.blur();
                             }
                           }}
-                          className="w-24 rounded-md border bg-background px-2 py-1.5 disabled:opacity-50"
+                          className="w-20 rounded-xl border border-[#E7DCE4] bg-white px-2.5 py-1.5 font-semibold text-[#302630] outline-none focus:border-[#D9468D] disabled:opacity-50"
                           aria-label={`Time override for question ${question.position}`}
                         />
                       </td>
@@ -388,7 +379,7 @@ function handleDeleteAllQuestions() {
                               event.currentTarget.blur();
                             }
                           }}
-                          className="w-20 rounded-md border bg-background px-2 py-1.5 disabled:opacity-50"
+                          className="w-16 rounded-xl border border-[#E7DCE4] bg-white px-2.5 py-1.5 font-semibold text-[#302630] outline-none focus:border-[#D9468D] disabled:opacity-50"
                           aria-label={`Marks for question ${question.position}`}
                         />
                       </td>
@@ -405,10 +396,10 @@ function handleDeleteAllQuestions() {
                               ),
                             )
                           }
-                          className={`rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-50 ${
+                          className={`rounded-xl border px-3 py-1 text-xs font-bold transition-all disabled:opacity-50 ${
                             question.included
-                              ? "bg-secondary text-secondary-foreground"
-                              : "border-dashed text-muted-foreground"
+                              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                              : "border-[#E7DCE4] bg-white/60 text-[#4E404C] hover:text-[#302630]"
                           }`}
                         >
                           {question.included ? "Included" : "Excluded"}
@@ -425,7 +416,7 @@ function handleDeleteAllQuestions() {
                                 reorderQuestion(question.id, "up"),
                               )
                             }
-                            className="rounded border p-1 text-xs disabled:pointer-events-none disabled:opacity-30"
+                            className="rounded-lg border border-[#E7DCE4] bg-white px-2 py-1 text-xs font-bold text-[#4E404C] hover:bg-[#FCE7F1] hover:text-[#BE3477] disabled:pointer-events-none disabled:opacity-30"
                             aria-label={`Move question ${question.position} up`}
                           >
                             ↑
@@ -441,7 +432,7 @@ function handleDeleteAllQuestions() {
                                 reorderQuestion(question.id, "down"),
                               )
                             }
-                            className="rounded border p-1 text-xs disabled:pointer-events-none disabled:opacity-30"
+                            className="rounded-lg border border-[#E7DCE4] bg-white px-2 py-1 text-xs font-bold text-[#4E404C] hover:bg-[#FCE7F1] hover:text-[#BE3477] disabled:pointer-events-none disabled:opacity-30"
                             aria-label={`Move question ${question.position} down`}
                           >
                             ↓
@@ -450,12 +441,12 @@ function handleDeleteAllQuestions() {
                       </td>
 
                       <td className="px-4 py-3">
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
                             disabled={isPending}
                             onClick={() => openEditEditor(question)}
-                            className="rounded border px-3 py-1.5 text-xs disabled:opacity-50"
+                            className="rounded-xl border border-[#E7DCE4] bg-white/80 px-3 py-1.5 text-xs font-semibold text-[#302630] hover:bg-white transition-colors disabled:opacity-50"
                           >
                             Edit
                           </button>
@@ -463,8 +454,8 @@ function handleDeleteAllQuestions() {
                           <button
                             type="button"
                             disabled={isRowBusy}
-                            onClick={() => handleConfirmDelete(question)}
-                            className="rounded-md border border-destructive/30 px-3 py-1.5 text-xs font-medium text-destructive disabled:opacity-40"
+                            onClick={() => requestDeleteQuestion(question)}
+                            className="rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors disabled:opacity-40"
                           >
                             Delete
                           </button>
@@ -483,6 +474,28 @@ function handleDeleteAllQuestions() {
         open={editorOpen}
         initialQuestion={initialQuestion}
         onClose={closeEditor}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteAllConfirm}
+        title="Delete All Questions"
+        description="Are you sure you want to delete ALL questions and their options? This cannot be undone."
+        confirmLabel="Delete All Questions"
+        cancelLabel="Cancel"
+        isDestructive
+        onConfirm={handleConfirmDeleteAll}
+        onCancel={() => setShowDeleteAllConfirm(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={!!questionToDelete}
+        title="Delete Question"
+        description={`Are you sure you want to delete question #${questionToDelete?.position}? This cannot be undone.`}
+        confirmLabel="Delete Question"
+        cancelLabel="Cancel"
+        isDestructive
+        onConfirm={handleConfirmDeleteQuestion}
+        onCancel={() => setQuestionToDelete(null)}
       />
     </>
   );

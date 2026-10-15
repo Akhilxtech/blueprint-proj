@@ -1,8 +1,9 @@
-
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSession, requireAdmin, requireParticipant } from "@/lib/auth-helper";
 import { prisma } from "@/lib/db";
 import GoogleSignInButton from "@/components/google-sign-in-button";
+import { Code2 } from "lucide-react";
 
 export const instant = false;
 
@@ -40,34 +41,42 @@ export default async function Round3EntryPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-6 py-12 text-white">
-      <section className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900 p-8">
-        <p className="text-sm font-medium uppercase tracking-[0.25em] text-violet-400">
-          Blueprint to Live
+    <main className="flex min-h-screen items-center justify-center bg-[#F7F2F5] px-6 py-12 text-[#302630]">
+      <section className="glass-panel w-full max-w-md rounded-3xl p-8 shadow-[0_24px_80px_rgba(78,40,62,0.12)] border border-white/80 animate-fade-in-up">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-[#FCE7F1] text-[#BE3477]">
+            <Code2 className="size-5" />
+          </span>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#D9468D]">
+              Blueprint to Live
+            </p>
+            <h1 className="text-2xl font-bold tracking-tight text-[#302630]">
+              Round 3 Access
+            </h1>
+          </div>
+        </div>
+
+        <p className="mt-4 text-sm leading-6 text-[#746873]">
+          Sign in with the Google account associated with your finalist team registration to enter the Final Build-Off.
         </p>
 
-        <h1 className="mt-4 text-3xl font-bold">Round 3 Access</h1>
-
-        <p className="mt-4 leading-7 text-zinc-300">
-          Sign in with the Google account associated with your event
-          registration to continue to Round 3.
-        </p>
-
-        <div className="mt-7">
+        <div className="mt-6">
           <GoogleSignInButton callbackURL="/play/round3" />
         </div>
 
-        <p className="mt-5 text-sm text-zinc-500">
-          Only registered participants and authorized administrators can access
-          protected event features.
+        <p className="mt-5 text-center text-xs leading-5 text-[#746873]/80">
+          Only registered participants and authorized administrators can access protected event features.
         </p>
 
-        <a
-          href="/"
-          className="mt-5 inline-block text-sm text-violet-400 hover:text-violet-300"
-        >
-          Back to home
-        </a>
+        <div className="mt-6 border-t border-[#E7DCE4] pt-4 text-center">
+          <Link
+            href="/"
+            className="text-xs font-semibold text-[#746873] hover:text-[#BE3477] transition-colors"
+          >
+            ← Back to home
+          </Link>
+        </div>
       </section>
     </main>
   );

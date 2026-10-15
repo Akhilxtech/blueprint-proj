@@ -2,6 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 type ReadyTeam = {
   id: string;
@@ -60,6 +61,7 @@ export default function QuizControl() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [now, setNow] = useState<number | null>(null);
+  const [pendingQuizAction, setPendingQuizAction] = useState<"start" | "skip" | "end" | "reset-practice" | null>(null);
 
   const quizStatus: QuizRunStatus = quizRun?.status ?? "NOT_STARTED";
 
@@ -135,17 +137,12 @@ export default function QuizControl() {
     };
   }, [refreshAll]);
 
-  async function startQuiz() {
+  async function executeStartQuiz() {
     if (!readiness || readiness.eligibleTeams === 0 || actionLoading) {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Start the quiz? The eligible team roster and question list will be frozen.",
-    );
-
-    if (!confirmed) return;
-
+    setPendingQuizAction(null);
     setActionLoading(true);
     setError("");
     setMessage("");
@@ -214,20 +211,15 @@ export default function QuizControl() {
   }
 
 
-  async function performQuizAction(
+  function requestQuizAction(action: "skip" | "end" | "reset-practice") {
+    if (actionLoading) return;
+    setPendingQuizAction(action);
+  }
+
+  async function executeQuizAction(
     action: "skip" | "end" | "reset-practice",
   ) {
-    if (actionLoading) return;
-
-    const confirmations: Record<typeof action, string> = {
-      skip: "Skip the current question and move to the next one?",
-      end: "End the quiz now? Participants will no longer be able to answer.",
-      "reset-practice":
-        "Reset practice? All quiz responses will be deleted, the roster cleared, and team quiz states reset.",
-    };
-
-    if (!window.confirm(confirmations[action])) return;
-
+    setPendingQuizAction(null);
     setActionLoading(true);
     setError("");
     setMessage("");
@@ -267,7 +259,6 @@ export default function QuizControl() {
     }
   }
 
-
   function formatLastSeen(value: string | null) {
     if (!value) return "Never";
 
@@ -297,10 +288,10 @@ export default function QuizControl() {
   }
 
   const statusStyles: Record<QuizRunStatus, string> = {
-    NOT_STARTED: "border-zinc-500/30 bg-zinc-500/10 text-zinc-300",
-    RUNNING: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-    PAUSED: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-    ENDED: "border-red-500/30 bg-red-500/10 text-red-300",
+    NOT_STARTED: "border-[#E7DCE4] bg-white/80 text-[#4E404C]",
+    RUNNING: "border-emerald-300 bg-emerald-50 text-emerald-800",
+    PAUSED: "border-amber-300 bg-amber-50 text-amber-800",
+    ENDED: "border-rose-300 bg-rose-50 text-rose-800",
   };
 
   const statusLabels: Record<QuizRunStatus, string> = {
@@ -311,33 +302,36 @@ export default function QuizControl() {
   };
 
   return (
-    <section className="mx-auto max-w-6xl">
-      <p className="text-sm font-medium uppercase tracking-widest text-violet-400">
-        Administration
-      </p>
+    <section className="mx-auto max-w-6xl animate-fade-in-up">
+      <div className="mb-2">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+          Administration
+        </p>
+        <div className="mt-1 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-black tracking-tight text-[#302630] sm:text-3xl">
+              Quiz Control
+            </h1>
+            <p className="mt-1 text-sm text-[#4E404C]">
+              Manage the synchronized quiz and review team readiness.
+            </p>
+          </div>
 
-      <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Quiz Control</h1>
-          <p className="mt-2 text-zinc-400">
-            Manage the synchronized quiz and review team readiness.
-          </p>
+          <button
+            type="button"
+            onClick={() => void refreshAll()}
+            disabled={loading || statusLoading}
+            className="rounded-xl border border-[#E7DCE4] bg-white/80 px-4 py-2 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-2xs"
+          >
+            {loading || statusLoading ? "Loading..." : "Refresh"}
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={loading || statusLoading}
-          className="rounded-lg border border-white/15 px-4 py-2 text-sm transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading || statusLoading ? "Loading..." : "Refresh"}
-        </button>
       </div>
 
       {error && (
         <div
           role="alert"
-          className="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+          className="mt-6 rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs font-semibold text-rose-800"
         >
           {error}
         </div>
@@ -346,51 +340,49 @@ export default function QuizControl() {
       {message && (
         <div
           role="status"
-          className="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300"
+          className="mt-6 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800"
         >
           {message}
         </div>
       )}
 
-      <div className="mt-8 rounded-xl border border-white/10 bg-zinc-900 p-5">
+      <div className="mt-6 rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">Quiz status</h2>
-            <p className="mt-1 text-sm text-zinc-400">
+            <h2 className="text-base font-bold text-[#302630]">Quiz status</h2>
+            <p className="mt-0.5 text-xs text-[#4E404C]">
               Status updates automatically every five seconds.
             </p>
           </div>
 
           <span
-            className={`rounded-full border px-4 py-2 text-sm font-semibold ${statusStyles[quizStatus]}`}
+            className={`rounded-full border px-4 py-1.5 text-xs font-bold ${statusStyles[quizStatus]}`}
           >
             {statusLoading ? "Loading status..." : statusLabels[quizStatus]}
           </span>
         </div>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-white/10 p-4">
-            <p className="text-sm text-zinc-400">Quiz started at</p>
-            <p className="mt-2 text-sm font-medium">
+          <div className="rounded-xl border border-[#E7DCE4] bg-white/80 p-4 shadow-2xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Quiz started at</p>
+            <p className="mt-1 text-xs font-bold text-[#302630]">
               {formatTimestamp(quizRun?.startedAt ?? null)}
             </p>
           </div>
 
-          <div className="rounded-lg border border-white/10 p-4">
-            <p className="text-sm text-zinc-400">Quiz ended at</p>
-            <p className="mt-2 text-sm font-medium">
+          <div className="rounded-xl border border-[#E7DCE4] bg-white/80 p-4 shadow-2xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Quiz ended at</p>
+            <p className="mt-1 text-xs font-bold text-[#302630]">
               {formatTimestamp(quizRun?.endedAt ?? null)}
             </p>
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-[#E7DCE4] pt-5">
           {quizStatus === "NOT_STARTED" && (
             <button
               type="button"
-              onClick={() => void startQuiz()}
+              onClick={() => setPendingQuizAction("start")}
               disabled={
                 loading ||
                 statusLoading ||
@@ -398,7 +390,7 @@ export default function QuizControl() {
                 !readiness ||
                 readiness.eligibleTeams === 0
               }
-              className="rounded-lg bg-violet-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
             >
               {actionLoading ? "Starting..." : "Start Quiz"}
             </button>
@@ -409,7 +401,7 @@ export default function QuizControl() {
               type="button"
               onClick={() => void changeQuizState("pause")}
               disabled={actionLoading || statusLoading}
-              className="rounded-lg bg-amber-500 px-5 py-3 text-sm font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-amber-300 bg-amber-50 px-5 py-2.5 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
             >
               {actionLoading ? "Processing..." : "Pause Quiz"}
             </button>
@@ -422,7 +414,7 @@ export default function QuizControl() {
                   type="button"
                   onClick={() => void changeQuizState("resume")}
                   disabled={actionLoading || statusLoading}
-                  className="rounded-lg bg-emerald-500 px-5 py-3 text-sm font-semibold text-black transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="rounded-xl border border-emerald-300 bg-emerald-50 px-5 py-2.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {actionLoading ? "Processing..." : "Resume Quiz"}
                 </button>
@@ -430,18 +422,18 @@ export default function QuizControl() {
 
               <button
                 type="button"
-                onClick={() => void performQuizAction("skip")}
+                onClick={() => requestQuizAction("skip")}
                 disabled={actionLoading || statusLoading}
-                className="rounded-lg border border-white/20 px-5 py-3 text-sm font-semibold transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-xl border border-[#E7DCE4] bg-white/80 px-5 py-2.5 text-xs font-bold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Skip Question
               </button>
 
               <button
                 type="button"
-                onClick={() => void performQuizAction("end")}
+                onClick={() => requestQuizAction("end")}
                 disabled={actionLoading || statusLoading}
-                className="rounded-lg bg-red-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-xl border border-rose-300 bg-rose-50 px-5 py-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               >
                 End Quiz
               </button>
@@ -451,93 +443,94 @@ export default function QuizControl() {
           {quizStatus === "ENDED" && (
             <button
               type="button"
-              onClick={() => void performQuizAction("reset-practice")}
+              onClick={() => requestQuizAction("reset-practice")}
               disabled={actionLoading || statusLoading}
-              className="rounded-lg bg-violet-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-rose-300 bg-rose-50 px-5 py-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
             >
               {actionLoading ? "Resetting..." : "Reset Practice"}
             </button>
           )}
         </div>
-
-        </div>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <article className="rounded-xl border border-white/10 bg-zinc-900 p-5">
-          <p className="text-sm text-zinc-400">Registered teams</p>
-          <p className="mt-2 text-3xl font-semibold">
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <article className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Registered teams</p>
+          <p className="mt-2 text-2xl font-black text-[#BE3477]">
             {readiness?.totalTeams ?? "—"}
           </p>
         </article>
 
-        <article className="rounded-xl border border-white/10 bg-zinc-900 p-5">
-          <p className="text-sm text-zinc-400">Ready teams</p>
-          <p className="mt-2 text-3xl font-semibold">
+        <article className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Ready teams</p>
+          <p className="mt-2 text-2xl font-black text-emerald-800">
             {readiness?.eligibleTeams ?? "—"}
           </p>
         </article>
 
-        <article className="rounded-xl border border-white/10 bg-zinc-900 p-5">
-          <p className="text-sm text-zinc-400">Readiness window</p>
-          <p className="mt-2 text-3xl font-semibold">
+        <article className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Readiness window</p>
+          <p className="mt-2 text-2xl font-black text-[#302630]">
             {readiness?.readinessWindowSeconds ?? 30}s
           </p>
         </article>
       </div>
 
-      <div className="mt-8 rounded-xl border border-white/10 bg-zinc-900 p-5">
+      <div className="mt-6 rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold">Prestart readiness</h2>
-            <p className="mt-1 text-sm text-zinc-400">
-              Teams must accept the rules and check in within the last 30
-              seconds.
+            <h2 className="text-base font-bold text-[#302630]">Prestart readiness</h2>
+            <p className="mt-0.5 text-xs text-[#4E404C]">
+              Teams must accept the rules and check in within the last 30 seconds.
             </p>
           </div>
         </div>
 
         {loading && !readiness ? (
-          <p className="mt-6 text-sm text-zinc-400">
+          <p className="mt-6 text-xs text-[#4E404C]">
             Loading team readiness...
           </p>
         ) : readiness && readiness.teams.length === 0 ? (
-          <p className="mt-6 text-sm text-zinc-400">
+          <p className="mt-6 text-xs text-[#4E404C]">
             No teams have been registered yet.
           </p>
         ) : (
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-sm">
-              <thead className="border-b border-white/10 text-zinc-400">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-[#E7DCE4] bg-white/80">
+            <table className="w-full min-w-[700px] text-left text-xs">
+              <thead className="border-b border-[#E7DCE4] bg-[#F1E9EF]/80 text-[#4E404C]">
                 <tr>
-                  <th className="px-3 py-3 font-medium">Team</th>
-                  <th className="px-3 py-3 font-medium">Participants</th>
-                  <th className="px-3 py-3 font-medium">Rules accepted</th>
-                  <th className="px-3 py-3 font-medium">Last seen</th>
-                  <th className="px-3 py-3 font-medium">Readiness</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Team</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Participants</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Rules accepted</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Last seen</th>
+                  <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Readiness</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-[#E7DCE4] bg-white/60">
                 {readiness?.teams.map((team) => (
-                  <tr key={team.id}>
-                    <td className="px-3 py-4 font-medium">{team.name}</td>
-                    <td className="px-3 py-4">{team.participantCount}</td>
-                    <td className="px-3 py-4">
-                      {team.rulesAccepted ? "Yes" : "No"}
+                  <tr key={team.id} className="hover:bg-[#FCE7F1]/20">
+                    <td className="px-3.5 py-3 font-bold text-[#302630]">{team.name}</td>
+                    <td className="px-3.5 py-3 font-semibold text-[#4E404C]">{team.participantCount}</td>
+                    <td className="px-3.5 py-3">
+                      {team.rulesAccepted ? (
+                        <span className="font-bold text-emerald-700">✓ Accepted</span>
+                      ) : (
+                        <span className="text-[#4E404C]">Pending</span>
+                      )}
                     </td>
-                    <td className="px-3 py-4 text-zinc-400">
+                    <td className="px-3.5 py-3 text-[#4E404C]">
                       {formatLastSeen(team.lastSeenAt)}
                     </td>
-                    <td className="px-3 py-4">
+                    <td className="px-3.5 py-3">
                       <span
-                        className={
+                        className={`rounded-full px-3 py-1 text-2xs font-bold ${
                           team.ready
-                            ? "rounded-full bg-emerald-500/15 px-3 py-1 text-emerald-300"
-                            : "rounded-full bg-zinc-700 px-3 py-1 text-zinc-300"
-                        }
+                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
+                            : "border border-[#E7DCE4] bg-[#F1E9EF] text-[#4E404C]"
+                        }`}
                       >
-                        {team.ready ? "Ready" : "Not ready"}
+                        {team.ready ? "✓ Ready" : "○ Not ready"}
                       </span>
                     </td>
                   </tr>
@@ -547,6 +540,48 @@ export default function QuizControl() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={pendingQuizAction === "start"}
+        title="Start Synchronized Quiz"
+        description="Start the quiz? The eligible team roster and question list will be frozen."
+        confirmLabel="Start Quiz Now"
+        cancelLabel="Cancel"
+        onConfirm={() => void executeStartQuiz()}
+        onCancel={() => setPendingQuizAction(null)}
+      />
+
+      <ConfirmDialog
+        isOpen={pendingQuizAction === "skip"}
+        title="Skip Current Question"
+        description="Skip the current question and move to the next one for all teams?"
+        confirmLabel="Skip Question"
+        cancelLabel="Cancel"
+        onConfirm={() => void executeQuizAction("skip")}
+        onCancel={() => setPendingQuizAction(null)}
+      />
+
+      <ConfirmDialog
+        isOpen={pendingQuizAction === "end"}
+        title="End Quiz"
+        description="End the quiz now? Participants will no longer be able to answer."
+        confirmLabel="End Quiz Now"
+        cancelLabel="Cancel"
+        isDestructive
+        onConfirm={() => void executeQuizAction("end")}
+        onCancel={() => setPendingQuizAction(null)}
+      />
+
+      <ConfirmDialog
+        isOpen={pendingQuizAction === "reset-practice"}
+        title="Reset Practice Run"
+        description="Reset practice? All quiz responses will be deleted, the roster cleared, and team quiz states reset."
+        confirmLabel="Reset Practice"
+        cancelLabel="Cancel"
+        isDestructive
+        onConfirm={() => void executeQuizAction("reset-practice")}
+        onCancel={() => setPendingQuizAction(null)}
+      />
     </section>
   );
 }
