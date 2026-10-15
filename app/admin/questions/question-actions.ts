@@ -368,7 +368,7 @@ export async function deleteAllQuestions() {
         await tx.quizRun.update({
           where: { id: "main" },
           data: {
-            status: "NOT_STARTE",
+            status: "NOT_STARTED",
             startedAt: null,
             pausedAt: null,
             pausedMs: 0,
