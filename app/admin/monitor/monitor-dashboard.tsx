@@ -39,10 +39,10 @@ type StatusFilter =
   | "ELIMINATED";
 
 const panel =
-  "rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md";
+  "rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md";
 
 const button =
-  "rounded-xl border border-[#E7DCE4] bg-white/80 px-3 py-1.5 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:cursor-not-allowed disabled:opacity-40 shadow-2xs";
+  "rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] px-3 py-1.5 text-xs font-semibold text-[#4E404C] dark:text-[#D4D4D4] hover:bg-white dark:hover:bg-[#202020] hover:text-[#302630] dark:hover:text-[#FAFAFA] transition-colors disabled:cursor-not-allowed disabled:opacity-40 shadow-2xs";
 
 function formatDuration(ms: number) {
   const seconds = Math.max(0, Math.floor(ms / 1000));
@@ -223,13 +223,13 @@ export default function MonitorDashboard() {
     <section className="mx-auto max-w-7xl space-y-6 animate-fade-in-up">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477] dark:text-[#8B5CF6]">
             Administration
           </p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] sm:text-3xl">
+          <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] dark:text-[#FAFAFA] sm:text-3xl">
             Live Monitor
           </h1>
-          <p className="mt-1 text-sm text-[#4E404C]">
+          <p className="mt-1 text-sm text-[#4E404C] dark:text-[#A3A3A3]">
             Team readiness, answer progress and warning management in real time.
           </p>
         </div>
@@ -248,7 +248,7 @@ export default function MonitorDashboard() {
         snapshot.phase !== "ENDED" && (
           <div
             role="status"
-            className="flex items-center gap-3 rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-bold text-emerald-800 backdrop-blur-xs"
+            className="flex items-center gap-3 rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-950/20 p-4 text-xs font-bold text-emerald-800 dark:text-emerald-300 backdrop-blur-xs"
           >
             <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-600 animate-pulse" aria-hidden="true" />
             Quiz running · Phase: {snapshot.phase} · Updates every 2 seconds
@@ -258,7 +258,7 @@ export default function MonitorDashboard() {
       {error && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-300 bg-rose-50/90 p-4 text-xs font-semibold text-rose-800"
+          className="rounded-2xl border border-rose-300 dark:border-rose-500/30 bg-rose-50/90 dark:bg-rose-950/20 p-4 text-xs font-semibold text-rose-800 dark:text-rose-300"
         >
           {error}
         </div>
@@ -267,7 +267,7 @@ export default function MonitorDashboard() {
       {message && (
         <div
           role="status"
-          className="rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-semibold text-emerald-800"
+          className="rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-950/20 p-4 text-xs font-semibold text-emerald-800 dark:text-emerald-300"
         >
           {message}
         </div>
@@ -276,20 +276,20 @@ export default function MonitorDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {counterCards.map((card) => (
           <article key={card.label} className={panel}>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">{card.label}</p>
-            <p className="mt-2 text-3xl font-black tabular-nums text-[#BE3477]">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">{card.label}</p>
+            <p className="mt-2 text-3xl font-black tabular-nums text-[#BE3477] dark:text-[#8B5CF6]">
               {card.value}
             </p>
-            <p className="mt-1 text-2xs text-[#4E404C]">{card.detail}</p>
+            <p className="mt-1 text-2xs text-[#4E404C] dark:text-[#A3A3A3]">{card.detail}</p>
           </article>
         ))}
       </div>
 
       <div className={panel}>
-        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E7DCE4] pb-5">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E7DCE4] dark:border-[#292929] pb-5">
           <div>
-            <h2 className="text-base font-bold text-[#302630]">Teams</h2>
-            <p className="mt-0.5 text-xs text-[#4E404C]">
+            <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">Teams</h2>
+            <p className="mt-0.5 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               Showing {teams.length} of {snapshot?.teams.length ?? 0} teams.
             </p>
           </div>
@@ -300,7 +300,7 @@ export default function MonitorDashboard() {
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search team or member..."
               aria-label="Search teams"
-              className="min-w-56 rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs text-[#302630] outline-none placeholder:text-[#4E404C]/60 focus:border-[#D9468D]"
+              className="min-w-56 rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-3.5 py-2 text-xs text-[#302630] dark:text-[#FAFAFA] outline-none placeholder:text-[#4E404C]/60 dark:placeholder-[#A3A3A3]/50 focus:border-[#D9468D] dark:focus:border-[#8B5CF6]"
             />
 
             <select
@@ -309,7 +309,7 @@ export default function MonitorDashboard() {
                 setFilter(event.target.value as StatusFilter)
               }
               aria-label="Filter teams"
-              className="rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs font-semibold text-[#302630] outline-none focus:border-[#D9468D]"
+              className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-3.5 py-2 text-xs font-semibold text-[#302630] dark:text-[#FAFAFA] outline-none focus:border-[#D9468D] dark:focus:border-[#8B5CF6]"
             >
               <option value="ALL">All teams</option>
               <option value="READY">Ready</option>
@@ -322,17 +322,17 @@ export default function MonitorDashboard() {
         </div>
 
         {loading && !snapshot ? (
-          <p className="py-10 text-center text-xs text-[#4E404C]">
+          <p className="py-10 text-center text-xs text-[#4E404C] dark:text-[#A3A3A3]">
             Loading teams...
           </p>
         ) : teams.length === 0 ? (
-          <p className="py-10 text-center text-xs text-[#4E404C]">
+          <p className="py-10 text-center text-xs text-[#4E404C] dark:text-[#A3A3A3]">
             No teams match this search or filter.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto rounded-xl border border-[#E7DCE4] bg-white/80">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#111111]">
             <table className="w-full min-w-[1250px] text-left text-xs">
-              <thead className="border-b border-[#E7DCE4] bg-[#F1E9EF]/80 text-[#4E404C]">
+              <thead className="border-b border-[#E7DCE4] dark:border-[#292929] bg-[#F1E9EF]/80 dark:bg-[#171717] text-[#4E404C] dark:text-[#A3A3A3]">
                 <tr>
                   <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Team / members</th>
                   <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Ready</th>
@@ -347,16 +347,16 @@ export default function MonitorDashboard() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-[#E7DCE4] bg-white/60">
+              <tbody className="divide-y divide-[#E7DCE4] dark:divide-[#292929] bg-white/60 dark:bg-[#111111]">
                 {teams.map((team) => (
-                  <tr key={team.id} className="align-top hover:bg-[#FCE7F1]/20">
+                  <tr key={team.id} className="align-top hover:bg-[#FCE7F1]/20 dark:hover:bg-[#202020]">
                     <td className="px-3.5 py-3.5">
-                      <p className="font-bold text-[#302630]">{team.name}</p>
-                      <div className="mt-1.5 space-y-1 text-2xs text-[#4E404C]">
+                      <p className="font-bold text-[#302630] dark:text-[#FAFAFA]">{team.name}</p>
+                      <div className="mt-1.5 space-y-1 text-2xs text-[#4E404C] dark:text-[#A3A3A3]">
                         {team.members.map((member) => (
                           <p key={member.id}>
-                            <span className="font-semibold text-[#302630]">{member.name}</span>
-                            <span className="block text-[#4E404C]/80">
+                            <span className="font-semibold text-[#302630] dark:text-[#FAFAFA]">{member.name}</span>
+                            <span className="block text-[#4E404C]/80 dark:text-[#A3A3A3]/80">
                               {member.email}
                             </span>
                           </p>
@@ -368,42 +368,42 @@ export default function MonitorDashboard() {
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-2xs font-bold ${
                           team.ready
-                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
-                            : "border border-[#E7DCE4] bg-[#F1E9EF] text-[#4E404C]"
+                            ? "border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300"
+                            : "border border-[#E7DCE4] dark:border-[#292929] bg-[#F1E9EF] dark:bg-[#202020] text-[#4E404C] dark:text-[#A3A3A3]"
                         }`}
                       >
                         {team.ready ? "✓ Ready" : "○ Not ready"}
                       </span>
                     </td>
-                    <td className="px-3.5 py-3.5 font-semibold text-[#4E404C]">
+                    <td className="px-3.5 py-3.5 font-semibold text-[#4E404C] dark:text-[#D4D4D4]">
                       {team.onRoster ? "✓ Yes" : "○ No"}
                     </td>
                     <td className="px-3.5 py-3.5">
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-2xs font-bold ${
                           team.answeredCurrentQuestion
-                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
-                            : "border border-[#E7DCE4] bg-white text-[#4E404C]"
+                            ? "border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300"
+                            : "border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] text-[#4E404C] dark:text-[#A3A3A3]"
                         }`}
                       >
                         {team.answeredCurrentQuestion ? "✓ Answered" : "○ Waiting"}
                       </span>
                     </td>
-                    <td className="px-3.5 py-3.5 font-bold tabular-nums text-[#302630]">
+                    <td className="px-3.5 py-3.5 font-bold tabular-nums text-[#302630] dark:text-[#FAFAFA]">
                       {team.totalAnswered}
                     </td>
-                    <td className="px-3.5 py-3.5 font-bold tabular-nums text-emerald-700">
+                    <td className="px-3.5 py-3.5 font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
                       {team.correctSoFar}
                     </td>
-                    <td className="px-3.5 py-3.5 font-mono tabular-nums text-[#4E404C]">
+                    <td className="px-3.5 py-3.5 font-mono tabular-nums text-[#4E404C] dark:text-[#D4D4D4]">
                       {formatDuration(team.totalCorrectMs)}
                     </td>
                     <td className="px-3.5 py-3.5">
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-2xs font-bold ${
                           team.warningCount >= (snapshot?.maxWarnings ?? 3)
-                            ? "border border-rose-300 bg-rose-50 text-rose-800"
-                            : "border border-[#E7DCE4] bg-white text-[#4E404C]"
+                            ? "border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300"
+                            : "border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] text-[#4E404C] dark:text-[#D4D4D4]"
                         }`}
                       >
                         {team.warningCount}/{snapshot?.maxWarnings ?? 3}
@@ -413,8 +413,8 @@ export default function MonitorDashboard() {
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-2xs font-bold ${
                           team.quizStatus === "ELIMINATED"
-                            ? "border border-rose-300 bg-rose-50 text-rose-800"
-                            : "border border-emerald-300 bg-emerald-50 text-emerald-800"
+                            ? "border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300"
+                            : "border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300"
                         }`}
                       >
                         {team.quizStatus === "ELIMINATED" ? "⛔ Eliminated" : "✓ Active"}
@@ -425,7 +425,7 @@ export default function MonitorDashboard() {
                         {team.quizStatus === "ELIMINATED" && (
                           <button
                             type="button"
-                            className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-2xs"
+                            className="rounded-xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors shadow-2xs"
                             disabled={busyTeam === team.id}
                             onClick={() => setTeamToRestore(team)}
                           >

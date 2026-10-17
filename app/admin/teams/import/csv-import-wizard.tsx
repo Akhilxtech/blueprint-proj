@@ -52,7 +52,7 @@ const EMPTY_MAPPING: Mapping = {
 };
 
 const inputClass =
-  "mt-2 w-full rounded-xl border border-[#E7DCE4] bg-white/90 px-3.5 py-2 text-xs text-[#302630] outline-none placeholder:text-[#4E404C]/60 focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20 transition-all";
+  "mt-2 w-full rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/90 dark:bg-[#171717] px-3.5 py-2 text-xs text-[#302630] dark:text-[#FAFAFA] outline-none placeholder:text-[#4E404C]/60 dark:placeholder-[#A3A3A3]/50 focus:border-[#D9468D] dark:focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#D9468D]/20 dark:focus:ring-[#8B5CF6]/20 transition-all";
 
 const TEMPLATE = [
   "team_name,name,email,usn,phone,semester,branch",
@@ -389,33 +389,33 @@ export default function CsvImportWizard() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477] dark:text-[#8B5CF6]">
           Step 1 of 3: Upload and map columns
         </p>
         <button
           type="button"
           onClick={downloadTemplate}
-          className="rounded-xl border border-[#E7DCE4] bg-white/80 px-4 py-2 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors shadow-2xs"
+          className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] px-4 py-2 text-xs font-semibold text-[#4E404C] dark:text-[#D4D4D4] hover:bg-white dark:hover:bg-[#202020] hover:text-[#302630] dark:hover:text-[#FAFAFA] transition-colors shadow-2xs"
         >
           Download sample CSV
         </button>
       </div>
 
-      <section className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md sm:p-6">
-        <h2 className="text-base font-bold text-[#302630]">1. Upload CSV</h2>
-        <p className="mt-1 text-xs text-[#4E404C]">
+      <section className="rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md sm:p-6">
+        <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">1. Upload CSV</h2>
+        <p className="mt-1 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
           Upload one row per participant. Each row needs a team name.
         </p>
 
-        <label className="mt-4 block rounded-2xl border-2 border-dashed border-[#D9468D]/30 bg-white/50 p-6 text-center hover:border-[#D9468D] hover:bg-[#FCE7F1]/30 transition-all cursor-pointer">
-          <span className="block text-sm font-bold text-[#302630]">
+        <label className="mt-4 block rounded-2xl border-2 border-dashed border-[#D9468D]/30 dark:border-[#8B5CF6]/30 bg-white/50 dark:bg-[#171717]/50 p-6 text-center hover:border-[#D9468D] dark:hover:border-[#8B5CF6] hover:bg-[#FCE7F1]/30 dark:hover:bg-[#8B5CF6]/10 transition-all cursor-pointer">
+          <span className="block text-sm font-bold text-[#302630] dark:text-[#FAFAFA]">
             {isParsing ? "Reading CSV..." : "Choose a CSV file"}
           </span>
-          <span className="mt-1 block text-xs text-[#4E404C]">
+          <span className="mt-1 block text-xs text-[#4E404C] dark:text-[#A3A3A3]">
             CSV files only, maximum 5 MB and 500 rows
           </span>
           <input
-            className="mt-4 block w-full text-xs text-[#4E404C] file:mr-4 file:rounded-xl file:border-0 file:bg-[#BE3477] file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#a82a67] file:cursor-pointer cursor-pointer"
+            className="mt-4 block w-full text-xs text-[#4E404C] dark:text-[#A3A3A3] file:mr-4 file:rounded-xl file:border-0 file:bg-[#BE3477] dark:file:bg-[#8B5CF6] file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#a82a67] dark:hover:file:bg-[#7C3AED] file:cursor-pointer cursor-pointer"
             type="file"
             accept=".csv,text/csv"
             disabled={isParsing || isPending}
@@ -424,29 +424,29 @@ export default function CsvImportWizard() {
         </label>
 
         {fileName && (
-          <p className="mt-3 text-xs font-semibold text-emerald-700">
+          <p className="mt-3 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
             ✓ Loaded {fileName}: {rows.length} data rows.
           </p>
         )}
       </section>
 
       {error && (
-        <p role="alert" className="rounded-xl border border-rose-300 bg-rose-50 p-4 text-xs font-semibold text-rose-800">
+        <p role="alert" className="rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 p-4 text-xs font-semibold text-rose-800 dark:text-rose-300">
           {error}
         </p>
       )}
 
       {headers.length > 0 && !importResult && (
         <>
-          <section className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md sm:p-6">
-            <h2 className="text-base font-bold text-[#302630]">2. Map your columns</h2>
-            <p className="mt-1 text-xs text-[#4E404C]">
+          <section className="rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md sm:p-6">
+            <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">2. Map your columns</h2>
+            <p className="mt-1 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               Review the detected mappings. Required fields are marked with *.
             </p>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {FIELDS.map((field) => (
-                <label key={field.key} className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+                <label key={field.key} className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">
                   {field.label}{field.required ? " *" : " (optional)"}
                   <select
                     className={inputClass}
@@ -468,27 +468,27 @@ export default function CsvImportWizard() {
             </div>
 
             {missingRequiredMappings.length > 0 && (
-              <p className="mt-3 text-xs font-semibold text-amber-800">
+              <p className="mt-3 text-xs font-semibold text-amber-800 dark:text-amber-300">
                 Map required fields:{" "}
                 {missingRequiredMappings.map((field) => field.label).join(", ")}.
               </p>
             )}
             {duplicateMappings && (
-              <p className="mt-2 text-xs font-semibold text-amber-800">
+              <p className="mt-2 text-xs font-semibold text-amber-800 dark:text-amber-300">
                 A column cannot be assigned to multiple fields.
               </p>
             )}
           </section>
 
-          <section className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md sm:p-6">
-            <h2 className="text-base font-bold text-[#302630]">3. Preview your data</h2>
-            <p className="mt-1 text-xs text-[#4E404C]">
+          <section className="rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md sm:p-6">
+            <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">3. Preview your data</h2>
+            <p className="mt-1 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               Showing up to five of {rows.length} rows.
             </p>
 
-            <div className="mt-4 overflow-x-auto rounded-xl border border-[#E7DCE4] bg-white/80">
+            <div className="mt-4 overflow-x-auto rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#111111]">
               <table className="w-full min-w-[650px] text-left text-xs">
-                <thead className="border-b border-[#E7DCE4] bg-[#F1E9EF]/80 text-[#4E404C]">
+                <thead className="border-b border-[#E7DCE4] dark:border-[#292929] bg-[#F1E9EF]/80 dark:bg-[#171717] text-[#4E404C] dark:text-[#A3A3A3]">
                   <tr>
                     {FIELDS.map((field) => (
                       <th key={field.key} className="px-3 py-2.5 font-bold uppercase tracking-wider">
@@ -497,11 +497,11 @@ export default function CsvImportWizard() {
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E7DCE4]">
+                <tbody className="divide-y divide-[#E7DCE4] dark:divide-[#292929]">
                   {previewRows.map((row, index) => (
-                    <tr key={index} className="hover:bg-[#FCE7F1]/20">
+                    <tr key={index} className="hover:bg-[#FCE7F1]/20 dark:hover:bg-[#202020]">
                       {FIELDS.map((field) => (
-                        <td key={field.key} className="px-3 py-2.5 text-[#302630]">
+                        <td key={field.key} className="px-3 py-2.5 text-[#302630] dark:text-[#FAFAFA]">
                           {mapping[field.key]
                             ? row[mapping[field.key]] || "—"
                             : "—"}
@@ -523,13 +523,13 @@ export default function CsvImportWizard() {
                 duplicateMappings
               }
               onClick={validateAgainstDatabase}
-              className="rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] dark:hover:bg-[#7C3AED] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isPending ? "Working..." : "Validate against database"}
             </button>
             <Link
               href="/admin/teams"
-              className="rounded-xl border border-[#E7DCE4] bg-white/80 px-5 py-2.5 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors"
+              className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] px-5 py-2.5 text-xs font-semibold text-[#4E404C] dark:text-[#D4D4D4] hover:bg-white dark:hover:bg-[#202020] hover:text-[#302630] dark:hover:text-[#FAFAFA] transition-colors"
             >
               Cancel
             </Link>
@@ -538,20 +538,20 @@ export default function CsvImportWizard() {
       )}
 
       {validatedRows && (
-        <section className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md sm:p-6">
-          <h2 className="text-base font-bold text-[#302630]">Database validation report</h2>
-          <p className="mt-1 text-xs text-[#4E404C]">
+        <section className="rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md sm:p-6">
+          <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">Database validation report</h2>
+          <p className="mt-1 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
             These checks include existing participant emails and current team sizes.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2.5 text-xs font-bold">
-            <span className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-emerald-800">
+            <span className="rounded-full border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-1.5 text-emerald-800 dark:text-emerald-300">
               Rows without errors: {validatedRows.length - errorCount}
             </span>
-            <span className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-rose-800">
+            <span className="rounded-full border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 px-3 py-1.5 text-rose-800 dark:text-rose-300">
               Errors: {errorCount}
             </span>
-            <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-amber-800">
+            <span className="rounded-full border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 text-amber-800 dark:text-amber-300">
               Warnings: {warningCount}
             </span>
           </div>
@@ -560,7 +560,7 @@ export default function CsvImportWizard() {
             <button
               type="button"
               onClick={() => downloadErrorCsv(validatedRows)}
-              className="mt-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors"
+              className="mt-4 rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 px-4 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
             >
               Download error report CSV
             </button>
@@ -578,24 +578,24 @@ export default function CsvImportWizard() {
               return (
                 <article
                   key={row.rowNumber}
-                  className="rounded-xl border border-[#E7DCE4] bg-white/80 p-3.5 shadow-2xs"
+                  className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] p-3.5 shadow-2xs"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                      <p className="text-xs font-bold text-[#302630]">
+                      <p className="text-xs font-bold text-[#302630] dark:text-[#FAFAFA]">
                         Row {row.rowNumber}: {row.name || "Unnamed participant"}
                       </p>
-                      <p className="mt-0.5 text-xs text-[#4E404C]">
+                      <p className="mt-0.5 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
                         {row.teamName || "No team"} · {row.email || "No email"}
                       </p>
                     </div>
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                         hasErrors
-                          ? "border border-rose-300 bg-rose-50 text-rose-800"
+                          ? "border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300"
                           : hasWarnings
-                            ? "border border-amber-300 bg-amber-50 text-amber-800"
-                            : "border border-emerald-300 bg-emerald-50 text-emerald-800"
+                            ? "border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300"
+                            : "border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300"
                       }`}
                     >
                       {hasErrors ? "Error" : hasWarnings ? "Warning" : "Valid"}
@@ -603,7 +603,7 @@ export default function CsvImportWizard() {
                   </div>
 
                   {row.issues.length === 0 ? (
-                    <p className="mt-2 text-xs font-medium text-emerald-700">
+                    <p className="mt-2 text-xs font-medium text-emerald-700 dark:text-emerald-400">
                       ✓ No issues detected.
                     </p>
                   ) : (
@@ -613,8 +613,8 @@ export default function CsvImportWizard() {
                           key={index}
                           className={`text-xs ${
                             issue.severity === "error"
-                              ? "font-semibold text-rose-700"
-                              : "text-amber-800"
+                              ? "font-semibold text-rose-700 dark:text-rose-400"
+                              : "text-amber-800 dark:text-amber-300"
                           }`}
                         >
                           {issue.severity === "error" ? "• Error" : "• Warning"}:{" "}
@@ -628,11 +628,11 @@ export default function CsvImportWizard() {
             })}
           </div>
 
-          <div className="mt-6 rounded-xl border border-[#E7DCE4] bg-white/60 p-4">
-            <label className="flex items-start gap-3 text-xs text-[#302630]">
+          <div className="mt-6 rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/60 dark:bg-[#171717] p-4">
+            <label className="flex items-start gap-3 text-xs text-[#302630] dark:text-[#FAFAFA]">
               <input
                 type="checkbox"
-                className="mt-0.5 accent-[#BE3477]"
+                className="mt-0.5 accent-[#BE3477] dark:accent-[#8B5CF6]"
                 checked={overrideTeamLimit}
                 disabled={isPending}
                 onChange={(event) => {
@@ -641,10 +641,10 @@ export default function CsvImportWizard() {
                 }}
               />
               <span>
-                <span className="font-bold text-[#302630]">
+                <span className="font-bold text-[#302630] dark:text-[#FAFAFA]">
                   Override team-size restrictions
                 </span>
-                <span className="mt-0.5 block text-xs text-[#4E404C]">
+                <span className="mt-0.5 block text-xs text-[#4E404C] dark:text-[#A3A3A3]">
                   Allow teams to finish with fewer than 2 or more than 3 members.
                   Use only if this is intentional.
                 </span>
@@ -657,7 +657,7 @@ export default function CsvImportWizard() {
               type="button"
               disabled={isPending || errorCount > 0}
               onClick={requestImport}
-              className="rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] dark:hover:bg-[#7C3AED] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isPending ? "Importing..." : "Import participants"}
             </button>
@@ -665,7 +665,7 @@ export default function CsvImportWizard() {
               type="button"
               disabled={isPending}
               onClick={validateAgainstDatabase}
-              className="rounded-xl border border-[#E7DCE4] bg-white/80 px-5 py-2.5 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:opacity-40"
+              className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] px-5 py-2.5 text-xs font-semibold text-[#4E404C] dark:text-[#D4D4D4] hover:bg-white dark:hover:bg-[#202020] hover:text-[#302630] dark:hover:text-[#FAFAFA] transition-colors disabled:opacity-40"
             >
               Revalidate
             </button>
@@ -674,28 +674,28 @@ export default function CsvImportWizard() {
       )}
 
       {importResult && (
-        <section className="rounded-2xl border border-emerald-300 bg-white/80 p-5 shadow-sm backdrop-blur-md sm:p-6">
-          <h2 className="text-base font-bold text-emerald-800">
+        <section className="rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-white/80 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md sm:p-6">
+          <h2 className="text-base font-bold text-emerald-800 dark:text-emerald-300">
             Import completed
           </h2>
-          <p className="mt-1 text-xs text-[#302630]">{importResult.message}</p>
+          <p className="mt-1 text-xs text-[#302630] dark:text-[#D4D4D4]">{importResult.message}</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-[#E7DCE4] bg-white p-4 shadow-2xs">
-              <p className="text-xs font-semibold text-[#4E404C]">Participants imported</p>
-              <p className="mt-1 text-2xl font-black text-[#BE3477]">{importResult.imported}</p>
+            <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] p-4 shadow-2xs">
+              <p className="text-xs font-semibold text-[#4E404C] dark:text-[#A3A3A3]">Participants imported</p>
+              <p className="mt-1 text-2xl font-black text-[#BE3477] dark:text-[#8B5CF6]">{importResult.imported}</p>
             </div>
-            <div className="rounded-xl border border-[#E7DCE4] bg-white p-4 shadow-2xs">
-              <p className="text-xs font-semibold text-[#4E404C]">Existing emails skipped</p>
-              <p className="mt-1 text-2xl font-black text-[#4E404C]">{importResult.skipped}</p>
+            <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] p-4 shadow-2xs">
+              <p className="text-xs font-semibold text-[#4E404C] dark:text-[#A3A3A3]">Existing emails skipped</p>
+              <p className="mt-1 text-2xl font-black text-[#4E404C] dark:text-[#D4D4D4]">{importResult.skipped}</p>
             </div>
-            <div className="rounded-xl border border-[#E7DCE4] bg-white p-4 shadow-2xs">
-              <p className="text-xs font-semibold text-[#4E404C]">Teams created</p>
-              <p className="mt-1 text-2xl font-black text-[#302630]">{importResult.teamsCreated}</p>
+            <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] p-4 shadow-2xs">
+              <p className="text-xs font-semibold text-[#4E404C] dark:text-[#A3A3A3]">Teams created</p>
+              <p className="mt-1 text-2xl font-black text-[#302630] dark:text-[#FAFAFA]">{importResult.teamsCreated}</p>
             </div>
           </div>
           <Link
             href="/admin/teams"
-            className="mt-5 inline-block rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] transition-all"
+            className="mt-5 inline-block rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] dark:hover:bg-[#7C3AED] transition-all"
           >
             View teams
           </Link>

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #F7F2F5;
   --foreground: #302630;
@@ -15,6 +17,33 @@
   --muted: #4E404C;
   --muted-foreground: #4E404C;
   --neutral-light: #E7DCE4;
+}
+
+.dark {
+  --background: #050505;
+  --foreground: #FAFAFA;
+  --foreground-secondary: #D4D4D4;
+  --sidebar: #090909;
+  --surface-main: #0C0C0C;
+  --card: #111111;
+  --card-elevated: #171717;
+  --card-border: #292929;
+  --card-solid: #111111;
+  --surface-hover: #202020;
+  --border: #292929;
+  --border-strong: #383838;
+  --primary: #8B5CF6;
+  --primary-deep: #7C3AED;
+  --primary-hover: #A78BFA;
+  --primary-accent: rgba(139, 92, 246, 0.15);
+  --secondary: #60A5FA;
+  --muted: #A3A3A3;
+  --muted-foreground: #737373;
+  --neutral-light: #292929;
+  --neutral-dark: #FAFAFA;
+  --neutral-50: #0C0C0C;
+  --neutral-100: #111111;
+  --neutral-200: #171717;
 }
 
 @theme inline {
@@ -40,8 +69,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body, header, aside, main, nav, .glass-panel, .glass-panel-interactive, .glass-surface-solid {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
 .text-muted {
   color: #4E404C !important;
+}
+
+.dark .text-muted {
+  color: #A3A3A3 !important;
 }
 
 .text-2xs {
@@ -54,6 +91,10 @@ body {
   opacity: 1 !important;
 }
 
+.dark ::placeholder {
+  color: #737373 !important;
+}
+
 /* Glassmorphism Surface Utilities */
 .glass-panel {
   background: rgba(255, 255, 255, 0.58);
@@ -61,6 +102,27 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.72);
   box-shadow: 0 10px 30px rgba(78, 40, 62, 0.05);
+}
+
+.dark .glass-panel {
+  background: rgba(17, 17, 17, 0.88);
+  border-color: #292929;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(78, 40, 62, 0.05);
+}
+
+.dark .glass-card {
+  background: rgba(17, 17, 17, 0.88);
+  border-color: #292929;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
 .glass-panel-interactive {
@@ -72,6 +134,12 @@ body {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.dark .glass-panel-interactive {
+  background: rgba(17, 17, 17, 0.88);
+  border-color: #292929;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
 .glass-panel-interactive:hover {
   background: rgba(255, 255, 255, 0.75);
   border-color: rgba(217, 70, 141, 0.35);
@@ -79,10 +147,22 @@ body {
   transform: translateY(-2px);
 }
 
+.dark .glass-panel-interactive:hover {
+  background: #202020;
+  border-color: #8B5CF6;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+}
+
 .glass-surface-solid {
   background: #ffffff;
   border: 1px solid #E7DCE4;
   box-shadow: 0 4px 16px rgba(78, 40, 62, 0.03);
+}
+
+.dark .glass-surface-solid {
+  background: #111111;
+  border-color: #292929;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* Micro-interaction & Motion Classes */

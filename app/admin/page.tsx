@@ -43,16 +43,16 @@ export default function AdminDashboardPage() {
 
   return (
     <section className="animate-fade-in-up">
-      <div className="border-b border-[#E7DCE4] pb-6">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9468D]">
+      <div className="border-b border-[#E7DCE4] dark:border-[#292929] pb-6">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9468D] dark:text-[#8B5CF6]">
           Administration Portal
         </p>
 
-        <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-[#302630]">
+        <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-[#302630] dark:text-[#FAFAFA]">
           Console Dashboard
         </h1>
 
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#4E404C]">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#4E404C] dark:text-[#A3A3A3]">
           Welcome to the Blueprint to Live administrator control center. Select any module below or use the sidebar navigation.
         </p>
       </div>
@@ -64,21 +64,21 @@ export default function AdminDashboardPage() {
             <Link
               key={item.title}
               href={item.href}
-              className="glass-panel-interactive group flex flex-col justify-between rounded-3xl p-6 border border-white/80 shadow-xs"
+              className="glass-panel-interactive group flex flex-col justify-between rounded-3xl p-6 border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs"
             >
               <div>
-                <div className="flex size-11 items-center justify-center rounded-2xl bg-[#FCE7F1] text-[#BE3477] transition-transform duration-200 group-hover:scale-105">
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-[#FCE7F1] dark:bg-[#8B5CF6]/15 text-[#BE3477] dark:text-[#A78BFA] transition-transform duration-200 group-hover:scale-105">
                   <Icon className="size-5" />
                 </div>
-                <h2 className="mt-4 text-base font-bold text-[#302630] transition-colors group-hover:text-[#BE3477]">
+                <h2 className="mt-4 text-base font-bold text-[#302630] dark:text-[#FAFAFA] transition-colors group-hover:text-[#BE3477] dark:group-hover:text-[#A78BFA]">
                   {item.title}
                 </h2>
-                <p className="mt-1.5 text-xs leading-5 text-[#4E404C]">
+                <p className="mt-1.5 text-xs leading-5 text-[#4E404C] dark:text-[#A3A3A3]">
                   {item.description}
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#BE3477]">
+              <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#BE3477] dark:text-[#8B5CF6]">
                 <span>Manage</span>
                 <ArrowRight className="size-3.5 transition-transform duration-150 group-hover:translate-x-1" />
               </div>

@@ -50,16 +50,16 @@ export default function ConfirmDialog({
         event.preventDefault();
         onCancel();
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-white/80 bg-white/95 p-0 text-[#302630] shadow-[0_24px_80px_rgba(78,40,62,0.18)] backdrop:bg-[#302630]/35 backdrop:backdrop-blur-sm animate-fade-in"
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-white/80 dark:border-[#292929] bg-white/95 dark:bg-[#111111] p-0 text-[#302630] dark:text-[#FAFAFA] shadow-[0_24px_80px_rgba(78,40,62,0.18)] backdrop:bg-[#302630]/35 dark:backdrop:bg-black/75 backdrop:backdrop-blur-sm animate-fade-in"
     >
       <div className="p-6 sm:p-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D9468D]">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#D9468D] dark:text-[#8B5CF6]">
           Please confirm
         </p>
-        <h2 id="confirm-dialog-title" className="mt-2 text-xl font-bold tracking-tight text-[#302630]">
+        <h2 id="confirm-dialog-title" className="mt-2 text-xl font-bold tracking-tight text-[#302630] dark:text-[#FAFAFA]">
           {title}
         </h2>
-        <div id="confirm-dialog-description" className="mt-3 text-sm leading-6 text-[#4E404C]">
+        <div id="confirm-dialog-description" className="mt-3 text-sm leading-6 text-[#4E404C] dark:text-[#A3A3A3]">
           {description}
         </div>
         <div className="mt-6 flex flex-col-reverse justify-end gap-2.5 sm:flex-row">
@@ -67,7 +67,7 @@ export default function ConfirmDialog({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="min-h-11 rounded-xl border border-[#E7DCE4] bg-white px-4 py-2.5 text-sm font-semibold text-[#302630] transition hover:bg-[#F1E9EF] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9468D] disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-4 py-2.5 text-sm font-semibold text-[#302630] dark:text-[#FAFAFA] transition hover:bg-[#F1E9EF] dark:hover:bg-[#202020] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9468D] dark:focus-visible:ring-[#8B5CF6] disabled:opacity-50"
           >
             {cancelLabel}
           </button>
@@ -75,10 +75,10 @@ export default function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`min-h-11 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9468D] disabled:opacity-50 ${
+            className={`min-h-11 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9468D] dark:focus-visible:ring-[#8B5CF6] disabled:opacity-50 ${
               isDestructiveAction
                 ? "bg-red-600 hover:bg-red-700"
-                : "bg-[#BE3477] hover:bg-[#a62a66]"
+                : "bg-[#BE3477] dark:bg-[#8B5CF6] hover:bg-[#a62a66] dark:hover:bg-[#A78BFA]"
             }`}
           >
             {isLoading ? "Processing..." : confirmLabel}

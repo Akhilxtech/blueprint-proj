@@ -1,7 +1,7 @@
 
 "use client";
-
 import { useCallback, useEffect, useMemo, useState } from "react";
+import ThemeToggle from "@/components/theme-toggle";
 
 type StatementStatus = "Available" | "Full" | "Unavailable" | "Selected";
 
@@ -82,6 +82,16 @@ function remainingTime(deadline: string | null, serverNow: string) {
   const remainder = seconds % 60;
 
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+}
+
+function remainingSeconds(deadline: string | null, serverNow: string) {
+  if (!deadline) return 0;
+  return Math.max(
+    0,
+    Math.floor(
+      (new Date(deadline).getTime() - new Date(serverNow).getTime()) / 1000,
+    ),
+  );
 }
 
 async function fetchWithTimeout(
@@ -383,42 +393,49 @@ useEffect(() => {
   );
 
   const timeLeft = remainingTime(data?.selectionWindow.deadline ?? null, now);
+  const isSelectionOpen = Boolean(data?.selectionWindow.isOpen && timeLeft !== "00:00:00");
+  const selectionSeconds = remainingSeconds(data?.selectionWindow.deadline ?? null, now);
+  const submissionSeconds = remainingSeconds(submissionDeadline, now);
+  const submissionTimeLeft = remainingTime(submissionDeadline, now);
 
   return (
-    <main className="min-h-screen bg-[#F7F2F5] px-4 py-8 text-[#302630] sm:px-6 sm:py-12">
+    <main className="min-h-screen bg-[#F7F2F5] dark:bg-[#050505] px-4 py-8 text-[#302630] dark:text-[#FAFAFA] sm:px-6 sm:py-12">
       <div className="mx-auto max-w-6xl">
-        <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center border-b border-[#E7DCE4] pb-6">
+        <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center border-b border-[#E7DCE4] dark:border-[#292929] pb-6">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9468D]">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D9468D] dark:text-[#8B5CF6]">
               Blueprint to Live · Round 3
             </p>
-            <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-[#302630]">
+            <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-[#302630] dark:text-[#FAFAFA]">
               Final Build-Off
             </h1>
-            <p className="mt-1 text-sm text-[#746873]">
-              Welcome, <strong className="font-semibold text-[#302630]">{participantName}</strong> · Team:{" "}
-              <span className="font-bold text-[#BE3477]">{teamName}</span>
+            <p className="mt-1 text-sm text-[#746873] dark:text-[#A3A3A3]">
+              Welcome, <strong className="font-semibold text-[#302630] dark:text-[#FAFAFA]">{participantName}</strong> · Team:{" "}
+              <span className="font-bold text-[#BE3477] dark:text-[#8B5CF6]">{teamName}</span>
             </p>
           </div>
 
-          <a
-            href="/play"
-            className="w-fit rounded-xl border border-[#E7DCE4] bg-white/70 px-4 py-2 text-xs font-semibold text-[#746873] shadow-xs backdrop-blur-md transition hover:border-[#D9468D]/40 hover:bg-white hover:text-[#BE3477]"
-          >
-            ← Back to dashboard
-          </a>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <a
+              href="/play"
+              className="w-fit rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/70 dark:bg-[#111111] px-4 py-2 text-xs font-semibold text-[#746873] dark:text-[#A3A3A3] shadow-xs backdrop-blur-md transition hover:border-[#D9468D]/40 dark:hover:border-[#8B5CF6]/40 hover:bg-white dark:hover:bg-[#171717] hover:text-[#BE3477] dark:hover:text-[#8B5CF6]"
+            >
+              ← Back to dashboard
+            </a>
+          </div>
         </header>
 
         {error && (
           <div
             role="alert"
-            className="mt-6 flex items-start justify-between gap-4 rounded-2xl border border-red-500/25 bg-red-50/85 p-4 text-sm font-medium text-red-800 shadow-xs"
+            className="mt-6 flex items-start justify-between gap-4 rounded-2xl border border-red-500/25 bg-red-50/85 dark:bg-red-950/30 p-4 text-sm font-medium text-red-800 dark:text-red-300 shadow-xs"
           >
             <p>{error}</p>
             <button
               type="button"
               onClick={() => setError("")}
-              className="shrink-0 text-red-600 hover:text-red-900"
+              className="shrink-0 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
               aria-label="Dismiss error"
             >
               ✕
@@ -427,29 +444,144 @@ useEffect(() => {
         )}
 
         {loading && !data ? (
-          <section className="glass-panel mt-8 rounded-3xl p-8 text-center border border-white/80 shadow-xs">
-            <p className="text-sm font-medium text-[#746873]">
+          <section className="glass-panel mt-8 rounded-3xl p-8 text-center border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs">
+            <p className="text-sm font-medium text-[#746873] dark:text-[#A3A3A3]">
               Loading problem statements and submission windows...
             </p>
           </section>
         ) : data && !data.isFinalist ? (
-          <section className="glass-panel mt-8 rounded-3xl p-8 text-center border border-white/80 shadow-xs">
-            <h2 className="text-xl font-bold text-[#302630]">
+          <section className="glass-panel mt-8 rounded-3xl p-8 text-center border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs">
+            <h2 className="text-xl font-bold text-[#302630] dark:text-[#FAFAFA]">
               Thank you for participating!
             </h2>
-            <p className="mt-2 text-sm text-[#746873]">
+            <p className="mt-2 text-sm text-[#746873] dark:text-[#A3A3A3]">
               Round 3 is available only to finalist teams.
             </p>
           </section>
         ) : data ? (
           <>
+            {/* Sticky Timer Panel */}
+            <div className="sticky top-2 z-30 mb-8 rounded-3xl border border-white/80 dark:border-[#292929] bg-white/90 dark:bg-[#090909]/95 p-4 sm:p-5 shadow-lg backdrop-blur-xl transition-all">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                {/* Problem Selection Window Timer Card */}
+                <div
+                  className={`relative overflow-hidden rounded-2xl border p-4 sm:p-5 transition-all ${
+                    isSelectionOpen
+                      ? "border-purple-500/30 dark:border-[#8B5CF6]/30 bg-purple-50/40 dark:bg-[#8B5CF6]/10 shadow-xs"
+                      : "border-[#E7DCE4] dark:border-[#292929] bg-white/60 dark:bg-[#111111]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">
+                      Problem Selection Window
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                        isSelectionOpen
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
+                          : "bg-[#F1E9EF] dark:bg-[#171717] dark:border dark:border-[#292929] text-[#746873] dark:text-[#A3A3A3]"
+                      }`}
+                    >
+                      {isSelectionOpen && (
+                        <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      )}
+                      {isSelectionOpen ? "Window Open" : "Window Closed"}
+                    </span>
+                  </div>
+
+                  <div className="mt-2.5 flex items-baseline justify-between gap-2">
+                    <p
+                      className={`font-black tracking-tight tabular-nums text-3xl sm:text-4xl md:text-5xl ${
+                        !isSelectionOpen
+                          ? "text-[#746873] dark:text-[#737373]"
+                          : selectionSeconds <= 300
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-[#BE3477] dark:text-[#8B5CF6]"
+                      }`}
+                    >
+                      {isSelectionOpen ? (timeLeft ?? "00:00:00") : "00:00:00"}
+                    </p>
+                  </div>
+
+                  <p className="mt-2 text-xs text-[#746873] dark:text-[#A3A3A3] flex items-center justify-between">
+                    <span>
+                      {data?.selectionWindow.deadline
+                        ? `Deadline: ${formatDate(data.selectionWindow.deadline)}`
+                        : "Deadline not announced"}
+                    </span>
+                    {isSelectionOpen && selectionSeconds <= 300 && (
+                      <span className="font-semibold text-amber-600 dark:text-amber-400">
+                        Closing soon!
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                {/* Deployment Submission Window Timer Card */}
+                <div
+                  className={`relative overflow-hidden rounded-2xl border p-4 sm:p-5 transition-all ${
+                    submissionOpen
+                      ? "border-purple-500/30 dark:border-[#8B5CF6]/30 bg-purple-50/40 dark:bg-[#8B5CF6]/10 shadow-xs"
+                      : "border-[#E7DCE4] dark:border-[#292929] bg-white/60 dark:bg-[#111111]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">
+                      Deployment Submission Window
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                        submissionOpen
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
+                          : "bg-[#F1E9EF] dark:bg-[#171717] dark:border dark:border-[#292929] text-[#746873] dark:text-[#A3A3A3]"
+                      }`}
+                    >
+                      {submissionOpen && (
+                        <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      )}
+                      {submissionOpen ? "Window Open" : "Window Closed"}
+                    </span>
+                  </div>
+
+                  <div className="mt-2.5 flex items-baseline justify-between gap-2">
+                    <p
+                      className={`font-black tracking-tight tabular-nums text-3xl sm:text-4xl md:text-5xl ${
+                        !submissionOpen
+                          ? "text-[#746873] dark:text-[#737373]"
+                          : submissionSeconds <= 300
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-[#BE3477] dark:text-[#8B5CF6]"
+                      }`}
+                    >
+                      {submissionOpen
+                        ? (submissionTimeLeft ?? "00:00:00")
+                        : "00:00:00"}
+                    </p>
+                  </div>
+
+                  <p className="mt-2 text-xs text-[#746873] dark:text-[#A3A3A3] flex items-center justify-between">
+                    <span>
+                      {submissionDeadline
+                        ? `Deadline: ${formatDate(submissionDeadline)}`
+                        : "Deadline not announced"}
+                    </span>
+                    {submissionOpen && submissionSeconds <= 300 && (
+                      <span className="font-semibold text-amber-600 dark:text-amber-400">
+                        Closing soon!
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <section className="mt-8 grid gap-4 sm:grid-cols-3 animate-fade-in-up">
-              <div className="glass-panel rounded-3xl p-5 border border-white/80 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">Your selection</p>
-                <p className="mt-2 text-base font-bold text-[#302630] truncate">
+              <div className="glass-panel rounded-3xl p-5 border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">Your selection</p>
+                <p className="mt-2 text-base font-bold text-[#302630] dark:text-[#FAFAFA] truncate">
                   {selectedStatement?.title ?? "Not selected"}
                 </p>
-                <p className="mt-1 text-xs text-[#746873]">
+                <p className="mt-1 text-xs text-[#746873] dark:text-[#A3A3A3]">
                   {data.assignedByAdmin
                     ? "Assigned by the event admin"
                     : data.selectedAt
@@ -458,26 +590,24 @@ useEffect(() => {
                 </p>
               </div>
 
-              <div className="glass-panel rounded-3xl p-5 border border-white/80 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">Selection window</p>
-                <p className="mt-2 text-base font-bold text-[#302630]">
-                  {data.selectionWindow.isOpen && timeLeft !== "00:00:00"
-                    ? "Open"
-                    : "Closed"}
+              <div className="glass-panel rounded-3xl p-5 border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">Selection window</p>
+                <p className="mt-2 text-base font-bold text-[#302630] dark:text-[#FAFAFA]">
+                  {isSelectionOpen ? "Open" : "Closed"}
                 </p>
-                <p className="mt-1 text-xs text-[#746873]">
-                  {data.selectionWindow.isOpen
+                <p className="mt-1 text-xs text-[#746873] dark:text-[#A3A3A3]">
+                  {isSelectionOpen
                     ? `Time remaining: ${timeLeft ?? "Unknown"}`
                     : "Wait for the event admin to open selection"}
                 </p>
               </div>
 
-              <div className="glass-panel rounded-3xl p-5 border border-white/80 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">Available statements</p>
-                <p className="mt-2 text-2xl font-black text-[#BE3477]">
+              <div className="glass-panel rounded-3xl p-5 border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">Available statements</p>
+                <p className="mt-2 text-2xl font-black text-[#BE3477] dark:text-[#8B5CF6]">
                   {data.statements.filter((s) => s.status === "Available").length}
                 </p>
-                <p className="mt-1 text-xs text-[#746873]">
+                <p className="mt-1 text-xs text-[#746873] dark:text-[#A3A3A3]">
                   State refreshes automatically
                 </p>
               </div>
@@ -485,17 +615,17 @@ useEffect(() => {
 
             {/* Selected Statement Banner */}
             {selectedStatement && (
-              <section className="mt-6 rounded-3xl border border-[#D9468D]/30 bg-[#FCE7F1]/80 p-6 shadow-xs animate-fade-in-up">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+              <section className="mt-6 rounded-3xl border border-[#D9468D]/30 dark:border-[#8B5CF6]/30 bg-[#FCE7F1]/80 dark:bg-[#8B5CF6]/10 p-6 shadow-xs animate-fade-in-up">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477] dark:text-[#8B5CF6]">
                   Your team&apos;s locked problem statement
                 </p>
-                <h2 className="mt-2 text-xl font-bold text-[#302630]">
+                <h2 className="mt-2 text-xl font-bold text-[#302630] dark:text-[#FAFAFA]">
                   {selectedStatement.title}
                 </h2>
                 <button
                   type="button"
                   onClick={() => setDetails(selectedStatement)}
-                  className="mt-4 rounded-xl bg-[#BE3477] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#a62a66] active:scale-[0.98]"
+                  className="mt-4 rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#a62a66] dark:hover:bg-[#A78BFA] active:scale-[0.98]"
                 >
                   View full statement details
                 </button>
@@ -503,11 +633,11 @@ useEffect(() => {
             )}
 
             {/* Deployment submission */}
-            <section className="glass-panel mt-6 rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xs animate-fade-in-up animation-delay-75">
-              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start border-b border-[#E7DCE4]/80 pb-5">
+            <section className="glass-panel mt-6 rounded-3xl p-6 sm:p-7 border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs animate-fade-in-up animation-delay-75">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start border-b border-[#E7DCE4]/80 dark:border-[#292929] pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-[#302630]">Deployment submission</h2>
-                  <p className="mt-1 text-xs sm:text-sm text-[#746873]">
+                  <h2 className="text-xl font-bold text-[#302630] dark:text-[#FAFAFA]">Deployment submission</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-[#746873] dark:text-[#A3A3A3]">
                     Submit your team&apos;s deployed static website URL from EC2. You can update it while submissions are open.
                   </p>
                 </div>
@@ -515,22 +645,22 @@ useEffect(() => {
                 <span
                   className={`w-fit rounded-full px-3 py-1 text-xs font-bold ${
                     submissionOpen
-                      ? "bg-emerald-500/15 text-emerald-800"
-                      : "bg-[#F1E9EF] text-[#746873]"
+                      ? "bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border border-emerald-500/20"
+                      : "bg-[#F1E9EF] dark:bg-[#171717] dark:border dark:border-[#292929] text-[#746873] dark:text-[#A3A3A3]"
                   }`}
                 >
                   {submissionOpen ? "Submissions open" : "Submissions closed"}
                 </span>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-[#E7DCE4] bg-white/70 p-4 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#746873]">Submission deadline</p>
-                <p className="mt-1 text-sm font-bold text-[#302630]">
+              <div className="mt-5 rounded-2xl border border-[#E7DCE4] dark:border-[#292929] bg-white/70 dark:bg-[#171717] p-4 shadow-xs">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">Submission deadline</p>
+                <p className="mt-1 text-sm font-bold text-[#302630] dark:text-[#FAFAFA]">
                   {submissionDeadline
                     ? formatDate(submissionDeadline)
                     : "Not announced"}
                 </p>
-                <p className="mt-1 text-xs text-[#746873]">
+                <p className="mt-1 text-xs text-[#746873] dark:text-[#A3A3A3]">
                   {submissionOpen
                     ? `Time remaining: ${
                         remainingTime(submissionDeadline, now) ?? "Not available"
@@ -546,7 +676,7 @@ useEffect(() => {
                   void saveDeployment();
                 }}
               >
-                <label htmlFor="deployment-url" className="block text-xs font-bold uppercase tracking-wider text-[#746873]">
+                <label htmlFor="deployment-url" className="block text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">
                   EC2 website URL
                 </label>
 
@@ -559,10 +689,10 @@ useEffect(() => {
                   onChange={(event) => setDeploymentUrl(event.target.value)}
                   placeholder="http://your-ec2-public-ip or https://your-domain"
                   disabled={!submissionOpen || !data.selectedStatementId || savingDeployment}
-                  className="w-full rounded-xl border border-[#E7DCE4] bg-white px-4 py-3 text-sm text-[#302630] outline-none placeholder:text-[#746873]/50 focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-4 py-3 text-sm text-[#302630] dark:text-[#FAFAFA] outline-none placeholder:text-[#746873]/50 dark:placeholder:text-[#A3A3A3]/40 focus:border-[#D9468D] dark:focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#D9468D]/20 dark:focus:ring-[#8B5CF6]/20 disabled:cursor-not-allowed disabled:opacity-50"
                 />
 
-                <p className="text-xs text-[#746873]">
+                <p className="text-xs text-[#746873] dark:text-[#A3A3A3]">
                   Your team must select a problem statement before submitting.
                 </p>
 
@@ -574,7 +704,7 @@ useEffect(() => {
                     savingDeployment ||
                     !deploymentUrl.trim()
                   }
-                  className="rounded-xl bg-[#BE3477] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#a62a66] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#a62a66] dark:hover:bg-[#A78BFA] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {savingDeployment
                     ? "Saving..."
@@ -585,15 +715,15 @@ useEffect(() => {
               </form>
 
               {savedDeploymentUrl && (
-                <div className="mt-5 rounded-2xl border border-emerald-500/25 bg-emerald-50/80 p-4 shadow-xs">
-                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                <div className="mt-5 rounded-2xl border border-emerald-500/25 dark:border-emerald-500/30 bg-emerald-50/80 dark:bg-emerald-950/25 p-4 shadow-xs">
+                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
                     Saved deployment URL
                   </p>
                   <a
                     href={savedDeploymentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 block break-all text-sm font-semibold text-[#BE3477] underline underline-offset-4 hover:text-[#a62a66]"
+                    className="mt-1 block break-all text-sm font-semibold text-[#BE3477] dark:text-[#8B5CF6] underline underline-offset-4 hover:text-[#a62a66] dark:hover:text-[#A78BFA]"
                   >
                     {savedDeploymentUrl}
                   </a>
@@ -601,7 +731,7 @@ useEffect(() => {
               )}
 
               {deploymentMessage && (
-                <p role="status" className="mt-4 text-xs font-semibold text-[#BE3477]">
+                <p role="status" className="mt-4 text-xs font-semibold text-[#BE3477] dark:text-[#8B5CF6]">
                   {deploymentMessage}
                 </p>
               )}
@@ -609,32 +739,32 @@ useEffect(() => {
 
             {/* Deliverables Checklist */}
             {data.selectedStatementId && (
-              <section className="glass-panel mt-6 rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xs animate-fade-in-up">
-                <div className="flex items-center justify-between gap-3 border-b border-[#E7DCE4]/80 pb-4">
+              <section className="glass-panel mt-6 rounded-3xl p-6 sm:p-7 border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs animate-fade-in-up">
+                <div className="flex items-center justify-between gap-3 border-b border-[#E7DCE4]/80 dark:border-[#292929] pb-4">
                   <div>
-                    <h2 className="text-xl font-bold text-[#302630]">Deliverables checklist</h2>
-                    <p className="mt-0.5 text-xs text-[#746873]">
+                    <h2 className="text-xl font-bold text-[#302630] dark:text-[#FAFAFA]">Deliverables checklist</h2>
+                    <p className="mt-0.5 text-xs text-[#746873] dark:text-[#A3A3A3]">
                       Shared team progress updates automatically.
                     </p>
                   </div>
-                  <span className="rounded-full bg-[#FCE7F1] px-3 py-1 text-xs font-bold text-[#BE3477]">
+                  <span className="rounded-full bg-[#FCE7F1] dark:bg-[#8B5CF6]/15 text-[#BE3477] dark:text-[#8B5CF6] border border-transparent dark:border-[#8B5CF6]/30 px-3 py-1 text-xs font-bold">
                     {deliverables.filter((item) => item.completed).length} / {deliverables.length} done
                   </span>
                 </div>
 
                 {loadingDeliverables && deliverables.length === 0 ? (
-                  <p className="mt-5 text-sm text-[#746873]">
+                  <p className="mt-5 text-sm text-[#746873] dark:text-[#A3A3A3]">
                     Loading deliverables...
                   </p>
                 ) : deliverables.length === 0 ? (
-                  <p className="mt-5 text-sm text-[#746873]">
+                  <p className="mt-5 text-sm text-[#746873] dark:text-[#A3A3A3]">
                     No deliverables configured for this statement.
                   </p>
                 ) : (
                   <ul className="mt-5 space-y-2.5">
                     {deliverables.map((item) => (
                       <li key={item.index}>
-                        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#E7DCE4] bg-white/70 p-3.5 shadow-xs transition hover:bg-white">
+                        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#E7DCE4] dark:border-[#292929] bg-white/70 dark:bg-[#171717] p-3.5 shadow-xs transition hover:bg-white dark:hover:bg-[#202020]">
                           <input
                             type="checkbox"
                             checked={item.completed}
@@ -642,19 +772,19 @@ useEffect(() => {
                             onChange={(event) =>
                               void toggleDeliverable(item.index, event.target.checked)
                             }
-                            className="mt-0.5 size-4 rounded accent-[#BE3477]"
+                            className="mt-0.5 size-4 rounded accent-[#BE3477] dark:accent-[#8B5CF6]"
                           />
                           <span
                             className={`text-sm leading-6 ${
                               item.completed
-                                ? "text-[#746873] line-through font-normal"
-                                : "text-[#302630] font-medium"
+                                ? "text-[#746873] dark:text-[#737373] line-through font-normal"
+                                : "text-[#302630] dark:text-[#FAFAFA] font-medium"
                             }`}
                           >
                             {item.text}
                           </span>
                           {updatingDeliverable === item.index && (
-                            <span className="ml-auto text-xs font-medium text-[#BE3477]">
+                            <span className="ml-auto text-xs font-medium text-[#BE3477] dark:text-[#8B5CF6]">
                               Saving...
                             </span>
                           )}
@@ -668,10 +798,10 @@ useEffect(() => {
 
             {/* Problem-solving hints */}
             {selectedStatement && (
-              <section className="glass-panel mt-6 rounded-3xl p-6 sm:p-7 border border-white/80 shadow-xs animate-fade-in-up">
+              <section className="glass-panel mt-6 rounded-3xl p-6 sm:p-7 border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs animate-fade-in-up">
                 <div>
-                  <h2 className="text-xl font-bold text-[#302630]">Problem-solving hints</h2>
-                  <p className="mt-0.5 text-xs text-[#746873]">
+                  <h2 className="text-xl font-bold text-[#302630] dark:text-[#FAFAFA]">Problem-solving hints</h2>
+                  <p className="mt-0.5 text-xs text-[#746873] dark:text-[#A3A3A3]">
                     Consult hints if your team needs architecture or implementation guidance.
                   </p>
                 </div>
@@ -684,24 +814,24 @@ useEffect(() => {
                       .map((hint) => (
                         <details
                           key={hint.id}
-                          className="group rounded-2xl border border-[#E7DCE4] bg-white/80 shadow-xs"
+                          className="group rounded-2xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] shadow-xs"
                         >
-                          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-bold text-[#302630]">
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-bold text-[#302630] dark:text-[#FAFAFA]">
                             <span>
                               Hint {hint.order}: {hint.title}
                             </span>
-                            <span className="text-xs text-[#746873] transition group-open:rotate-180">
+                            <span className="text-xs text-[#746873] dark:text-[#A3A3A3] transition group-open:rotate-180">
                               ▼
                             </span>
                           </summary>
-                          <div className="border-t border-[#E7DCE4] px-4 py-3.5 text-sm leading-6 text-[#746873]">
+                          <div className="border-t border-[#E7DCE4] dark:border-[#292929] px-4 py-3.5 text-sm leading-6 text-[#746873] dark:text-[#A3A3A3]">
                             {hint.content}
                           </div>
                         </details>
                       ))}
                   </div>
                 ) : (
-                  <p className="mt-5 text-sm text-[#746873]">
+                  <p className="mt-5 text-sm text-[#746873] dark:text-[#A3A3A3]">
                     No hints configured for this statement yet.
                   </p>
                 )}
@@ -712,14 +842,14 @@ useEffect(() => {
             <section className="mt-10">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#302630]">Problem statements</h2>
-                  <p className="mt-1 text-sm text-[#746873]">
+                  <h2 className="text-2xl font-bold text-[#302630] dark:text-[#FAFAFA]">Problem statements</h2>
+                  <p className="mt-1 text-sm text-[#746873] dark:text-[#A3A3A3]">
                     {data.selectedStatementId
                       ? "Your team's choice is locked. You can review the remaining challenges."
                       : "Explore the available challenges and choose your problem statement."}
                   </p>
                 </div>
-                <p className="text-xs font-semibold text-[#746873]">
+                <p className="text-xs font-semibold text-[#746873] dark:text-[#A3A3A3]">
                   {filteredStatements.length} of {data.statements.length} shown
                 </p>
               </div>
@@ -729,17 +859,17 @@ useEffect(() => {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search by title, domain, or description..."
-                  className="w-full rounded-xl border border-[#E7DCE4] bg-white px-4 py-3 text-sm text-[#302630] outline-none placeholder:text-[#746873]/50 focus:border-[#D9468D] shadow-xs"
+                  className="w-full rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-4 py-3 text-sm text-[#302630] dark:text-[#FAFAFA] outline-none placeholder:text-[#746873]/50 dark:placeholder:text-[#A3A3A3]/40 focus:border-[#D9468D] dark:focus:border-[#8B5CF6] shadow-xs"
                   aria-label="Search problem statements"
                 />
                 <select
                   value={domain}
                   onChange={(event) => setDomain(event.target.value)}
-                  className="rounded-xl border border-[#E7DCE4] bg-white px-4 py-3 text-sm text-[#302630] outline-none focus:border-[#D9468D] shadow-xs"
+                  className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-4 py-3 text-sm text-[#302630] dark:text-[#FAFAFA] outline-none focus:border-[#D9468D] dark:focus:border-[#8B5CF6] shadow-xs"
                   aria-label="Filter by domain"
                 >
                   {domains.map((item) => (
-                    <option key={item} value={item}>
+                    <option key={item} value={item} className="bg-white dark:bg-[#171717] text-[#302630] dark:text-[#FAFAFA]">
                       {item === "All" ? "All domains" : item}
                     </option>
                   ))}
@@ -761,40 +891,40 @@ useEffect(() => {
                       key={statement.id}
                       className={`glass-panel-interactive flex flex-col rounded-3xl p-6 shadow-xs border ${
                         isSelected
-                          ? "border-[#D9468D] ring-2 ring-[#D9468D]/30 bg-[#FCE7F1]/30"
-                          : "border-white/80"
+                          ? "border-[#D9468D] dark:border-[#8B5CF6] ring-2 ring-[#D9468D]/30 dark:ring-[#8B5CF6]/30 bg-[#FCE7F1]/30 dark:bg-[#8B5CF6]/10"
+                          : "border-white/80 dark:border-[#292929] dark:bg-[#111111]"
                       }`}
                     >
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-[#FCE7F1] px-2.5 py-0.5 text-xs font-bold text-[#BE3477]">
+                        <span className="rounded-full bg-[#FCE7F1] dark:bg-[#8B5CF6]/15 text-[#BE3477] dark:text-[#8B5CF6] border border-transparent dark:border-[#8B5CF6]/30 px-2.5 py-0.5 text-xs font-bold">
                           {statement.domain}
                         </span>
-                        <span className="rounded-full bg-[#F1E9EF] px-2.5 py-0.5 text-xs font-semibold text-[#746873]">
+                        <span className="rounded-full bg-[#F1E9EF] dark:bg-[#171717] dark:border dark:border-[#292929] px-2.5 py-0.5 text-xs font-semibold text-[#746873] dark:text-[#A3A3A3]">
                           {statement.difficulty}
                         </span>
                       </div>
 
-                      <h3 className="mt-4 text-lg font-bold leading-snug text-[#302630]">
+                      <h3 className="mt-4 text-lg font-bold leading-snug text-[#302630] dark:text-[#FAFAFA]">
                         {statement.title}
                       </h3>
-                      <p className="mt-2.5 flex-1 text-xs sm:text-sm leading-6 text-[#746873]">
+                      <p className="mt-2.5 flex-1 text-xs sm:text-sm leading-6 text-[#746873] dark:text-[#A3A3A3]">
                         {statement.shortDescription}
                       </p>
 
-                      <div className="mt-5 flex items-center justify-between gap-3 border-t border-[#E7DCE4] pt-4">
+                      <div className="mt-5 flex items-center justify-between gap-3 border-t border-[#E7DCE4] dark:border-[#292929] pt-4">
                         <div>
                           <p
                             className={`text-xs font-bold ${
                               isSelected
-                                ? "text-[#BE3477]"
+                                ? "text-[#BE3477] dark:text-[#8B5CF6]"
                                 : statement.status === "Available"
-                                  ? "text-emerald-700"
-                                  : "text-[#746873]"
+                                  ? "text-emerald-700 dark:text-emerald-400"
+                                  : "text-[#746873] dark:text-[#A3A3A3]"
                             }`}
                           >
                             {isSelected ? "Your selection ✓" : statement.status}
                           </p>
-                          <p className="mt-0.5 text-[11px] text-[#746873]">
+                          <p className="mt-0.5 text-[11px] text-[#746873] dark:text-[#A3A3A3]">
                             {statement.selectedCount} selected
                             {statement.maxTeams !== null
                               ? ` / ${statement.maxTeams} teams`
@@ -805,7 +935,7 @@ useEffect(() => {
                         <button
                           type="button"
                           onClick={() => setDetails(statement)}
-                          className="rounded-xl border border-[#E7DCE4] bg-white px-3 py-1.5 text-xs font-semibold text-[#302630] hover:bg-[#F1E9EF] transition shadow-xs"
+                          className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-3 py-1.5 text-xs font-semibold text-[#302630] dark:text-[#FAFAFA] hover:bg-[#F1E9EF] dark:hover:bg-[#202020] transition shadow-xs"
                         >
                           Details
                         </button>
@@ -815,7 +945,7 @@ useEffect(() => {
                         <button
                           type="button"
                           onClick={() => setConfirmSelection(statement)}
-                          className="mt-4 w-full rounded-xl bg-[#BE3477] px-4 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-[#a62a66] active:scale-[0.98]"
+                          className="mt-4 w-full rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-4 py-2.5 text-sm font-bold text-white shadow-xs transition hover:bg-[#a62a66] dark:hover:bg-[#A78BFA] active:scale-[0.98]"
                         >
                           Select this problem
                         </button>
@@ -826,9 +956,9 @@ useEffect(() => {
               </div>
 
               {filteredStatements.length === 0 && (
-                <div className="mt-6 rounded-3xl border border-dashed border-[#E7DCE4] p-10 text-center">
-                  <p className="font-bold text-[#302630]">No matching statements</p>
-                  <p className="mt-1 text-sm text-[#746873]">
+                <div className="mt-6 rounded-3xl border border-dashed border-[#E7DCE4] dark:border-[#292929] p-10 text-center">
+                  <p className="font-bold text-[#302630] dark:text-[#FAFAFA]">No matching statements</p>
+                  <p className="mt-1 text-sm text-[#746873] dark:text-[#A3A3A3]">
                     Try another search term or domain filter.
                   </p>
                 </div>
@@ -836,14 +966,14 @@ useEffect(() => {
             </section>
           </>
         ) : (
-          <section className="glass-panel mt-8 rounded-3xl p-8 border border-white/80 shadow-xs text-center">
-            <p className="text-sm text-[#746873]">
+          <section className="glass-panel mt-8 rounded-3xl p-8 border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs text-center">
+            <p className="text-sm text-[#746873] dark:text-[#A3A3A3]">
               Round 3 could not be loaded.
             </p>
             <button
               type="button"
               onClick={() => void loadState(true)}
-              className="mt-4 rounded-xl bg-[#BE3477] px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#a62a66]"
+              className="mt-4 rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#a62a66] dark:hover:bg-[#A78BFA]"
             >
               Retry
             </button>
@@ -854,24 +984,24 @@ useEffect(() => {
       {/* Details Dialog */}
       {details && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#302630]/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#302630]/40 dark:bg-black/75 backdrop-blur-sm p-4"
           onClick={() => setDetails(null)}
         >
           <section
             role="dialog"
             aria-modal="true"
             aria-labelledby="statement-dialog-title"
-            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-white/80 bg-white/95 p-6 sm:p-8 text-[#302630] shadow-2xl animate-fade-in"
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-white/80 dark:border-[#292929] bg-white/95 dark:bg-[#111111] p-6 sm:p-8 text-[#302630] dark:text-[#FAFAFA] shadow-2xl animate-fade-in"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-[#E7DCE4] pb-4">
+            <div className="flex items-start justify-between gap-4 border-b border-[#E7DCE4] dark:border-[#292929] pb-4">
               <div>
-                <span className="rounded-full bg-[#FCE7F1] px-2.5 py-0.5 text-xs font-bold text-[#BE3477]">
+                <span className="rounded-full bg-[#FCE7F1] dark:bg-[#8B5CF6]/15 text-[#BE3477] dark:text-[#8B5CF6] border border-transparent dark:border-[#8B5CF6]/30 px-2.5 py-0.5 text-xs font-bold">
                   {details.domain}
                 </span>
                 <h2
                   id="statement-dialog-title"
-                  className="mt-2 text-2xl font-bold tracking-tight text-[#302630]"
+                  className="mt-2 text-2xl font-bold tracking-tight text-[#302630] dark:text-[#FAFAFA]"
                 >
                   {details.title}
                 </h2>
@@ -879,7 +1009,7 @@ useEffect(() => {
               <button
                 type="button"
                 onClick={() => setDetails(null)}
-                className="rounded-xl border border-[#E7DCE4] bg-white px-3 py-1.5 text-xs font-bold text-[#746873] hover:text-[#BE3477]"
+                className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-3 py-1.5 text-xs font-bold text-[#746873] dark:text-[#A3A3A3] hover:text-[#BE3477] dark:hover:text-[#8B5CF6]"
                 aria-label="Close statement details"
               >
                 ✕
@@ -887,16 +1017,16 @@ useEffect(() => {
             </div>
 
             <div className="mt-6">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#746873]">Problem description</h3>
-              <div className="mt-2 whitespace-pre-wrap text-sm leading-7 text-[#302630]">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">Problem description</h3>
+              <div className="mt-2 whitespace-pre-wrap text-sm leading-7 text-[#302630] dark:text-[#FAFAFA]">
                 {details.description || details.shortDescription || "No description provided yet."}
               </div>
             </div>
 
             {details.constraints && (
               <div className="mt-6">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#746873]">Constraints</h3>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#746873]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">Constraints</h3>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#746873] dark:text-[#A3A3A3]">
                   {details.constraints}
                 </p>
               </div>
@@ -904,8 +1034,8 @@ useEffect(() => {
 
             {details.deliverables && (
               <div className="mt-6">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#746873]">Deliverables</h3>
-                <ul className="mt-2 list-inside list-disc space-y-1 text-sm leading-6 text-[#746873]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">Deliverables</h3>
+                <ul className="mt-2 list-inside list-disc space-y-1 text-sm leading-6 text-[#746873] dark:text-[#A3A3A3]">
                   {details.deliverables
                     .split("\n")
                     .filter(Boolean)
@@ -918,15 +1048,15 @@ useEffect(() => {
 
             {details.hints && details.hints.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#746873]">Hints</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#746873] dark:text-[#A3A3A3]">Hints</h3>
                 <div className="mt-3 space-y-2.5">
                   {details.hints.map((hint) => (
                     <div
                       key={hint.id}
-                      className="rounded-2xl border border-[#E7DCE4] bg-[#F1E9EF]/50 p-4"
+                      className="rounded-2xl border border-[#E7DCE4] dark:border-[#292929] bg-[#F1E9EF]/50 dark:bg-[#171717] p-4"
                     >
-                      <p className="text-xs font-bold text-[#302630]">{hint.title}</p>
-                      <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-[#746873]">
+                      <p className="text-xs font-bold text-[#302630] dark:text-[#FAFAFA]">{hint.title}</p>
+                      <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-[#746873] dark:text-[#A3A3A3]">
                         {hint.content}
                       </p>
                     </div>
@@ -941,7 +1071,7 @@ useEffect(() => {
                 <button
                   type="button"
                   onClick={() => setConfirmSelection(details)}
-                  className="mt-8 w-full rounded-xl bg-[#BE3477] px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#a62a66] active:scale-[0.98]"
+                  className="mt-8 w-full rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-4 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#a62a66] dark:hover:bg-[#A78BFA] active:scale-[0.98]"
                 >
                   Select this problem
                 </button>
@@ -953,7 +1083,7 @@ useEffect(() => {
       {/* Confirm Selection Dialog */}
       {confirmSelection && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-[#302630]/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-[#302630]/40 dark:bg-black/75 backdrop-blur-sm p-4"
           onClick={() => {
             if (!selecting) setConfirmSelection(null);
           }}
@@ -962,23 +1092,23 @@ useEffect(() => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="confirm-title"
-            className="w-full max-w-md rounded-3xl border border-white/80 bg-white/95 p-6 sm:p-7 text-[#302630] shadow-2xl animate-fade-in"
+            className="w-full max-w-md rounded-3xl border border-white/80 dark:border-[#292929] bg-white/95 dark:bg-[#111111] p-6 sm:p-7 text-[#302630] dark:text-[#FAFAFA] shadow-2xl animate-fade-in"
             onClick={(event) => event.stopPropagation()}
           >
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#D9468D]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#D9468D] dark:text-[#8B5CF6]">
               Confirmation required
             </p>
             <h2 id="confirm-title" className="mt-1 text-xl font-bold">
               Confirm your selection
             </h2>
-            <p className="mt-3 text-sm leading-6 text-[#746873]">
+            <p className="mt-3 text-sm leading-6 text-[#746873] dark:text-[#A3A3A3]">
               Your team is about to select{" "}
-              <strong className="font-bold text-[#302630]">
+              <strong className="font-bold text-[#302630] dark:text-[#FAFAFA]">
                 {confirmSelection.title}
               </strong>
               . This choice cannot be changed by your team after confirmation.
             </p>
-            <p className="mt-2 text-xs font-semibold text-amber-700">
+            <p className="mt-2 text-xs font-semibold text-amber-700 dark:text-amber-400">
               Make sure your team agrees before continuing.
             </p>
 
@@ -987,7 +1117,7 @@ useEffect(() => {
                 type="button"
                 disabled={selecting}
                 onClick={() => setConfirmSelection(null)}
-                className="rounded-xl border border-[#E7DCE4] bg-white px-4 py-2.5 text-sm font-semibold text-[#302630] hover:bg-[#F1E9EF] disabled:opacity-50"
+                className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-4 py-2.5 text-sm font-semibold text-[#302630] dark:text-[#FAFAFA] hover:bg-[#F1E9EF] dark:hover:bg-[#202020] disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -995,7 +1125,7 @@ useEffect(() => {
                 type="button"
                 disabled={selecting}
                 onClick={() => void selectStatement()}
-                className="rounded-xl bg-[#BE3477] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#a62a66] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#a62a66] dark:hover:bg-[#A78BFA] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {selecting ? "Selecting..." : "Confirm choice"}
               </button>

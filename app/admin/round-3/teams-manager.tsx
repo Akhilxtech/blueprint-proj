@@ -56,7 +56,7 @@ type DialogState = {
 };
 
 const buttonClass =
-  "rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:hover:bg-[#202020]";
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "Not available";
@@ -379,12 +379,12 @@ export default function TeamsManager() {
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300"
         >
           <span>{error}</span>
           <button
             type="button"
-            className="text-xs font-semibold text-red-700 underline hover:no-underline ml-3"
+            className="text-xs font-semibold text-red-700 underline hover:no-underline ml-3 dark:text-red-400"
             onClick={() => setError("")}
           >
             Dismiss
@@ -395,15 +395,15 @@ export default function TeamsManager() {
       {message && (
         <div
           role="status"
-          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300"
         >
           {message}
         </div>
       )}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-muted">
-          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+        <div className="py-10 text-center text-sm text-muted dark:text-[#A3A3A3]">
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2 dark:border-[#8B5CF6]" />
           <p>Loading team management...</p>
         </div>
       ) : (
@@ -420,7 +420,7 @@ export default function TeamsManager() {
               },
             ].map((item) => (
               <article key={item.label} className="glass-card p-5">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted dark:text-[#A3A3A3]">
                   {item.label}
                 </p>
                 <p className="mt-1 text-3xl font-extrabold tracking-tight text-foreground">
@@ -432,12 +432,12 @@ export default function TeamsManager() {
 
           {/* Statement Capacity */}
           <section className="glass-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light dark:border-[#292929] pb-4">
               <div>
                 <h3 className="text-lg font-bold tracking-tight text-foreground">
                   Statement Capacity
                 </h3>
-                <p className="text-sm text-muted">
+                <p className="text-sm text-muted dark:text-[#A3A3A3]">
                   Capacity counts reflect all active selections, including team self-selections.
                 </p>
               </div>
@@ -445,7 +445,7 @@ export default function TeamsManager() {
               <button
                 type="button"
                 disabled={busy || selectedTeams.length === 0}
-                className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50"
+                className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50 dark:border-red-900/40 dark:bg-[#171717] dark:text-red-400 dark:hover:bg-red-950/40"
                 onClick={openResetAllModal}
               >
                 Reset all selections
@@ -461,14 +461,14 @@ export default function TeamsManager() {
                 return (
                   <div
                     key={statement.id}
-                    className="rounded-xl border border-neutral-light bg-white p-4 shadow-2xs"
+                    className="rounded-xl border border-neutral-light bg-white p-4 shadow-2xs dark:border-[#292929] dark:bg-[#111111]"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="font-bold text-foreground">
                           {statement.title}
                         </p>
-                        <p className="mt-0.5 text-xs text-muted">
+                        <p className="mt-0.5 text-xs text-muted dark:text-[#A3A3A3]">
                           {statement.domain}
                         </p>
                       </div>
@@ -476,10 +476,10 @@ export default function TeamsManager() {
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                           !statement.enabled
-                            ? "border border-neutral-light bg-neutral-100 text-muted"
+                            ? "border border-neutral-light bg-neutral-100 text-muted dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]"
                             : full
-                              ? "border border-rose-200 bg-rose-50 text-rose-700"
-                              : "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                              ? "border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-400"
+                              : "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-400"
                         }`}
                       >
                         {!statement.enabled
@@ -491,10 +491,10 @@ export default function TeamsManager() {
                     </div>
 
                     <div className="mt-3 flex items-center gap-3">
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-100 border border-neutral-light/50">
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-100 border border-neutral-light/50 dark:bg-[#171717] dark:border-[#292929]">
                         <div
                           className={`h-full rounded-full transition-all duration-300 ${
-                            full ? "bg-rose-500" : "bg-primary"
+                            full ? "bg-rose-500" : "bg-primary dark:bg-[#8B5CF6]"
                           }`}
                           style={{
                             width:
@@ -514,7 +514,7 @@ export default function TeamsManager() {
               })}
 
               {data.statements.length === 0 && (
-                <p className="text-sm text-muted italic">
+                <p className="text-sm text-muted dark:text-[#A3A3A3] italic">
                   No problem statements exist yet.
                 </p>
               )}
@@ -529,14 +529,14 @@ export default function TeamsManager() {
 
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <input
-                className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:placeholder:text-[#A3A3A3] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
                 placeholder="Search team name..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
 
               <select
-                className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
                 value={filter}
                 onChange={(event) => setFilter(event.target.value)}
               >
@@ -550,7 +550,7 @@ export default function TeamsManager() {
               </select>
             </div>
 
-            <p className="mt-3 text-xs text-muted">
+            <p className="mt-3 text-xs text-muted dark:text-[#A3A3A3]">
               Showing {filteredTeams.length} of {data.teams.length} teams.
             </p>
 
@@ -569,7 +569,7 @@ export default function TeamsManager() {
                 return (
                   <article
                     key={team.id}
-                    className="rounded-xl border border-neutral-light bg-white p-5 shadow-2xs hover:shadow-soft transition"
+                    className="rounded-xl border border-neutral-light bg-white p-5 shadow-2xs hover:shadow-soft transition dark:border-[#292929] dark:bg-[#111111]"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
@@ -581,14 +581,14 @@ export default function TeamsManager() {
                           <span
                             className={`rounded-full px-2.5 py-0.5 font-semibold ${
                               team.isFinalist
-                                ? "border border-pink-200 bg-pink-50 text-primary"
-                                : "border border-neutral-light bg-neutral-100 text-muted"
+                                ? "border border-pink-200 bg-pink-50 text-primary dark:border-[#8B5CF6]/30 dark:bg-[#8B5CF6]/15 dark:text-[#A78BFA]"
+                                : "border border-neutral-light bg-neutral-100 text-muted dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]"
                             }`}
                           >
                             {team.isFinalist ? "Finalist" : "Not a finalist"}
                           </span>
 
-                          <span className="rounded-full border border-neutral-light bg-neutral-50 px-2.5 py-0.5 text-muted font-medium">
+                          <span className="rounded-full border border-neutral-light bg-neutral-50 px-2.5 py-0.5 text-muted font-medium dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]">
                             Resets: {team.selectionResetCount}
                           </span>
                         </div>
@@ -597,16 +597,16 @@ export default function TeamsManager() {
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                           selection
-                            ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border border-neutral-light bg-neutral-100 text-muted"
+                            ? "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-400"
+                            : "border border-neutral-light bg-neutral-100 text-muted dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]"
                         }`}
                       >
                         {selection ? "● Selected" : "○ Unselected"}
                       </span>
                     </div>
 
-                    <div className="mt-4 rounded-xl border border-neutral-light bg-[#FAF7F9] p-3.5">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                    <div className="mt-4 rounded-xl border border-neutral-light bg-[#FAF7F9] p-3.5 dark:border-[#292929] dark:bg-[#0C0C0C]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted dark:text-[#A3A3A3]">
                         Current Problem Statement
                       </p>
 
@@ -615,7 +615,7 @@ export default function TeamsManager() {
                       </p>
 
                       {selection && (
-                        <div className="mt-2 space-y-1 text-xs text-muted">
+                        <div className="mt-2 space-y-1 text-xs text-muted dark:text-[#A3A3A3]">
                           <p>
                             Selected at: <span className="font-medium text-foreground">{formatDate(selection.selectedAt)}</span>
                           </p>
@@ -636,7 +636,7 @@ export default function TeamsManager() {
                       {selection &&
                         selectedStatement &&
                         !selectedStatement.enabled && (
-                          <p className="mt-2 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded-md border border-amber-200 inline-block">
+                          <p className="mt-2 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded-md border border-amber-200 inline-block dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300">
                             ⚠ This statement is disabled for new selections.
                           </p>
                         )}
@@ -650,7 +650,7 @@ export default function TeamsManager() {
                           </span>
 
                           <select
-                            className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
                             value={currentAssignment}
                             onChange={(event) =>
                               setAssignments((current) => ({
@@ -696,7 +696,7 @@ export default function TeamsManager() {
                               !currentAssignment ||
                               currentAssignment === selection?.statementId
                             }
-                            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
+                            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50 dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
                             onClick={() => handleAssignStatement(team)}
                           >
                             {selection ? "Reassign statement" : "Assign statement"}
@@ -705,7 +705,7 @@ export default function TeamsManager() {
                           <button
                             type="button"
                             disabled={busy || !selection}
-                            className="rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50"
+                            className="rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50 dark:border-red-900/40 dark:bg-[#171717] dark:text-red-400 dark:hover:bg-red-950/40"
                             onClick={() => handleResetOne(team)}
                           >
                             Reset selection
@@ -714,8 +714,8 @@ export default function TeamsManager() {
                       </div>
                     )}
 
-                    <div className="mt-4 border-t border-neutral-light pt-4">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                    <div className="mt-4 border-t border-neutral-light dark:border-[#292929] pt-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted dark:text-[#A3A3A3]">
                         Deployment Submission
                       </p>
 
@@ -726,25 +726,25 @@ export default function TeamsManager() {
                               href={submission.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="break-all font-semibold text-primary underline hover:text-primary-hover"
+                              className="break-all font-semibold text-primary underline hover:text-primary-hover dark:text-[#8B5CF6] dark:hover:text-[#A78BFA]"
                             >
                               {submission.url}
                             </a>
                           ) : (
-                            <p className="break-all text-amber-700 font-mono text-xs">
+                            <p className="break-all text-amber-700 dark:text-amber-400 font-mono text-xs">
                               Invalid URL: {submission.url}
                             </p>
                           )}
 
-                          <p className="text-xs text-muted">
+                          <p className="text-xs text-muted dark:text-[#A3A3A3]">
                             Submitted: {formatDate(submission.submittedAt)}
                           </p>
-                          <p className="text-xs text-muted">
+                          <p className="text-xs text-muted dark:text-[#A3A3A3]">
                             Last updated: {formatDate(submission.updatedAt)}
                           </p>
                         </div>
                       ) : (
-                        <p className="mt-1.5 text-xs text-muted italic">
+                        <p className="mt-1.5 text-xs text-muted dark:text-[#A3A3A3] italic">
                           No deployment submitted.
                         </p>
                       )}
@@ -754,7 +754,7 @@ export default function TeamsManager() {
               })}
 
               {filteredTeams.length === 0 && (
-                <p className="text-sm text-muted text-center py-6">
+                <p className="text-sm text-muted dark:text-[#A3A3A3] text-center py-6">
                   No teams match the current filter.
                 </p>
               )}
@@ -766,13 +766,13 @@ export default function TeamsManager() {
             <h3 className="text-lg font-bold tracking-tight text-foreground">
               Submission Summary
             </h3>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-sm text-muted dark:text-[#A3A3A3]">
               {submittedTeams.length} of {data.teams.length} teams have submitted a deployment URL.
             </p>
 
-            <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-neutral-100 border border-neutral-light/50">
+            <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-neutral-100 border border-neutral-light/50 dark:bg-[#171717] dark:border-[#292929]">
               <div
-                className="h-full rounded-full bg-primary transition-all duration-300"
+                className="h-full rounded-full bg-primary dark:bg-[#8B5CF6] transition-all duration-300"
                 style={{
                   width:
                     data.teams.length === 0
@@ -793,7 +793,7 @@ export default function TeamsManager() {
               Refresh team data
             </button>
 
-            <span className="text-xs text-muted">
+            <span className="text-xs text-muted dark:text-[#A3A3A3]">
               Data refreshes when you load this page or use Refresh.
             </span>
           </div>
@@ -813,30 +813,30 @@ export default function TeamsManager() {
 
       {/* Typed Reset All Modal */}
       {resetAllModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="reset-all-title"
-            className="w-full max-w-md rounded-2xl border border-white/80 bg-white/95 p-6 shadow-2xl backdrop-blur-md"
+            className="w-full max-w-md rounded-2xl border border-white/80 bg-white/95 p-6 shadow-2xl backdrop-blur-md dark:border-[#292929] dark:bg-[#111111]"
           >
-            <p className="text-xs font-semibold uppercase tracking-wider text-red-600">
+            <p className="text-xs font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
               High Risk Administrative Action
             </p>
             <h3 id="reset-all-title" className="mt-1 text-xl font-bold text-foreground">
               Reset All Active Selections
             </h3>
-            <p className="mt-2 text-sm text-muted leading-relaxed">
+            <p className="mt-2 text-sm text-muted dark:text-[#A3A3A3] leading-relaxed">
               Reset all active Round 3 selections? Team records, participants, and deployment submissions will remain intact. Deliverable progress for active selections will be cleared.
             </p>
 
             <div className="mt-4 space-y-2">
               <label htmlFor="reset-all-input" className="block text-xs font-semibold text-foreground">
-                Type <span className="text-red-600 font-mono">RESET ALL</span> to confirm:
+                Type <span className="text-red-600 dark:text-red-400 font-mono">RESET ALL</span> to confirm:
               </label>
               <input
                 id="reset-all-input"
-                className="w-full rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-mono text-foreground outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                className="w-full rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-mono text-foreground outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-200 dark:border-red-900/50 dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:ring-red-950"
                 value={typedConfirmation}
                 onChange={(e) => setTypedConfirmation(e.target.value)}
                 placeholder="RESET ALL"

@@ -124,10 +124,10 @@ export default function SettingsForm({
         {fields.map((field) => (
           <label
             key={field.key}
-            className="block rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md"
+            className="block rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md dark:border-[#292929] dark:bg-[#111111]"
           >
-            <span className="text-sm font-bold text-[#302630]">{field.label}</span>
-            <span className="mt-1 block text-xs text-[#4E404C]">
+            <span className="text-sm font-bold text-[#302630] dark:text-[#FAFAFA]">{field.label}</span>
+            <span className="mt-1 block text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               {field.description}
             </span>
 
@@ -142,9 +142,9 @@ export default function SettingsForm({
                 onChange={(event) =>
                   updateValue(field.key, event.target.value)
                 }
-                className="w-full rounded-xl border border-[#E7DCE4] bg-white/90 px-3.5 py-2 text-xs font-bold text-[#302630] outline-none focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20 transition-all"
+                className="w-full rounded-xl border border-[#E7DCE4] bg-white/90 px-3.5 py-2 text-xs font-bold text-[#302630] outline-none focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20 transition-all dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
               />
-              <span className="shrink-0 rounded-lg bg-[#F1E9EF] px-2.5 py-1 text-xs font-semibold text-[#4E404C]">
+              <span className="shrink-0 rounded-lg bg-[#F1E9EF] px-2.5 py-1 text-xs font-semibold text-[#4E404C] dark:bg-[#171717] dark:text-[#A3A3A3]">
                 {field.suffix}
               </span>
             </span>
@@ -157,8 +157,8 @@ export default function SettingsForm({
           role="status"
           className={`rounded-xl border p-3 text-xs font-semibold ${
             isSuccess
-              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-              : "border-rose-300 bg-rose-50 text-rose-800"
+              ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300"
+              : "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-300"
           }`}
         >
           {message}
@@ -169,7 +169,7 @@ export default function SettingsForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:opacity-50"
+          className="rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:opacity-50 dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
         >
           {pending ? "Saving..." : "Save settings"}
         </button>
@@ -178,7 +178,7 @@ export default function SettingsForm({
           type="button"
           onClick={resetDefaults}
           disabled={pending}
-          className="rounded-xl border border-[#E7DCE4] bg-white/80 px-5 py-2.5 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:opacity-50"
+          className="rounded-xl border border-[#E7DCE4] bg-white/80 px-5 py-2.5 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:opacity-50 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:hover:bg-[#202020]"
         >
           Reset form to defaults
         </button>

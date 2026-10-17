@@ -554,14 +554,14 @@ export default function Round2Dashboard() {
     <section className="glass-card p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold tracking-tight text-foreground">{title}</h2>
-        <span className="rounded-full bg-pink-50 border border-pink-200/70 px-2.5 py-0.5 text-xs font-semibold text-primary">
+        <span className="rounded-full bg-pink-50 dark:bg-[#8B5CF6]/15 border border-pink-200/70 dark:border-[#8B5CF6]/30 px-2.5 py-0.5 text-xs font-semibold text-primary dark:text-[#A78BFA]">
           {tableRows.length} teams
         </span>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs">
+      <div className="overflow-x-auto rounded-xl border border-neutral-light dark:border-[#292929] bg-white dark:bg-[#111111] shadow-xs">
         <table className="w-full min-w-[1700px] border-collapse text-left text-sm">
-          <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted">
+          <thead className="border-b border-neutral-light dark:border-[#292929] bg-[#FBF7FA] dark:bg-[#171717] text-xs font-semibold uppercase tracking-wider text-muted">
             <tr>
               <th className="px-3.5 py-3">Rank</th>
               <th className="px-3.5 py-3">Team</th>
@@ -585,9 +585,9 @@ export default function Round2Dashboard() {
               <th className="px-3 py-3">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-light">
+          <tbody className="divide-y divide-neutral-light dark:divide-[#292929]">
             {tableRows.map((row) => (
-              <tr key={row.teamId} className="hover:bg-neutral-50/60 transition-colors">
+              <tr key={row.teamId} className="hover:bg-neutral-50/60 dark:hover:bg-[#202020] transition-colors">
                 <td className="px-3.5 py-3 font-bold text-foreground">
                   {row.rank}
                   {row.cutLineTie && (
@@ -608,7 +608,7 @@ export default function Round2Dashboard() {
                     <td key={index} className="px-1.5 py-2 text-center">
                       <input
                         aria-label={`${row.teamName} question ${index + 1} marks`}
-                        className="w-14 rounded-lg border border-neutral-light bg-[#FAF7F9] px-1.5 py-1 text-center text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
+                        className="w-14 rounded-lg border border-neutral-light dark:border-[#292929] bg-[#FAF7F9] dark:bg-[#171717] px-1.5 py-1 text-center text-sm font-semibold text-foreground outline-none transition focus:border-primary dark:focus:border-[#8B5CF6] focus:bg-white dark:focus:bg-[#050505] focus:ring-2 focus:ring-primary/20"
                         type="number"
                         min={0}
                         max={questionMaxMarks[index]}
@@ -653,12 +653,12 @@ export default function Round2Dashboard() {
                   {row.whyRankedHere.includes(
                     "lower Round 1 correct-answer time decided the order",
                   ) && (
-                    <span className="mt-1 inline-block rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+                    <span className="mt-1 inline-block rounded-md border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:text-amber-300">
                       Decided by time
                     </span>
                   )}
                   {row.suddenDeathTie && (
-                    <span className="mt-1 inline-block rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-800">
+                    <span className="mt-1 inline-block rounded-md border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 px-2 py-0.5 text-[11px] font-medium text-rose-800 dark:text-rose-300">
                       {row.cutLineTie ? "Cutoff tie" : "Exact tie"}
                     </span>
                   )}
@@ -668,15 +668,15 @@ export default function Round2Dashboard() {
                 </td>
                 <td className="px-3 py-3">
                   {snapshot?.resetAwaitingReevaluation ? (
-                    <span className="inline-block rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                    <span className="inline-block rounded-md border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:text-amber-300">
                       Pending re-evaluation
                     </span>
                   ) : (
                     <button
                       className={`rounded-lg px-3 py-1.5 text-xs font-semibold shadow-2xs transition active:scale-[0.98] ${
                         row.isFinalist
-                          ? "border border-pink-200 bg-pink-50 text-primary hover:bg-pink-100"
-                          : "border border-neutral-light bg-white text-foreground hover:bg-neutral-50 hover:border-neutral"
+                          ? "border border-pink-200 dark:border-[#8B5CF6]/30 bg-pink-50 dark:bg-[#8B5CF6]/20 text-primary dark:text-[#A78BFA] hover:bg-pink-100 dark:hover:bg-[#8B5CF6]/30"
+                          : "border border-neutral-light dark:border-[#292929] bg-white dark:bg-[#171717] text-foreground dark:text-[#FAFAFA] hover:bg-neutral-50 dark:hover:bg-[#202020] hover:border-neutral"
                       }`}
                       disabled={saving !== null}
                       onClick={() => void toggleFinalist(row)}
@@ -685,7 +685,7 @@ export default function Round2Dashboard() {
                     </button>
                   )}
                   {row.suddenDeathTie && (
-                    <span className="mt-1 block text-xs font-medium text-amber-600">
+                    <span className="mt-1 block text-xs font-medium text-amber-600 dark:text-amber-400">
                       {row.cutLineTie ? "Cutoff tie" : "Exact tie"}
                     </span>
                   )}
@@ -722,14 +722,14 @@ export default function Round2Dashboard() {
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <button
-            className="rounded-xl border border-neutral-light bg-white/80 px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-white hover:border-neutral active:scale-[0.98] disabled:opacity-50"
+            className="rounded-xl border border-neutral-light bg-white/80 px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-white hover:border-neutral active:scale-[0.98] disabled:opacity-50 dark:border-[#292929] dark:bg-[#111111] dark:hover:bg-[#171717] dark:hover:border-[#383838]"
             onClick={() => void refresh()}
             disabled={loading}
           >
             {loading ? "Loading..." : "Refresh"}
           </button>
           <button
-            className="rounded-xl border border-neutral-light bg-white/80 px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-white hover:border-neutral active:scale-[0.98] disabled:opacity-50"
+            className="rounded-xl border border-neutral-light bg-white/80 px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-white hover:border-neutral active:scale-[0.98] disabled:opacity-50 dark:border-[#292929] dark:bg-[#111111] dark:hover:bg-[#171717] dark:hover:border-[#383838]"
             onClick={exportCsv}
             disabled={!rows.length}
           >
@@ -744,8 +744,8 @@ export default function Round2Dashboard() {
             }
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition shadow-sm active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
               snapshot?.publishFinalResults
-                ? "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
-                : "bg-primary text-white hover:bg-primary-hover"
+                ? "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-950/60"
+                : "bg-primary text-white hover:bg-primary-hover dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
             }`}
           >
             {snapshot?.publishFinalResults
@@ -759,7 +759,7 @@ export default function Round2Dashboard() {
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300"
         >
           {error}
         </div>
@@ -768,7 +768,7 @@ export default function Round2Dashboard() {
       {notice && (
         <div
           role="status"
-          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300"
         >
           {notice}
         </div>
@@ -777,7 +777,7 @@ export default function Round2Dashboard() {
       {snapshot?.cutLineTie && (
         <div
           role="alert"
-          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300"
         >
           A tie crosses the finalist cutoff. Review the tie-break decision before confirming the shortlist.
         </div>
@@ -786,18 +786,18 @@ export default function Round2Dashboard() {
       {cutoffTieTeams.length > 0 && (
         <section
           role="alert"
-          className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5"
+          className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 dark:border-amber-900/40 dark:bg-amber-950/20"
         >
-          <h2 className="font-bold text-amber-900">
+          <h2 className="font-bold text-amber-900 dark:text-amber-300">
             Finalist cutoff tie requires manual review
           </h2>
-          <p className="mt-1 text-sm text-amber-800">
+          <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/80">
             Automatic selection was blocked. Review these teams before manually finalizing the shortlist. Existing finalist selections have not been changed by the blocked request.
           </p>
 
-          <div className="mt-4 overflow-x-auto rounded-xl border border-amber-200 bg-white">
+          <div className="mt-4 overflow-x-auto rounded-xl border border-amber-200 bg-white dark:border-[#292929] dark:bg-[#111111]">
             <table className="w-full min-w-[850px] text-left text-sm">
-              <thead className="border-b border-amber-200 bg-amber-100/50 text-xs font-semibold uppercase tracking-wider text-amber-900">
+              <thead className="border-b border-amber-200 bg-amber-100/50 text-xs font-semibold uppercase tracking-wider text-amber-900 dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]">
                 <tr>
                   <th className="p-3">Team</th>
                   <th className="p-3">Rank</th>
@@ -809,17 +809,17 @@ export default function Round2Dashboard() {
                   <th className="p-3">Comparison</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-amber-100">
+              <tbody className="divide-y divide-amber-100 dark:divide-[#292929]">
                 {cutoffTieTeams.map((team) => (
-                  <tr key={team.teamId} className="hover:bg-amber-50/30">
+                  <tr key={team.teamId} className="hover:bg-amber-50/30 dark:hover:bg-[#171717]">
                     <td className="p-3 font-semibold text-foreground">{team.teamName}</td>
-                    <td className="p-3 font-medium">{team.rank}</td>
-                    <td className="p-3 font-bold text-primary">{team.combined.toFixed(2)}</td>
-                    <td className="p-3">{team.round2Percent.toFixed(2)}%</td>
-                    <td className="p-3">{team.round1Percent.toFixed(2)}%</td>
-                    <td className="p-3">{team.sectionC}</td>
-                    <td className="p-3">{(team.totalCorrectMs / 1000).toFixed(2)} s</td>
-                    <td className="p-3 text-xs text-muted">{team.whyRankedHere}</td>
+                    <td className="p-3 font-medium text-foreground">{team.rank}</td>
+                    <td className="p-3 font-bold text-primary dark:text-[#8B5CF6]">{team.combined.toFixed(2)}</td>
+                    <td className="p-3 text-foreground">{team.round2Percent.toFixed(2)}%</td>
+                    <td className="p-3 text-foreground">{team.round1Percent.toFixed(2)}%</td>
+                    <td className="p-3 text-foreground">{team.sectionC}</td>
+                    <td className="p-3 text-foreground">{(team.totalCorrectMs / 1000).toFixed(2)} s</td>
+                    <td className="p-3 text-xs text-muted dark:text-[#A3A3A3]">{team.whyRankedHere}</td>
                   </tr>
                 ))}
               </tbody>
@@ -860,7 +860,7 @@ export default function Round2Dashboard() {
           <label className="space-y-1.5 text-sm">
             <span className="font-semibold text-foreground">Round 1 Weight (%)</span>
             <input
-              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
               type="number"
               min={0}
               max={100}
@@ -871,7 +871,7 @@ export default function Round2Dashboard() {
           <label className="space-y-1.5 text-sm">
             <span className="font-semibold text-foreground">Round 2 Weight (%)</span>
             <input
-              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
               type="number"
               min={0}
               max={100}
@@ -882,7 +882,7 @@ export default function Round2Dashboard() {
           <label className="space-y-1.5 text-sm">
             <span className="font-semibold text-foreground">Number of Finalists</span>
             <input
-              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
               type="number"
               min={1}
               max={500}
@@ -902,7 +902,7 @@ export default function Round2Dashboard() {
             <label key={index} className="space-y-1 text-center text-xs">
               <span className="font-semibold text-muted">Q{index + 1}</span>
               <input
-                className="w-full rounded-xl border border-neutral-light bg-white px-2 py-1.5 text-center text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full rounded-xl border border-neutral-light bg-white px-2 py-1.5 text-center text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
                 type="number"
                 min={1}
                 max={10000}
@@ -929,7 +929,7 @@ export default function Round2Dashboard() {
           ].map((item) => (
             <div
               key={item.label}
-              className="rounded-xl border border-neutral-light bg-white/70 p-3 shadow-2xs"
+              className="rounded-xl border border-neutral-light bg-white/70 p-3 shadow-2xs dark:border-[#292929] dark:bg-[#171717]"
             >
               <p className="text-xs font-medium text-muted">{item.label}</p>
               <p className="mt-0.5 text-lg font-bold text-foreground">{item.value}</p>
@@ -939,7 +939,7 @@ export default function Round2Dashboard() {
 
         <div className="mt-5 flex flex-wrap items-center gap-4">
           <button
-            className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
+            className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50 dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
             onClick={() => void saveSettings()}
             disabled={saving !== null}
           >
@@ -948,8 +948,8 @@ export default function Round2Dashboard() {
           <span
             className={`text-xs font-semibold ${
               weightRound1 + weightRound2 === 100
-                ? "text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200"
-                : "text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200"
+                ? "text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300"
+                : "text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300"
             }`}
           >
             Weights total: {weightRound1 + weightRound2}%
@@ -971,7 +971,7 @@ export default function Round2Dashboard() {
               aria-live="polite"
               className={`mt-2 text-xs font-semibold ${
                 pendingMarksCount > 0
-                  ? "text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200 inline-block"
+                  ? "text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200 inline-block dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300"
                   : "text-muted"
               }`}
             >
@@ -983,7 +983,7 @@ export default function Round2Dashboard() {
 
           <div className="flex flex-wrap items-center gap-3">
             <input
-              className="w-full sm:w-64 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none placeholder:text-muted transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-full sm:w-64 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground outline-none placeholder:text-muted transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:placeholder:text-[#A3A3A3] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search teams..."
@@ -991,7 +991,7 @@ export default function Round2Dashboard() {
             />
             <button
               type="button"
-              className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
               disabled={saving !== null || pendingMarksCount === 0}
               onClick={() => void saveAllMarks()}
             >
@@ -1002,7 +1002,7 @@ export default function Round2Dashboard() {
 
         {loading && !snapshot && (
           <div className="py-12 text-center text-sm text-muted">
-            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2 dark:border-[#8B5CF6]" />
             <p>Loading Round 2...</p>
           </div>
         )}
@@ -1011,11 +1011,11 @@ export default function Round2Dashboard() {
       {snapshot && (
         <>
           {snapshot.resetAwaitingReevaluation && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-              <h2 className="font-bold text-amber-900">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
+              <h2 className="font-bold text-amber-900 dark:text-amber-300">
                 Round 2 reset: re-evaluation pending
               </h2>
-              <p className="mt-1 text-sm text-amber-800">
+              <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/80">
                 All teams are shown together. Existing finalist labels are unchanged until you finish re-evaluation and select finalists again.
               </p>
             </div>
@@ -1045,7 +1045,7 @@ export default function Round2Dashboard() {
 
         <div className="flex flex-wrap items-center gap-3">
           <button
-            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50"
+            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50 dark:border-red-900/40 dark:bg-[#171717] dark:text-red-400 dark:hover:bg-red-950/40"
             onClick={handleResetRound2Scores}
             disabled={saving !== null || !snapshot}
           >
@@ -1053,7 +1053,7 @@ export default function Round2Dashboard() {
           </button>
 
           <button
-            className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
+            className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50 dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
             onClick={handleSelectFinalists}
             disabled={saving !== null || !snapshot || rows.length === 0}
           >
@@ -1078,11 +1078,11 @@ export default function Round2Dashboard() {
             .map((row) => (
               <div
                 key={row.teamId}
-                className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm"
+                className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900/40 dark:bg-amber-950/20"
               >
                 <span className="font-semibold text-foreground">{row.teamName}</span>
                 <span className="text-muted"> · Rank {row.rank} · </span>
-                <span className="font-medium text-amber-900">{row.whyRankedHere}</span>
+                <span className="font-medium text-amber-900 dark:text-amber-300">{row.whyRankedHere}</span>
               </div>
             ))}
           {!rows.some((row) => row.suddenDeathTie) && (

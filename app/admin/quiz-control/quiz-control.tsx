@@ -288,10 +288,10 @@ export default function QuizControl() {
   }
 
   const statusStyles: Record<QuizRunStatus, string> = {
-    NOT_STARTED: "border-[#E7DCE4] bg-white/80 text-[#4E404C]",
-    RUNNING: "border-emerald-300 bg-emerald-50 text-emerald-800",
-    PAUSED: "border-amber-300 bg-amber-50 text-amber-800",
-    ENDED: "border-rose-300 bg-rose-50 text-rose-800",
+    NOT_STARTED: "border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] text-[#4E404C] dark:text-[#A3A3A3]",
+    RUNNING: "border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400",
+    PAUSED: "border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400",
+    ENDED: "border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-400",
   };
 
   const statusLabels: Record<QuizRunStatus, string> = {
@@ -304,15 +304,15 @@ export default function QuizControl() {
   return (
     <section className="mx-auto max-w-6xl animate-fade-in-up">
       <div className="mb-2">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477] dark:text-[#8B5CF6]">
           Administration
         </p>
         <div className="mt-1 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-[#302630] sm:text-3xl">
+            <h1 className="text-2xl font-black tracking-tight text-[#302630] dark:text-[#FAFAFA] sm:text-3xl">
               Quiz Control
             </h1>
-            <p className="mt-1 text-sm text-[#4E404C]">
+            <p className="mt-1 text-sm text-[#4E404C] dark:text-[#A3A3A3]">
               Manage the synchronized quiz and review team readiness.
             </p>
           </div>
@@ -321,7 +321,7 @@ export default function QuizControl() {
             type="button"
             onClick={() => void refreshAll()}
             disabled={loading || statusLoading}
-            className="rounded-xl border border-[#E7DCE4] bg-white/80 px-4 py-2 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-2xs"
+            className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] px-4 py-2 text-xs font-semibold text-[#4E404C] dark:text-[#FAFAFA] hover:bg-white dark:hover:bg-[#202020] hover:text-[#302630] dark:hover:text-[#FAFAFA] transition-colors disabled:cursor-not-allowed disabled:opacity-50 shadow-2xs"
           >
             {loading || statusLoading ? "Loading..." : "Refresh"}
           </button>
@@ -331,7 +331,7 @@ export default function QuizControl() {
       {error && (
         <div
           role="alert"
-          className="mt-6 rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs font-semibold text-rose-800"
+          className="mt-6 rounded-2xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/30 p-4 text-xs font-semibold text-rose-800 dark:text-rose-300"
         >
           {error}
         </div>
@@ -340,17 +340,17 @@ export default function QuizControl() {
       {message && (
         <div
           role="status"
-          className="mt-6 rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-xs font-semibold text-emerald-800"
+          className="mt-6 rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 p-4 text-xs font-semibold text-emerald-800 dark:text-emerald-300"
         >
           {message}
         </div>
       )}
 
-      <div className="mt-6 rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md sm:p-6">
+      <div className="mt-6 rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-bold text-[#302630]">Quiz status</h2>
-            <p className="mt-0.5 text-xs text-[#4E404C]">
+            <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">Quiz status</h2>
+            <p className="mt-0.5 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               Status updates automatically every five seconds.
             </p>
           </div>
@@ -363,22 +363,22 @@ export default function QuizControl() {
         </div>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-[#E7DCE4] bg-white/80 p-4 shadow-2xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Quiz started at</p>
-            <p className="mt-1 text-xs font-bold text-[#302630]">
+          <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] p-4 shadow-2xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Quiz started at</p>
+            <p className="mt-1 text-xs font-bold text-[#302630] dark:text-[#FAFAFA]">
               {formatTimestamp(quizRun?.startedAt ?? null)}
             </p>
           </div>
 
-          <div className="rounded-xl border border-[#E7DCE4] bg-white/80 p-4 shadow-2xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Quiz ended at</p>
-            <p className="mt-1 text-xs font-bold text-[#302630]">
+          <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] p-4 shadow-2xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Quiz ended at</p>
+            <p className="mt-1 text-xs font-bold text-[#302630] dark:text-[#FAFAFA]">
               {formatTimestamp(quizRun?.endedAt ?? null)}
             </p>
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-[#E7DCE4] pt-5">
+        <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-[#E7DCE4] dark:border-[#292929] pt-5">
           {quizStatus === "NOT_STARTED" && (
             <button
               type="button"
@@ -390,7 +390,7 @@ export default function QuizControl() {
                 !readiness ||
                 readiness.eligibleTeams === 0
               }
-              className="rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] dark:hover:bg-[#A78BFA] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
             >
               {actionLoading ? "Starting..." : "Start Quiz"}
             </button>
@@ -401,7 +401,7 @@ export default function QuizControl() {
               type="button"
               onClick={() => void changeQuizState("pause")}
               disabled={actionLoading || statusLoading}
-              className="rounded-xl border border-amber-300 bg-amber-50 px-5 py-2.5 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/40 px-5 py-2.5 text-xs font-bold text-amber-900 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
             >
               {actionLoading ? "Processing..." : "Pause Quiz"}
             </button>
@@ -414,7 +414,7 @@ export default function QuizControl() {
                   type="button"
                   onClick={() => void changeQuizState("resume")}
                   disabled={actionLoading || statusLoading}
-                  className="rounded-xl border border-emerald-300 bg-emerald-50 px-5 py-2.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                  className="rounded-xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 px-5 py-2.5 text-xs font-bold text-emerald-800 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {actionLoading ? "Processing..." : "Resume Quiz"}
                 </button>
@@ -424,7 +424,7 @@ export default function QuizControl() {
                 type="button"
                 onClick={() => requestQuizAction("skip")}
                 disabled={actionLoading || statusLoading}
-                className="rounded-xl border border-[#E7DCE4] bg-white/80 px-5 py-2.5 text-xs font-bold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] px-5 py-2.5 text-xs font-bold text-[#4E404C] dark:text-[#FAFAFA] hover:bg-white dark:hover:bg-[#202020] hover:text-[#302630] dark:hover:text-[#FAFAFA] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Skip Question
               </button>
@@ -433,7 +433,7 @@ export default function QuizControl() {
                 type="button"
                 onClick={() => requestQuizAction("end")}
                 disabled={actionLoading || statusLoading}
-                className="rounded-xl border border-rose-300 bg-rose-50 px-5 py-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/40 px-5 py-2.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               >
                 End Quiz
               </button>
@@ -445,7 +445,7 @@ export default function QuizControl() {
               type="button"
               onClick={() => requestQuizAction("reset-practice")}
               disabled={actionLoading || statusLoading}
-              className="rounded-xl border border-rose-300 bg-rose-50 px-5 py-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/40 px-5 py-2.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
             >
               {actionLoading ? "Resetting..." : "Reset Practice"}
             </button>
@@ -454,50 +454,50 @@ export default function QuizControl() {
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <article className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Registered teams</p>
-          <p className="mt-2 text-2xl font-black text-[#BE3477]">
+        <article className="rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Registered teams</p>
+          <p className="mt-2 text-2xl font-black text-[#BE3477] dark:text-[#8B5CF6]">
             {readiness?.totalTeams ?? "—"}
           </p>
         </article>
 
-        <article className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Ready teams</p>
-          <p className="mt-2 text-2xl font-black text-emerald-800">
+        <article className="rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Ready teams</p>
+          <p className="mt-2 text-2xl font-black text-emerald-800 dark:text-emerald-400">
             {readiness?.eligibleTeams ?? "—"}
           </p>
         </article>
 
-        <article className="rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Readiness window</p>
-          <p className="mt-2 text-2xl font-black text-[#302630]">
+        <article className="rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Readiness window</p>
+          <p className="mt-2 text-2xl font-black text-[#302630] dark:text-[#FAFAFA]">
             {readiness?.readinessWindowSeconds ?? 30}s
           </p>
         </article>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md sm:p-6">
+      <div className="mt-6 rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-bold text-[#302630]">Prestart readiness</h2>
-            <p className="mt-0.5 text-xs text-[#4E404C]">
+            <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">Prestart readiness</h2>
+            <p className="mt-0.5 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               Teams must accept the rules and check in within the last 30 seconds.
             </p>
           </div>
         </div>
 
         {loading && !readiness ? (
-          <p className="mt-6 text-xs text-[#4E404C]">
+          <p className="mt-6 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
             Loading team readiness...
           </p>
         ) : readiness && readiness.teams.length === 0 ? (
-          <p className="mt-6 text-xs text-[#4E404C]">
+          <p className="mt-6 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
             No teams have been registered yet.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto rounded-xl border border-[#E7DCE4] bg-white/80">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#111111]">
             <table className="w-full min-w-[700px] text-left text-xs">
-              <thead className="border-b border-[#E7DCE4] bg-[#F1E9EF]/80 text-[#4E404C]">
+              <thead className="border-b border-[#E7DCE4] dark:border-[#292929] bg-[#F1E9EF]/80 dark:bg-[#171717] text-[#4E404C] dark:text-[#A3A3A3]">
                 <tr>
                   <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Team</th>
                   <th className="px-3.5 py-3 font-bold uppercase tracking-wider">Participants</th>
@@ -507,27 +507,27 @@ export default function QuizControl() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-[#E7DCE4] bg-white/60">
+              <tbody className="divide-y divide-[#E7DCE4] dark:divide-[#292929] bg-white/60 dark:bg-[#111111]">
                 {readiness?.teams.map((team) => (
-                  <tr key={team.id} className="hover:bg-[#FCE7F1]/20">
-                    <td className="px-3.5 py-3 font-bold text-[#302630]">{team.name}</td>
-                    <td className="px-3.5 py-3 font-semibold text-[#4E404C]">{team.participantCount}</td>
+                  <tr key={team.id} className="hover:bg-[#FCE7F1]/20 dark:hover:bg-[#202020]">
+                    <td className="px-3.5 py-3 font-bold text-[#302630] dark:text-[#FAFAFA]">{team.name}</td>
+                    <td className="px-3.5 py-3 font-semibold text-[#4E404C] dark:text-[#A3A3A3]">{team.participantCount}</td>
                     <td className="px-3.5 py-3">
                       {team.rulesAccepted ? (
-                        <span className="font-bold text-emerald-700">✓ Accepted</span>
+                        <span className="font-bold text-emerald-700 dark:text-emerald-400">✓ Accepted</span>
                       ) : (
-                        <span className="text-[#4E404C]">Pending</span>
+                        <span className="text-[#4E404C] dark:text-[#A3A3A3]">Pending</span>
                       )}
                     </td>
-                    <td className="px-3.5 py-3 text-[#4E404C]">
+                    <td className="px-3.5 py-3 text-[#4E404C] dark:text-[#A3A3A3]">
                       {formatLastSeen(team.lastSeenAt)}
                     </td>
                     <td className="px-3.5 py-3">
                       <span
                         className={`rounded-full px-3 py-1 text-2xs font-bold ${
                           team.ready
-                            ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
-                            : "border border-[#E7DCE4] bg-[#F1E9EF] text-[#4E404C]"
+                            ? "border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400"
+                            : "border border-[#E7DCE4] dark:border-[#292929] bg-[#F1E9EF] dark:bg-[#171717] text-[#4E404C] dark:text-[#A3A3A3]"
                         }`}
                       >
                         {team.ready ? "✓ Ready" : "○ Not ready"}

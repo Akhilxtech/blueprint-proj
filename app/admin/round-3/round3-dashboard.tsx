@@ -197,14 +197,14 @@ export default function Round3Dashboard() {
 
     return (
       <section className="glass-card p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light dark:border-[#292929] pb-4">
           <h2 className="text-xl font-bold tracking-tight text-foreground">{title}</h2>
 
           <span
             className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
               info?.isOpen
-                ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border border-neutral-light bg-neutral-100 text-muted"
+                ? "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-400"
+                : "border border-neutral-light bg-neutral-100 text-muted dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]"
             }`}
           >
             {info?.isOpen ? "● Open" : "○ Closed"}
@@ -212,7 +212,7 @@ export default function Round3Dashboard() {
         </div>
 
         <div className="mt-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted dark:text-[#A3A3A3]">
             Configured Duration (Minutes)
           </p>
 
@@ -234,7 +234,7 @@ export default function Round3Dashboard() {
                   [name]: event.target.value,
                 }))
               }
-              className="w-32 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-32 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
               aria-label={`${title} duration in minutes`}
             />
 
@@ -257,25 +257,25 @@ export default function Round3Dashboard() {
                   durationMinutes: value,
                 });
               }}
-              className="rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50"
+              className="rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50 dark:border-[#292929] dark:bg-[#171717] dark:hover:bg-[#202020] dark:text-[#FAFAFA]"
             >
               Save duration
             </button>
           </div>
         </div>
 
-        <div className="mt-5 rounded-xl border border-neutral-light bg-[#FAF7F9] p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+        <div className="mt-5 rounded-xl border border-neutral-light bg-[#FAF7F9] p-4 dark:border-[#292929] dark:bg-[#171717]">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted dark:text-[#A3A3A3]">
             Deadline
           </p>
           <p className="mt-1 font-semibold text-foreground">
             {formatDeadline(info?.deadline ?? null)}
           </p>
 
-          <p className="mt-3.5 text-xs font-semibold uppercase tracking-wider text-muted">
+          <p className="mt-3.5 text-xs font-semibold uppercase tracking-wider text-muted dark:text-[#A3A3A3]">
             Remaining Time
           </p>
-          <p className="mt-1 font-mono text-2xl sm:text-3xl font-extrabold tracking-tight text-primary">
+          <p className="mt-1 font-mono text-2xl sm:text-3xl font-extrabold tracking-tight text-primary dark:text-[#8B5CF6]">
             {remainingTime(info?.deadline ?? null, info?.isOpen ?? false)}
           </p>
         </div>
@@ -286,7 +286,7 @@ export default function Round3Dashboard() {
               type="button"
               disabled={busy !== null}
               onClick={() => handleCloseWindow(name, title)}
-              className="rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50"
+              className="rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
             >
               Close window
             </button>
@@ -310,15 +310,15 @@ export default function Round3Dashboard() {
                   durationMinutes: value,
                 });
               }}
-              className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
+              className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50 dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
             >
               Open window
             </button>
           )}
         </div>
 
-        <div className="mt-5 border-t border-neutral-light pt-5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-muted">
+        <div className="mt-5 border-t border-neutral-light dark:border-[#292929] pt-5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted dark:text-[#A3A3A3]">
             Adjust Remaining Time in Minutes
           </label>
 
@@ -334,7 +334,7 @@ export default function Round3Dashboard() {
                   [name]: event.target.value,
                 }))
               }
-              className="w-32 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="w-32 rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20"
               aria-label={`${title} time adjustment`}
             />
 
@@ -357,13 +357,13 @@ export default function Round3Dashboard() {
 
                 void performAction(name, "adjustTime", { minutes });
               }}
-              className="rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50"
+              className="rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50 dark:border-[#292929] dark:bg-[#171717] dark:hover:bg-[#202020] dark:text-[#FAFAFA]"
             >
               Apply adjustment
             </button>
           </div>
 
-          <p className="mt-2 text-xs text-muted">
+          <p className="mt-2 text-xs text-muted dark:text-[#A3A3A3]">
             Positive values extend the window. Negative values reduce the remaining time.
           </p>
         </div>
@@ -392,13 +392,13 @@ export default function Round3Dashboard() {
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between"
+          className="rounded-xl border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800 dark:text-red-300 flex items-center justify-between"
         >
           <span>{error}</span>
           <button
             type="button"
             onClick={() => setError("")}
-            className="text-xs font-semibold text-red-700 underline hover:no-underline ml-3"
+            className="text-xs font-semibold text-red-700 dark:text-red-400 underline hover:no-underline ml-3"
           >
             Dismiss
           </button>
@@ -408,7 +408,7 @@ export default function Round3Dashboard() {
       {message && (
         <div
           role="status"
-          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+          className="rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-sm text-emerald-800 dark:text-emerald-300"
         >
           {message}
         </div>

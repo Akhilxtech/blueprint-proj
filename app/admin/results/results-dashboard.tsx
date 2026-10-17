@@ -199,7 +199,7 @@ export default function ResultsDashboard() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
-            className="rounded-xl border border-neutral-light bg-white/80 px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-white hover:border-neutral active:scale-[0.98] disabled:opacity-50"
+            className="rounded-xl border border-neutral-light dark:border-[#292929] bg-white/80 dark:bg-[#171717] px-4 py-2 text-sm font-semibold text-foreground dark:text-[#FAFAFA] shadow-xs transition hover:bg-white dark:hover:bg-[#202020] hover:border-neutral active:scale-[0.98] disabled:opacity-50"
             onClick={() => void refresh()}
             disabled={loading}
           >
@@ -208,7 +208,7 @@ export default function ResultsDashboard() {
 
           <a
             href="/api/admin/results/export"
-            className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98]"
+            className="inline-flex items-center rounded-xl bg-primary dark:bg-[#8B5CF6] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover dark:hover:bg-[#7C3AED] active:scale-[0.98]"
           >
             Download CSV
           </a>
@@ -227,7 +227,7 @@ export default function ResultsDashboard() {
                 {data.slots.length}
               </p>
             </div>
-            <div className="rounded-xl border border-pink-200/60 bg-pink-50/50 px-4 py-2.5 text-xs text-muted max-w-md">
+            <div className="rounded-xl border border-pink-200/60 dark:border-[#8B5CF6]/30 bg-pink-50/50 dark:bg-[#8B5CF6]/10 px-4 py-2.5 text-xs text-muted max-w-md">
               <span className="font-semibold text-foreground">Ranking Criteria:</span>{" "}
               Total score, lowest correct-answer cumulative time, and fastest-correct response count.
             </div>
@@ -239,7 +239,7 @@ export default function ResultsDashboard() {
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          className="rounded-xl border border-red-200 dark:border-rose-500/30 bg-red-50 dark:bg-rose-950/20 p-4 text-sm text-red-800 dark:text-rose-300"
         >
           {error}
         </div>
@@ -263,7 +263,7 @@ export default function ResultsDashboard() {
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search teams..."
               aria-label="Search results by team"
-              className="w-full rounded-xl border border-neutral-light bg-white/90 px-3.5 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
+              className="w-full rounded-xl border border-neutral-light dark:border-[#292929] bg-white/90 dark:bg-[#171717] px-3.5 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary dark:focus:border-[#8B5CF6] focus:ring-2 focus:ring-primary/20 outline-none transition"
             />
           </div>
         </div>
@@ -278,9 +278,9 @@ export default function ResultsDashboard() {
             No ranking entries found.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-neutral-light dark:border-[#292929] bg-white dark:bg-[#111111] shadow-xs">
             <table className="w-full min-w-[950px] text-left text-sm">
-              <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted">
+              <thead className="border-b border-neutral-light dark:border-[#292929] bg-[#FBF7FA] dark:bg-[#171717] text-xs font-semibold uppercase tracking-wider text-muted">
                 <tr>
                   <th className="px-4 py-3">Rank</th>
                   <th className="px-4 py-3">Team</th>
@@ -369,7 +369,7 @@ export default function ResultsDashboard() {
                       <td className="px-4 py-3.5 text-right">
                         <button
                           type="button"
-                          className="rounded-lg border border-pink-200 bg-pink-50/80 px-3 py-1.5 text-xs font-semibold text-primary shadow-2xs transition hover:bg-pink-100 hover:border-pink-300 active:scale-[0.98]"
+                          className="rounded-lg border border-pink-200 dark:border-[#8B5CF6]/30 bg-pink-50/80 dark:bg-[#8B5CF6]/15 px-3 py-1.5 text-xs font-semibold text-primary dark:text-[#A78BFA] shadow-2xs transition hover:bg-pink-100 dark:hover:bg-[#8B5CF6]/25 hover:border-pink-300 dark:hover:border-[#8B5CF6]/40 active:scale-[0.98]"
                           onClick={() => setSelectedTeamId(entry.teamId)}
                         >
                           View answers
@@ -400,9 +400,9 @@ export default function ResultsDashboard() {
             No quiz questions are available yet.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-neutral-light dark:border-[#292929] bg-white dark:bg-[#111111] shadow-xs">
             <table className="w-full min-w-[850px] text-left text-sm">
-              <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted">
+              <thead className="border-b border-neutral-light dark:border-[#292929] bg-[#FBF7FA] dark:bg-[#171717] text-xs font-semibold uppercase tracking-wider text-muted">
                 <tr>
                   <th className="px-4 py-3">Question</th>
                   <th className="px-4 py-3">Answered</th>
@@ -413,9 +413,9 @@ export default function ResultsDashboard() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-neutral-light">
+              <tbody className="divide-y divide-neutral-light dark:divide-[#292929]">
                 {questionAnalysis.map((question, index) => (
-                  <tr key={question.questionId} className="align-top hover:bg-neutral-50/60 transition-colors">
+                  <tr key={question.questionId} className="align-top hover:bg-neutral-50/60 dark:hover:bg-[#202020] transition-colors">
                     <td className="max-w-xs px-4 py-3.5">
                       <p className="font-semibold text-foreground">
                         Q{index + 1} · <span className="text-primary font-medium text-xs">{question.type}</span>
@@ -427,7 +427,7 @@ export default function ResultsDashboard() {
                     <td className="px-4 py-3.5 tabular-nums text-foreground font-medium">
                       {question.answered}
                     </td>
-                    <td className="px-4 py-3.5 tabular-nums text-emerald-700 font-medium">
+                    <td className="px-4 py-3.5 tabular-nums text-emerald-700 dark:text-emerald-400 font-medium">
                       {question.correct}
                     </td>
                     <td className="px-4 py-3.5 tabular-nums">
@@ -440,7 +440,7 @@ export default function ResultsDashboard() {
                         {question.distribution.map((option) => (
                           <span
                             key={option.label}
-                            className="inline-flex items-center rounded-md border border-neutral-light bg-[#FAF7F9] px-2 py-0.5 text-xs font-medium text-foreground"
+                            className="inline-flex items-center rounded-md border border-neutral-light dark:border-[#292929] bg-[#FAF7F9] dark:bg-[#171717] px-2 py-0.5 text-xs font-medium text-foreground"
                           >
                             <span className="font-semibold text-primary mr-1">
                               {option.label}:
@@ -473,9 +473,9 @@ export default function ResultsDashboard() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="team-detail-title"
-            className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/80 bg-white/95 p-6 shadow-2xl backdrop-blur-md"
+            className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/80 dark:border-[#292929] bg-white/95 dark:bg-[#111111] p-6 shadow-2xl backdrop-blur-md"
           >
-            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-neutral-light pb-4">
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-neutral-light dark:border-[#292929] pb-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-primary">
                   Team Response Audit
@@ -490,7 +490,7 @@ export default function ResultsDashboard() {
 
               <button
                 type="button"
-                className="rounded-xl border border-neutral-light bg-white px-3.5 py-1.5 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-100 active:scale-[0.98]"
+                className="rounded-xl border border-neutral-light dark:border-[#292929] bg-white dark:bg-[#171717] px-3.5 py-1.5 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-100 dark:hover:bg-[#202020] active:scale-[0.98]"
                 onClick={() => setSelectedTeamId(null)}
               >
                 Close
@@ -501,7 +501,7 @@ export default function ResultsDashboard() {
               {selectedAnswers.map(({ slot, response }, index) => (
                 <article
                   key={slot.questionId}
-                  className="rounded-xl border border-neutral-light bg-[#FAF7F9] p-4.5"
+                  className="rounded-xl border border-neutral-light dark:border-[#292929] bg-[#FAF7F9] dark:bg-[#171717] p-4.5"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h3 className="font-bold text-foreground">
@@ -510,10 +510,10 @@ export default function ResultsDashboard() {
                     <span
                       className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
                         response?.isCorrect
-                          ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                          ? "border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300"
                           : response
-                            ? "border border-rose-200 bg-rose-50 text-rose-700"
-                            : "border border-neutral-200 bg-neutral-100 text-muted"
+                            ? "border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300"
+                            : "border border-neutral-200 dark:border-[#292929] bg-neutral-100 dark:bg-[#202020] text-muted"
                       }`}
                     >
                       {response
@@ -529,7 +529,7 @@ export default function ResultsDashboard() {
                   </p>
 
                   {response ? (
-                    <div className="mt-3.5 rounded-xl border border-neutral-light bg-white p-3.5 text-sm">
+                    <div className="mt-3.5 rounded-xl border border-neutral-light dark:border-[#292929] bg-white dark:bg-[#111111] p-3.5 text-sm">
                       <p className="text-muted">
                         <span className="font-semibold text-foreground">Chosen Option:</span>{" "}
                         <span className="font-bold text-primary">{response.optionLabel}</span>
@@ -537,7 +537,7 @@ export default function ResultsDashboard() {
                       <p className="mt-1 whitespace-pre-wrap font-medium text-foreground">
                         {response.optionContent}
                       </p>
-                      <p className="mt-2.5 text-xs text-muted border-t border-neutral-light/70 pt-2">
+                      <p className="mt-2.5 text-xs text-muted border-t border-neutral-light/70 dark:border-[#292929] pt-2">
                         Response time: <span className="font-semibold text-foreground">{formatTime(response.responseMs)}</span>
                       </p>
                     </div>

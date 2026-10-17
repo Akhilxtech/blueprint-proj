@@ -71,7 +71,7 @@ type EditForm = {
 };
 
 const inputClass =
-  "mt-1 w-full rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2.5 text-sm text-[#302630] outline-none placeholder:text-[#4E404C]/50 focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20";
+  "mt-1 w-full rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-3.5 py-2.5 text-sm text-[#302630] dark:text-[#FAFAFA] outline-none placeholder:text-[#4E404C]/50 dark:placeholder-[#A3A3A3]/50 focus:border-[#D9468D] dark:focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#D9468D]/20 dark:focus:ring-[#8B5CF6]/20 transition-all";
 
 export default function TeamsTable({
   initialTeams,
@@ -405,10 +405,10 @@ event.preventDefault();
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search teams, names, emails, or USNs..."
           aria-label="Search teams and participants"
-          className="w-full rounded-2xl border border-[#E7DCE4] bg-white px-4 py-2.5 text-sm text-[#302630] outline-none placeholder:text-[#4E404C]/50 focus:border-[#D9468D] focus:ring-2 focus:ring-[#D9468D]/20 shadow-xs sm:max-w-md"
+          className="w-full rounded-2xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#111111] px-4 py-2.5 text-sm text-[#302630] dark:text-[#FAFAFA] outline-none placeholder:text-[#4E404C]/50 dark:placeholder-[#A3A3A3]/60 focus:border-[#D9468D] dark:focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#D9468D]/20 dark:focus:ring-[#8B5CF6]/20 shadow-xs sm:max-w-md transition-all"
         />
 
-        <p className="text-xs font-semibold text-[#4E404C]">
+        <p className="text-xs font-semibold text-[#4E404C] dark:text-[#A3A3A3]">
           {filteredTeams.length} of {teams.length} teams
         </p>
       </div>
@@ -416,15 +416,15 @@ event.preventDefault();
       {message && (
         <div
           role="status"
-          className="rounded-2xl border border-[#D9468D]/25 bg-[#FCE7F1]/80 p-3 text-xs font-semibold text-[#BE3477] shadow-xs"
+          className="rounded-2xl border border-[#D9468D]/25 dark:border-[#8B5CF6]/30 bg-[#FCE7F1]/80 dark:bg-[#8B5CF6]/15 p-3 text-xs font-semibold text-[#BE3477] dark:text-[#A78BFA] shadow-xs"
         >
           {message}
         </div>
       )}
 
-      <div className="glass-panel overflow-x-auto rounded-3xl border border-white/80 shadow-xs">
+      <div className="glass-panel overflow-x-auto rounded-3xl border border-white/80 dark:border-[#292929] dark:bg-[#111111] shadow-xs">
         <table className="w-full min-w-[850px] border-collapse text-left text-sm">
-          <thead className="bg-[#F1E9EF]/60 text-xs font-bold uppercase tracking-wider text-[#4E404C] border-b border-[#E7DCE4]">
+          <thead className="bg-[#F1E9EF]/60 dark:bg-[#171717] text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#D4D4D4] border-b border-[#E7DCE4] dark:border-[#292929]">
             <tr>
               <th className="px-5 py-3.5">Team</th>
               <th className="px-5 py-3.5">Members</th>
@@ -433,28 +433,28 @@ event.preventDefault();
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-[#E7DCE4]/70 bg-white/40">
+          <tbody className="divide-y divide-[#E7DCE4]/70 dark:divide-[#292929] bg-white/40 dark:bg-[#111111]/40">
             {filteredTeams.map((team) => (
-              <tr key={team.id} className="align-top hover:bg-white/70 transition-colors">
-                <td className="px-5 py-4 font-bold text-[#302630]">{team.name}</td>
+              <tr key={team.id} className="align-top hover:bg-white/70 dark:hover:bg-[#171717]/60 transition-colors">
+                <td className="px-5 py-4 font-bold text-[#302630] dark:text-[#FAFAFA]">{team.name}</td>
 
                 <td className="px-5 py-4">
                   {team.members.length === 0 ? (
-                    <span className="text-xs font-medium text-[#4E404C]/70">No members assigned</span>
+                    <span className="text-xs font-medium text-[#4E404C]/70 dark:text-[#A3A3A3]/70">No members assigned</span>
                   ) : (
                     <ul className="space-y-4">
                       {team.members.map((member) => (
-                        <li key={member.id} className="rounded-2xl border border-[#E7DCE4] bg-white/70 p-3 shadow-2xs">
-                          <p className="font-bold text-[#302630]">
+                        <li key={member.id} className="rounded-2xl border border-[#E7DCE4] dark:border-[#292929] bg-white/70 dark:bg-[#171717] p-3 shadow-2xs">
+                          <p className="font-bold text-[#302630] dark:text-[#FAFAFA]">
                             {member.name}
                           </p>
-                          <p className="text-xs text-[#4E404C]">{member.email}</p>
+                          <p className="text-xs text-[#4E404C] dark:text-[#A3A3A3]">{member.email}</p>
 
                           {(member.usn ||
                             member.phone ||
                             member.semester ||
                             member.branch) && (
-                            <p className="mt-1 text-[11px] text-[#4E404C]">
+                            <p className="mt-1 text-[11px] text-[#4E404C] dark:text-[#A3A3A3]">
                               {[
                                 member.usn,
                                 member.phone,
@@ -473,7 +473,7 @@ event.preventDefault();
                               type="button"
                               disabled={isPending}
                               onClick={() => openEdit(team, member)}
-                              className="rounded-xl border border-[#D9468D]/30 bg-[#FCE7F1]/70 px-2.5 py-1 text-xs font-bold text-[#BE3477] shadow-2xs transition hover:bg-[#FCE7F1] disabled:opacity-50"
+                              className="rounded-xl border border-[#D9468D]/30 dark:border-[#8B5CF6]/40 bg-[#FCE7F1]/70 dark:bg-[#8B5CF6]/15 px-2.5 py-1 text-xs font-bold text-[#BE3477] dark:text-[#A78BFA] shadow-2xs transition hover:bg-[#FCE7F1] dark:hover:bg-[#8B5CF6]/25 disabled:opacity-50"
                             >
                               Edit / Move
                             </button>
@@ -482,7 +482,7 @@ event.preventDefault();
                               type="button"
                               disabled={isPending}
                               onClick={() => handleDeleteParticipant(member)}
-                              className="rounded-xl border border-red-500/25 bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700 shadow-2xs transition hover:bg-red-100 disabled:opacity-50"
+                              className="rounded-xl border border-red-500/25 dark:border-red-500/30 bg-red-50 dark:bg-red-950/40 px-2.5 py-1 text-xs font-bold text-red-700 dark:text-red-400 shadow-2xs transition hover:bg-red-100 dark:hover:bg-red-950/60 disabled:opacity-50"
                             >
                               Delete member
                             </button>
@@ -494,7 +494,7 @@ event.preventDefault();
                 </td>
 
                 <td className="px-5 py-4">
-                  <span className="rounded-full bg-[#F1E9EF] px-3 py-1 text-xs font-bold text-[#4E404C]">
+                  <span className="rounded-full bg-[#F1E9EF] dark:bg-[#171717] border dark:border-[#292929] px-3 py-1 text-xs font-bold text-[#4E404C] dark:text-[#D4D4D4]">
                     {team.members.length} {team.members.length === 1 ? "member" : "members"}
                   </span>
                 </td>
@@ -502,18 +502,18 @@ event.preventDefault();
                 <td className="px-5 py-4">
                   <div className="flex min-w-48 flex-col items-start gap-2.5">
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-bold border ${
                         team.quizStatus === "ELIMINATED"
-                          ? "bg-red-500/15 text-red-700"
-                          : "bg-emerald-500/15 text-emerald-800"
+                          ? "bg-red-500/15 dark:bg-red-950/40 border-red-500/30 text-red-700 dark:text-red-400"
+                          : "bg-emerald-500/15 dark:bg-emerald-950/40 border-emerald-500/30 text-emerald-800 dark:text-emerald-400"
                       }`}
                     >
                       {team.quizStatus}
                     </span>
 
-                    <div className="text-xs text-[#4E404C]">
+                    <div className="text-xs text-[#4E404C] dark:text-[#A3A3A3]">
                       Warnings:{" "}
-                      <span className="font-bold text-[#302630]">
+                      <span className="font-bold text-[#302630] dark:text-[#FAFAFA]">
                         {team.warningCount}
                         {maxWarnings > 0 ? ` / ${maxWarnings}` : ""}
                       </span>
@@ -527,7 +527,7 @@ event.preventDefault();
                           team.warningCount === 0
                         }
                         onClick={() => handleWarningChange(team, -1)}
-                        className="rounded-xl border border-[#E7DCE4] bg-white px-2.5 py-1 text-xs font-bold text-[#4E404C] shadow-2xs hover:bg-[#FAF6F8] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-2.5 py-1 text-xs font-bold text-[#4E404C] dark:text-[#D4D4D4] shadow-2xs hover:bg-[#FAF6F8] dark:hover:bg-[#202020] disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         - Warning
                       </button>
@@ -536,7 +536,7 @@ event.preventDefault();
                         type="button"
                         disabled={!!teamActionLoading}
                         onClick={() => handleWarningChange(team, 1)}
-                        className="rounded-xl border border-amber-500/30 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800 shadow-2xs hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-xl border border-amber-500/30 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-xs font-bold text-amber-800 dark:text-amber-400 shadow-2xs hover:bg-amber-100 dark:hover:bg-amber-950/60 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         + Warning
                       </button>
@@ -546,7 +546,7 @@ event.preventDefault();
                           type="button"
                           disabled={!!teamActionLoading}
                           onClick={() => handleRestoreTeam(team)}
-                          className="rounded-xl border border-emerald-500/30 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800 shadow-2xs hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-xl border border-emerald-500/30 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-400 shadow-2xs hover:bg-emerald-100 dark:hover:bg-emerald-950/60 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           {teamActionLoading === team.id
                             ? "Processing..."
@@ -562,7 +562,7 @@ event.preventDefault();
                           !!teamActionLoading
                         }
                         onClick={() => handleDeleteTeam(team)}
-                        className="rounded-xl border border-red-500/30 bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700 shadow-2xs transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-30"
+                        className="rounded-xl border border-red-500/30 dark:border-red-500/40 bg-red-50 dark:bg-red-950/40 px-2.5 py-1 text-xs font-bold text-red-700 dark:text-red-400 shadow-2xs transition hover:bg-red-100 dark:hover:bg-red-950/60 disabled:cursor-not-allowed disabled:opacity-30"
                         title={
                           team.members.length
                             ? "Only empty teams can be deleted"
@@ -579,7 +579,7 @@ event.preventDefault();
 
             {filteredTeams.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-5 py-10 text-center text-xs text-[#4E404C]">
+                <td colSpan={4} className="px-5 py-10 text-center text-xs text-[#4E404C] dark:text-[#A3A3A3]">
                   No matching teams or participants found.
                 </td>
               </tr>
@@ -590,20 +590,20 @@ event.preventDefault();
 
       {/* Edit Participant Dialog */}
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#302630]/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#302630]/40 dark:bg-black/80 backdrop-blur-sm p-4">
           <form
             onSubmit={handleUpdate}
-            className="my-auto max-h-[90vh] w-full max-w-2xl space-y-5 overflow-y-auto rounded-3xl border border-white/80 bg-white/95 p-6 sm:p-8 text-[#302630] shadow-2xl animate-fade-in"
+            className="my-auto max-h-[90vh] w-full max-w-2xl space-y-5 overflow-y-auto rounded-3xl border border-white/80 dark:border-[#292929] bg-white/95 dark:bg-[#111111] p-6 sm:p-8 text-[#302630] dark:text-[#FAFAFA] shadow-2xl animate-fade-in"
           >
-            <div className="flex items-start justify-between gap-4 border-b border-[#E7DCE4] pb-4">
+            <div className="flex items-start justify-between gap-4 border-b border-[#E7DCE4] dark:border-[#292929] pb-4">
               <div>
-                <span className="rounded-full bg-[#FCE7F1] px-2.5 py-0.5 text-xs font-bold text-[#BE3477]">
+                <span className="rounded-full bg-[#FCE7F1] dark:bg-[#8B5CF6]/20 px-2.5 py-0.5 text-xs font-bold text-[#BE3477] dark:text-[#A78BFA]">
                   Participant Details
                 </span>
-                <h2 className="mt-1 text-xl font-bold tracking-tight text-[#302630]">
+                <h2 className="mt-1 text-xl font-bold tracking-tight text-[#302630] dark:text-[#FAFAFA]">
                   Edit Participant
                 </h2>
-                <p className="text-xs text-[#4E404C]">
+                <p className="text-xs text-[#4E404C] dark:text-[#A3A3A3]">
                   Update member details or reassign them to another registered team.
                 </p>
               </div>
@@ -611,7 +611,7 @@ event.preventDefault();
               <button
                 type="button"
                 onClick={() => setEditing(null)}
-                className="rounded-xl border border-[#E7DCE4] bg-white px-3 py-1.5 text-xs font-bold text-[#4E404C] hover:text-[#BE3477]"
+                className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-3 py-1.5 text-xs font-bold text-[#4E404C] dark:text-[#D4D4D4] hover:text-[#BE3477] dark:hover:text-[#A78BFA]"
                 aria-label="Close edit form"
               >
                 ✕
@@ -619,7 +619,7 @@ event.preventDefault();
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">
                 Full name *
                 <input
                   className={inputClass}
@@ -629,7 +629,7 @@ event.preventDefault();
                 />
               </label>
 
-              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">
                 Gmail address *
                 <input
                   className={inputClass}
@@ -642,7 +642,7 @@ event.preventDefault();
                 />
               </label>
 
-              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">
                 USN
                 <input
                   className={inputClass}
@@ -651,7 +651,7 @@ event.preventDefault();
                 />
               </label>
 
-              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">
                 Phone
                 <input
                   className={inputClass}
@@ -661,7 +661,7 @@ event.preventDefault();
                 />
               </label>
 
-              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">
                 Semester
                 <select
                   className={inputClass}
@@ -679,7 +679,7 @@ event.preventDefault();
                 </select>
               </label>
 
-              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">
                 Branch
                 <input
                   className={inputClass}
@@ -689,7 +689,7 @@ event.preventDefault();
               </label>
             </div>
 
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#4E404C]">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">
               Team *
               <select
                 className={inputClass}
@@ -716,10 +716,10 @@ event.preventDefault();
             </label>
 
             {exceedsLimit && (
-              <label className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-50 p-3.5 text-xs font-medium text-amber-800">
+              <label className="flex items-start gap-3 rounded-2xl border border-amber-500/30 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-950/40 p-3.5 text-xs font-medium text-amber-800 dark:text-amber-400">
                 <input
                   type="checkbox"
-                  className="mt-0.5 size-4 rounded accent-[#BE3477]"
+                  className="mt-0.5 size-4 rounded accent-[#BE3477] dark:accent-[#8B5CF6]"
                   checked={editing.overrideTeamLimit}
                   onChange={(event) =>
                     updateField("overrideTeamLimit", event.target.checked)
@@ -729,12 +729,12 @@ event.preventDefault();
               </label>
             )}
 
-            <div className="flex flex-wrap justify-end gap-3 border-t border-[#E7DCE4] pt-5">
+            <div className="flex flex-wrap justify-end gap-3 border-t border-[#E7DCE4] dark:border-[#292929] pt-5">
               <button
                 type="button"
                 onClick={() => setEditing(null)}
                 disabled={isPending}
-                className="rounded-xl border border-[#E7DCE4] bg-white px-4 py-2.5 text-sm font-semibold text-[#302630] hover:bg-[#F1E9EF]"
+                className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-4 py-2.5 text-sm font-semibold text-[#302630] dark:text-[#FAFAFA] hover:bg-[#F1E9EF] dark:hover:bg-[#202020]"
               >
                 Cancel
               </button>
@@ -742,7 +742,7 @@ event.preventDefault();
               <button
                 type="submit"
                 disabled={isPending}
-                className="rounded-xl bg-[#BE3477] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#a62a66] active:scale-[0.98] disabled:opacity-50"
+                className="rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#a62a66] dark:hover:bg-[#7C3AED] active:scale-[0.98] disabled:opacity-50"
               >
                 {isPending ? "Saving..." : "Save changes"}
               </button>

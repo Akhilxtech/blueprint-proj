@@ -51,15 +51,15 @@ export default function AdminQuizBanner() {
   return (
     <div
       role="status"
-      className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-900 shadow-sm backdrop-blur-md animate-fade-in"
+      className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-50/80 dark:bg-emerald-950/40 dark:border-emerald-500/40 px-4 py-3 text-sm text-emerald-900 dark:text-emerald-300 shadow-sm backdrop-blur-md animate-fade-in"
     >
       <span className="relative flex size-2.5">
         <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
         <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
       </span>
       <span className="font-semibold tracking-tight">Quiz in progress</span>
-      <span className="text-emerald-800/80">
-        Current phase: <span className="font-medium text-emerald-900">{status.phase}</span>
+      <span className="text-emerald-800/80 dark:text-emerald-400/80">
+        Current phase: <span className="font-medium text-emerald-900 dark:text-emerald-200">{status.phase}</span>
       </span>
     </div>
   );

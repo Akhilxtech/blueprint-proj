@@ -85,9 +85,9 @@ const sampleRow = {
 };
 
 const inputClass =
-  "w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
+  "w-full rounded-xl border border-neutral-light bg-white px-3.5 py-2 text-sm text-foreground placeholder:text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:placeholder:text-[#A3A3A3] dark:focus:border-[#8B5CF6] dark:focus:ring-[#8B5CF6]/20";
 const buttonClass =
-  "rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50";
+  "rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] disabled:opacity-50 dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:hover:bg-[#202020]";
 
 function downloadCsvTemplate() {
   const csv = Papa.unparse({
@@ -572,12 +572,12 @@ export default function StatementsManager() {
       {error && (
         <div
           role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300"
         >
           <span>{error}</span>
           <button
             type="button"
-            className="text-xs font-semibold text-red-700 underline hover:no-underline ml-3"
+            className="text-xs font-semibold text-red-700 underline hover:no-underline ml-3 dark:text-red-400"
             onClick={() => setError("")}
           >
             Dismiss
@@ -588,7 +588,7 @@ export default function StatementsManager() {
       {message && (
         <div
           role="status"
-          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300"
         >
           {message}
         </div>
@@ -596,7 +596,7 @@ export default function StatementsManager() {
 
       {/* Statement Form */}
       <section id="round3-statement-form" className="glass-card p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light dark:border-[#292929] pb-4">
           <h3 className="text-lg font-bold tracking-tight text-foreground">
             {editingId ? "Edit Problem Statement" : "Create Problem Statement"}
           </h3>
@@ -682,7 +682,7 @@ export default function StatementsManager() {
                 type="checkbox"
                 checked={form.enabled}
                 onChange={(event) => updateForm("enabled", event.target.checked)}
-                className="h-4 w-4 rounded border-neutral-light text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-neutral-light text-primary focus:ring-primary dark:border-[#383838] dark:bg-[#171717] dark:text-[#8B5CF6]"
               />
               <span className="font-semibold text-foreground">
                 Statement enabled for selection
@@ -736,11 +736,11 @@ export default function StatementsManager() {
             />
           </label>
 
-          <div className="space-y-4 rounded-xl border border-neutral-light bg-[#FAF7F9] p-5">
+          <div className="space-y-4 rounded-xl border border-neutral-light bg-[#FAF7F9] p-5 dark:border-[#292929] dark:bg-[#0C0C0C]">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h4 className="font-bold text-foreground">Hints</h4>
-                <p className="text-xs text-muted">
+                <p className="text-xs text-muted dark:text-[#A3A3A3]">
                   Add progressive hints released to participants during Round 3.
                 </p>
               </div>
@@ -752,7 +752,7 @@ export default function StatementsManager() {
             {form.hints.map((hint, index) => (
               <div
                 key={index}
-                className="space-y-3 rounded-xl border border-neutral-light bg-white p-4 shadow-2xs"
+                className="space-y-3 rounded-xl border border-neutral-light bg-white p-4 shadow-2xs dark:border-[#292929] dark:bg-[#111111]"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm font-bold text-foreground">
@@ -760,7 +760,7 @@ export default function StatementsManager() {
                   </span>
                   <button
                     type="button"
-                    className="text-xs font-semibold text-red-600 hover:text-red-700"
+                    className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                     onClick={() => removeHint(index)}
                   >
                     Remove
@@ -791,14 +791,14 @@ export default function StatementsManager() {
             ))}
 
             {form.hints.length === 0 && (
-              <p className="text-xs text-muted italic">No hints added yet.</p>
+              <p className="text-xs text-muted dark:text-[#A3A3A3] italic">No hints added yet.</p>
             )}
           </div>
 
           <button
             type="submit"
             disabled={saving}
-            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
+            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50 dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
           >
             {saving
               ? "Saving..."
@@ -827,7 +827,7 @@ export default function StatementsManager() {
             Download CSV template
           </button>
 
-          <label className="cursor-pointer rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98]">
+          <label className="cursor-pointer rounded-xl border border-neutral-light bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-2xs transition hover:bg-neutral-50 active:scale-[0.98] dark:border-[#292929] dark:bg-[#171717] dark:text-[#FAFAFA] dark:hover:bg-[#202020]">
             Choose CSV file
             <input
               type="file"
@@ -848,20 +848,20 @@ export default function StatementsManager() {
             </p>
 
             {csvErrors.length > 0 ? (
-              <div className="max-h-64 space-y-1.5 overflow-auto rounded-xl border border-red-200 bg-red-50 p-4">
-                <p className="font-bold text-red-800">
+              <div className="max-h-64 space-y-1.5 overflow-auto rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/40">
+                <p className="font-bold text-red-800 dark:text-red-300">
                   Fix these problems before importing:
                 </p>
                 {csvErrors.map((item, index) => (
-                  <p key={index} className="text-xs text-red-700">
+                  <p key={index} className="text-xs text-red-700 dark:text-red-400">
                     {item}
                   </p>
                 ))}
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs">
+              <div className="overflow-x-auto rounded-xl border border-neutral-light bg-white shadow-xs dark:border-[#292929] dark:bg-[#111111]">
                 <table className="w-full min-w-[700px] text-left text-sm">
-                  <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted">
+                  <thead className="border-b border-neutral-light bg-[#FBF7FA] text-xs font-semibold uppercase tracking-wider text-muted dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]">
                     <tr>
                       <th className="p-3">Title</th>
                       <th className="p-3">Domain</th>
@@ -870,24 +870,24 @@ export default function StatementsManager() {
                       <th className="p-3">Hints</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-light">
+                  <tbody className="divide-y divide-neutral-light dark:divide-[#292929]">
                     {csvRows.slice(0, 10).map((row, index) => {
                       let hintCount = 0;
 
                       try {
                         hintCount = row.hints
-                          ? JSON.parse(String(row.hints)).length
-                          : 0;
+                            ? JSON.parse(String(row.hints)).length
+                            : 0;
                       } catch {
                         hintCount = 0;
                       }
 
                       return (
-                        <tr key={index} className="hover:bg-neutral-50/60 transition-colors">
+                        <tr key={index} className="hover:bg-neutral-50/60 dark:hover:bg-[#171717] transition-colors">
                           <td className="p-3 font-semibold text-foreground">{String(row.title ?? "")}</td>
-                          <td className="p-3 text-muted">{String(row.domain ?? "")}</td>
+                          <td className="p-3 text-muted dark:text-[#A3A3A3]">{String(row.domain ?? "")}</td>
                           <td className="p-3 text-foreground">{String(row.difficulty ?? "")}</td>
-                          <td className="p-3 text-muted">
+                          <td className="p-3 text-muted dark:text-[#A3A3A3]">
                             {String(row.maxTeams ?? "") || "Unlimited"}
                           </td>
                           <td className="p-3 font-medium text-foreground">{hintCount}</td>
@@ -898,7 +898,7 @@ export default function StatementsManager() {
                 </table>
 
                 {csvRows.length > 10 && (
-                  <p className="p-3 text-xs text-muted border-t border-neutral-light bg-[#FAF7F9]">
+                  <p className="p-3 text-xs text-muted dark:text-[#A3A3A3] border-t border-neutral-light dark:border-[#292929] bg-[#FAF7F9] dark:bg-[#171717]">
                     Showing first 10 rows of {csvRows.length}.
                   </p>
                 )}
@@ -910,7 +910,7 @@ export default function StatementsManager() {
                 type="button"
                 disabled={importing || csvErrors.length > 0}
                 onClick={handleImportCsv}
-                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50"
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover active:scale-[0.98] disabled:opacity-50 dark:bg-[#8B5CF6] dark:hover:bg-[#A78BFA] dark:text-[#FAFAFA]"
               >
                 {importing ? "Importing..." : `Import ${csvRows.length} statement(s)`}
               </button>
@@ -933,19 +933,19 @@ export default function StatementsManager() {
 
       {/* Existing Statements List */}
       <section className="glass-card p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-light dark:border-[#292929] pb-4">
           <div>
             <h3 className="text-lg font-bold tracking-tight text-foreground">
               Existing Statements
             </h3>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted dark:text-[#A3A3A3]">
               {statements.length} statement{statements.length === 1 ? "" : "s"} configured
             </p>
           </div>
 
           <button
             type="button"
-            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50"
+            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:opacity-50 dark:border-red-900/40 dark:bg-[#171717] dark:text-red-400 dark:hover:bg-red-950/40"
             disabled={!statements.length}
             onClick={openDeleteAllModal}
           >
@@ -954,12 +954,12 @@ export default function StatementsManager() {
         </div>
 
         {loading ? (
-          <div className="py-10 text-center text-sm text-muted">
-            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+          <div className="py-10 text-center text-sm text-muted dark:text-[#A3A3A3]">
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2 dark:border-[#8B5CF6]" />
             <p>Loading statements...</p>
           </div>
         ) : statements.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted">
+          <p className="py-10 text-center text-sm text-muted dark:text-[#A3A3A3]">
             No problem statements have been created yet.
           </p>
         ) : (
@@ -967,31 +967,31 @@ export default function StatementsManager() {
             {statements.map((statement) => (
               <article
                 key={statement.id}
-                className="rounded-xl border border-neutral-light bg-white p-4.5 shadow-2xs hover:shadow-soft transition space-y-3"
+                className="rounded-xl border border-neutral-light bg-white p-4.5 shadow-2xs hover:shadow-soft transition space-y-3 dark:border-[#292929] dark:bg-[#111111]"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <h4 className="font-bold text-foreground text-base">
                       {statement.title}
                     </h4>
-                    <p className="mt-0.5 text-xs font-medium text-muted">
-                      {statement.domain} · <span className="text-primary font-semibold">{statement.difficulty}</span>
+                    <p className="mt-0.5 text-xs font-medium text-muted dark:text-[#A3A3A3]">
+                      {statement.domain} · <span className="text-primary dark:text-[#8B5CF6] font-semibold">{statement.difficulty}</span>
                     </p>
                     <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/80 leading-relaxed">
                       {statement.shortDescription}
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                      <span className="rounded-full bg-pink-50 border border-pink-200/60 px-2.5 py-0.5 font-semibold text-primary">
+                      <span className="rounded-full bg-pink-50 border border-pink-200/60 px-2.5 py-0.5 font-semibold text-primary dark:border-[#8B5CF6]/30 dark:bg-[#8B5CF6]/15 dark:text-[#A78BFA]">
                         {statement._count?.selections ?? 0} selected team(s)
                       </span>
-                      <span className="rounded-full bg-neutral-100 border border-neutral-light px-2.5 py-0.5 text-muted font-medium">
+                      <span className="rounded-full bg-neutral-100 border border-neutral-light px-2.5 py-0.5 text-muted font-medium dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]">
                         {statement.hints.length} hint(s)
                       </span>
                       <span
                         className={`rounded-full px-2.5 py-0.5 font-medium ${
                           statement.enabled
-                            ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border border-neutral-light bg-neutral-100 text-muted"
+                            ? "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-400"
+                            : "border border-neutral-light bg-neutral-100 text-muted dark:border-[#292929] dark:bg-[#171717] dark:text-[#A3A3A3]"
                         }`}
                       >
                         {statement.enabled ? "● Enabled" : "○ Disabled"}
@@ -1016,7 +1016,7 @@ export default function StatementsManager() {
                           ? "Reset or reassign its teams first."
                           : "Delete statement"
                       }
-                      className="rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-semibold text-red-700 shadow-2xs transition hover:bg-red-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 dark:border-red-900/40 dark:bg-[#171717] dark:text-red-400 dark:hover:bg-red-950/40"
                       onClick={() => handleDeleteStatement(statement)}
                     >
                       Delete
@@ -1042,30 +1042,30 @@ export default function StatementsManager() {
 
       {/* Typed Delete All Modal */}
       {deleteAllModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-all-title"
-            className="w-full max-w-md rounded-2xl border border-white/80 bg-white/95 p-6 shadow-2xl backdrop-blur-md"
+            className="w-full max-w-md rounded-2xl border border-white/80 bg-white/95 p-6 shadow-2xl backdrop-blur-md dark:border-[#292929] dark:bg-[#111111]"
           >
-            <p className="text-xs font-semibold uppercase tracking-wider text-red-600">
+            <p className="text-xs font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
               High Risk Administrative Action
             </p>
             <h3 id="delete-all-title" className="mt-1 text-xl font-bold text-foreground">
               Delete All Problem Statements
             </h3>
-            <p className="mt-2 text-sm text-muted leading-relaxed">
+            <p className="mt-2 text-sm text-muted dark:text-[#A3A3A3] leading-relaxed">
               This permanently deletes every problem statement, every team&apos;s Round 3 selection, and all deliverable progress. Team records, participants, and deployment submissions will remain intact. This cannot be undone.
             </p>
 
             <div className="mt-4 space-y-2">
               <label htmlFor="delete-all-input" className="block text-xs font-semibold text-foreground">
-                Type <span className="text-red-600 font-mono">DELETE ALL</span> to confirm:
+                Type <span className="text-red-600 dark:text-red-400 font-mono">DELETE ALL</span> to confirm:
               </label>
               <input
                 id="delete-all-input"
-                className="w-full rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-mono text-foreground outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                className="w-full rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-mono text-foreground outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-200 dark:border-red-900/50 dark:bg-[#171717] dark:text-[#FAFAFA] dark:focus:ring-red-950"
                 value={typedConfirmation}
                 onChange={(e) => setTypedConfirmation(e.target.value)}
                 placeholder="DELETE ALL"

@@ -225,46 +225,46 @@ export default function QuestionCsvImport() {
   }
 
   return (
-    <section className="space-y-4 rounded-2xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur-md">
+    <section className="space-y-4 rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 shadow-sm backdrop-blur-md">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-[#302630]">CSV question import</h2>
-          <p className="mt-0.5 text-xs text-[#4E404C]">
+          <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">CSV question import</h2>
+          <p className="mt-0.5 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
             Upload a CSV, review validation, then import questions.
           </p>
         </div>
         <button
           type="button"
           onClick={downloadTemplate}
-          className="rounded-xl border border-[#E7DCE4] bg-white/80 px-4 py-2 text-xs font-semibold text-[#4E404C] hover:bg-white hover:text-[#302630] transition-colors shadow-2xs"
+          className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] px-4 py-2 text-xs font-semibold text-[#4E404C] dark:text-[#D4D4D4] hover:bg-white dark:hover:bg-[#202020] hover:text-[#302630] dark:hover:text-[#FAFAFA] transition-colors shadow-2xs"
         >
           Download template
         </button>
       </div>
 
-      <div className="rounded-xl border border-dashed border-[#D9468D]/30 bg-white/40 p-4">
+      <div className="rounded-xl border border-dashed border-[#D9468D]/30 dark:border-[#8B5CF6]/30 bg-white/40 dark:bg-[#171717]/40 p-4">
         <input
           ref={inputRef}
           type="file"
           accept=".csv,text/csv"
           onChange={(event) => handleFile(event.currentTarget.files?.[0])}
-          className="block w-full text-xs text-[#4E404C] file:mr-4 file:rounded-xl file:border-0 file:bg-[#BE3477] file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#a82a67] file:cursor-pointer cursor-pointer"
+          className="block w-full text-xs text-[#4E404C] dark:text-[#A3A3A3] file:mr-4 file:rounded-xl file:border-0 file:bg-[#BE3477] dark:file:bg-[#8B5CF6] file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#a82a67] dark:hover:file:bg-[#7C3AED] file:cursor-pointer cursor-pointer"
         />
       </div>
 
       {fileName && (
-        <p className="text-xs font-semibold text-emerald-700">✓ Selected file: {fileName}</p>
+        <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">✓ Selected file: {fileName}</p>
       )}
 
       {rows.length > 0 && (
         <>
-          <p className="text-xs font-bold text-[#302630]">
-            Preview: <span className="text-[#BE3477]">{rows.length}</span> question rows detected
+          <p className="text-xs font-bold text-[#302630] dark:text-[#FAFAFA]">
+            Preview: <span className="text-[#BE3477] dark:text-[#8B5CF6]">{rows.length}</span> question rows detected
           </p>
 
-          <div className="max-h-80 overflow-auto rounded-xl border border-[#E7DCE4] bg-white/90">
+          <div className="max-h-80 overflow-auto rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/90 dark:bg-[#111111]">
             <table className="w-full min-w-[700px] text-left text-xs">
-              <thead className="sticky top-0 border-b border-[#E7DCE4] bg-[#F1E9EF]/90 text-[#4E404C] backdrop-blur-xs">
+              <thead className="sticky top-0 border-b border-[#E7DCE4] dark:border-[#292929] bg-[#F1E9EF]/90 dark:bg-[#171717] text-[#4E404C] dark:text-[#A3A3A3] backdrop-blur-xs">
                 <tr>
                   <th className="px-3 py-2.5 font-bold uppercase tracking-wider">External ID</th>
                   <th className="px-3 py-2.5 font-bold uppercase tracking-wider">Question</th>
@@ -273,20 +273,20 @@ export default function QuestionCsvImport() {
                   <th className="px-3 py-2.5 font-bold uppercase tracking-wider">Type</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E7DCE4]">
+              <tbody className="divide-y divide-[#E7DCE4] dark:divide-[#292929]">
                 {rows.map((row, index) => (
-                  <tr key={`${row.external_id}-${index}`} className="hover:bg-[#FCE7F1]/20">
-                    <td className="px-3 py-2 font-mono font-semibold text-[#BE3477]">{row.external_id}</td>
-                    <td className="max-w-sm truncate px-3 py-2 text-[#302630]">
+                  <tr key={`${row.external_id}-${index}`} className="hover:bg-[#FCE7F1]/20 dark:hover:bg-[#202020]">
+                    <td className="px-3 py-2 font-mono font-semibold text-[#BE3477] dark:text-[#8B5CF6]">{row.external_id}</td>
+                    <td className="max-w-sm truncate px-3 py-2 text-[#302630] dark:text-[#FAFAFA]">
                       {row.question_text}
                     </td>
-                    <td className="px-3 py-2 text-[#4E404C]">
+                    <td className="px-3 py-2 text-[#4E404C] dark:text-[#A3A3A3]">
                       {["a", "b", "c", "d", "e", "f"].filter(
                         (key) => row[`option_${key}`]?.trim(),
                       ).length}
                     </td>
-                    <td className="px-3 py-2 font-bold text-emerald-700">{row.correct_option}</td>
-                    <td className="px-3 py-2 text-[#4E404C]">
+                    <td className="px-3 py-2 font-bold text-emerald-700 dark:text-emerald-400">{row.correct_option}</td>
+                    <td className="px-3 py-2 text-[#4E404C] dark:text-[#A3A3A3]">
                       {row.question_type || (row.code ? "CODE" : "THEORY")}
                     </td>
                   </tr>
@@ -298,23 +298,23 @@ export default function QuestionCsvImport() {
       )}
 
       {errors.length > 0 && (
-        <div className="rounded-xl border border-rose-300 bg-rose-50 p-4">
-          <p className="text-xs font-bold text-rose-800">
+        <div className="rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 p-4">
+          <p className="text-xs font-bold text-rose-800 dark:text-rose-300">
             Fix these issues before importing:
           </p>
-          <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-rose-700">
+          <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-rose-700 dark:text-rose-400">
             {errors.slice(0, 30).map((error, index) => (
               <li key={`${index}-${error}`}>{error}</li>
             ))}
           </ul>
           {errors.length > 30 && (
-            <p className="mt-2 text-xs font-semibold text-rose-800">And {errors.length - 30} more errors.</p>
+            <p className="mt-2 text-xs font-semibold text-rose-800 dark:text-rose-300">And {errors.length - 30} more errors.</p>
           )}
         </div>
       )}
 
       {message && (
-        <p role="status" className="rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-xs font-semibold text-emerald-800">
+        <p role="status" className="rounded-xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 p-3 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
           {message}
         </p>
       )}
@@ -323,7 +323,7 @@ export default function QuestionCsvImport() {
         type="button"
         disabled={!rows.length || errors.length > 0 || isPending}
         onClick={requestImport}
-        className="rounded-xl bg-[#BE3477] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-xl bg-[#BE3477] dark:bg-[#8B5CF6] px-6 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#a82a67] dark:hover:bg-[#7C3AED] active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-40"
       >
         {isPending ? "Importing..." : `Import ${rows.length || ""} questions`}
       </button>

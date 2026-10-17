@@ -97,15 +97,15 @@ type Prestart = {
 };
 
 const panel =
-  "rounded-2xl border border-white/70 bg-white/70 p-5 sm:p-6 shadow-sm backdrop-blur-md";
+  "rounded-2xl border border-white/70 dark:border-[#292929] bg-white/70 dark:bg-[#111111] p-5 sm:p-6 shadow-sm backdrop-blur-md";
 const button =
   "rounded-xl px-4 py-2.5 text-xs font-bold transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 shadow-xs";
 const secondaryButton =
-  `${button} border border-[#E7DCE4] bg-white/80 text-[#4E404C] hover:bg-white hover:text-[#302630]`;
+  `${button} border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] text-[#4E404C] dark:text-[#D4D4D4] hover:bg-white dark:hover:bg-[#202020] hover:text-[#302630] dark:hover:text-[#FAFAFA]`;
 const primaryButton =
-  `${button} bg-[#BE3477] text-white hover:bg-[#a82a67]`;
+  `${button} bg-[#BE3477] dark:bg-[#8B5CF6] text-white hover:bg-[#a82a67] dark:hover:bg-[#7C3AED]`;
 const dangerButton =
-  `${button} border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100`;
+  `${button} border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40`;
 
 function formatTime(ms: number) {
   const seconds = Math.max(0, Math.ceil(ms / 1000));
@@ -382,13 +382,13 @@ const remainingMs = useMemo(() => {
     <section className="mx-auto max-w-7xl space-y-6 animate-fade-in-up">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477] dark:text-[#8B5CF6]">
             Administration
           </p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] sm:text-3xl">
+          <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] dark:text-[#FAFAFA] sm:text-3xl">
             Quiz Control Room
           </h1>
-          <p className="mt-1 text-sm text-[#4E404C]">
+          <p className="mt-1 text-sm text-[#4E404C] dark:text-[#A3A3A3]">
             Manage the synchronized quiz and monitor live progress in real time.
           </p>
         </div>
@@ -409,7 +409,7 @@ const remainingMs = useMemo(() => {
       {effectiveStatus === "RUNNING" && (
         <div
           role="status"
-          className="flex items-center gap-3 rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-bold text-emerald-800 backdrop-blur-xs"
+          className="flex items-center gap-3 rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-950/20 p-4 text-xs font-bold text-emerald-800 dark:text-emerald-300 backdrop-blur-xs"
         >
           <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-600 animate-pulse" aria-hidden="true" />
           The quiz is running. Live data refreshes every 2 seconds.
@@ -419,7 +419,7 @@ const remainingMs = useMemo(() => {
       {error && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-300 bg-rose-50/90 p-4 text-xs font-semibold text-rose-800"
+          className="rounded-2xl border border-rose-300 dark:border-rose-500/30 bg-rose-50/90 dark:bg-rose-950/20 p-4 text-xs font-semibold text-rose-800 dark:text-rose-300"
         >
           {error}
         </div>
@@ -428,7 +428,7 @@ const remainingMs = useMemo(() => {
       {message && (
         <div
           role="status"
-          className="rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-semibold text-emerald-800"
+          className="rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-950/20 p-4 text-xs font-semibold text-emerald-800 dark:text-emerald-300"
         >
           {message}
         </div>
@@ -437,55 +437,55 @@ const remainingMs = useMemo(() => {
       <div className={panel}>
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Current phase</p>
-            <h2 className="mt-1 text-2xl font-black text-[#302630]">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Current phase</p>
+            <h2 className="mt-1 text-2xl font-black text-[#302630] dark:text-[#FAFAFA]">
               {phaseLabel(phase)}
             </h2>
-            <p className="mt-1 text-xs text-[#4E404C]">
+            <p className="mt-1 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               {currentSlot
                 ? `Question ${clock!.index + 1} of ${snapshot?.totalQuestions}`
                 : `${snapshot?.totalQuestions ?? 0} questions configured`}
             </p>
           </div>
 
-          <div className="min-w-44 rounded-2xl border border-[#D9468D]/20 bg-[#FCE7F1]/60 p-4 text-center shadow-xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+          <div className="min-w-44 rounded-2xl border border-[#D9468D]/20 dark:border-[#8B5CF6]/30 bg-[#FCE7F1]/60 dark:bg-[#8B5CF6]/15 p-4 text-center shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477] dark:text-[#A78BFA]">
               {phase === "COUNTDOWN" ? "Starts in" : "Time remaining"}
             </p>
-            <p className="mt-1 font-mono text-4xl font-black tabular-nums text-[#BE3477]">
+            <p className="mt-1 font-mono text-4xl font-black tabular-nums text-[#BE3477] dark:text-[#A78BFA]">
               {formatTime(remainingMs)}
             </p>
           </div>
         </div>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-[#E7DCE4] bg-white/80 p-4 shadow-2xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Answers locked</p>
-            <p className="mt-1 text-2xl font-black text-[#BE3477]">
+          <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] p-4 shadow-2xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Answers locked</p>
+            <p className="mt-1 text-2xl font-black text-[#BE3477] dark:text-[#8B5CF6]">
               {snapshot?.answerStats.answered ?? 0}
-              <span className="text-sm font-semibold text-[#4E404C]">
+              <span className="text-sm font-semibold text-[#4E404C] dark:text-[#A3A3A3]">
                 {" "}
                 / {snapshot?.answerStats.eligibleTeams ?? 0}
               </span>
             </p>
           </div>
 
-          <div className="rounded-xl border border-[#E7DCE4] bg-white/80 p-4 shadow-2xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Teams on roster</p>
-            <p className="mt-1 text-2xl font-black text-[#302630]">
+          <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] p-4 shadow-2xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Teams on roster</p>
+            <p className="mt-1 text-2xl font-black text-[#302630] dark:text-[#FAFAFA]">
               {snapshot?.teamsOnRoster ?? 0}
             </p>
           </div>
 
-          <div className="rounded-xl border border-[#E7DCE4] bg-white/80 p-4 shadow-2xs">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Teams eliminated</p>
-            <p className="mt-1 text-2xl font-black text-rose-700">
+          <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/80 dark:bg-[#171717] p-4 shadow-2xs">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Teams eliminated</p>
+            <p className="mt-1 text-2xl font-black text-rose-700 dark:text-rose-400">
               {snapshot?.eliminatedTeams ?? 0}
             </p>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-[#E7DCE4] pt-5">
+        <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-[#E7DCE4] dark:border-[#292929] pt-5">
           {effectiveStatus === "NOT_STARTED" && (
             <button
               type="button"
@@ -500,7 +500,7 @@ const remainingMs = useMemo(() => {
           {effectiveStatus === "RUNNING" && (
             <button
               type="button"
-              className={`${button} border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100`}
+              className={`${button} border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40`}
               onClick={() => void performAction("pause")}
               disabled={actionLoading}
             >
@@ -511,7 +511,7 @@ const remainingMs = useMemo(() => {
           {effectiveStatus === "PAUSED" && (
             <button
               type="button"
-              className={`${button} border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100`}
+              className={`${button} border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40`}
               onClick={() => void performAction("resume")}
               disabled={actionLoading}
             >
@@ -561,15 +561,15 @@ const remainingMs = useMemo(() => {
       <div className={panel}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-[#302630]">Option distribution</h2>
-            <p className="mt-0.5 text-xs text-[#4E404C]">
+            <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">Option distribution</h2>
+            <p className="mt-0.5 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               {hasCurrentQuestion
                 ? "Answer counts for the current question."
                 : "Distribution appears while a question is active."}
             </p>
           </div>
           {currentSlot && (
-            <span className="rounded-full border border-[#D9468D]/20 bg-[#FCE7F1] px-3 py-1 text-xs font-bold text-[#BE3477]">
+            <span className="rounded-full border border-[#D9468D]/20 dark:border-[#8B5CF6]/30 bg-[#FCE7F1] dark:bg-[#8B5CF6]/15 px-3 py-1 text-xs font-bold text-[#BE3477] dark:text-[#A78BFA]">
               {currentSlot.type}
             </span>
           )}
@@ -585,20 +585,20 @@ const remainingMs = useMemo(() => {
               return (
                 <div key={option.optionId}>
                   <div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
-                    <span className="font-bold text-[#302630]">
+                    <span className="font-bold text-[#302630] dark:text-[#FAFAFA]">
                       Option {option.label}
                     </span>
-                    <span className="tabular-nums font-semibold text-[#4E404C]">
+                    <span className="tabular-nums font-semibold text-[#4E404C] dark:text-[#A3A3A3]">
                       {option.count} {option.count === 1 ? "answer" : "answers"} ({Math.round(percent)}%)
                     </span>
                   </div>
                   <div
-                    className="h-2.5 overflow-hidden rounded-full bg-[#F1E9EF]"
+                    className="h-2.5 overflow-hidden rounded-full bg-[#F1E9EF] dark:bg-[#202020]"
                     role="img"
                     aria-label={`Option ${option.label}: ${option.count} answers`}
                   >
                     <div
-                      className="h-full rounded-full bg-[#BE3477] transition-all duration-300"
+                      className="h-full rounded-full bg-[#BE3477] dark:bg-[#8B5CF6] transition-all duration-300"
                       style={{ width: `${percent}%` }}
                     />
                   </div>
@@ -607,7 +607,7 @@ const remainingMs = useMemo(() => {
             })}
           </div>
         ) : (
-          <p className="mt-4 rounded-xl border border-[#E7DCE4] bg-white/50 p-4 text-xs font-medium text-[#4E404C]">
+          <p className="mt-4 rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white/50 dark:bg-[#171717] p-4 text-xs font-medium text-[#4E404C] dark:text-[#A3A3A3]">
             No active question to display.
           </p>
         )}
@@ -616,18 +616,18 @@ const remainingMs = useMemo(() => {
       <div className={panel}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-[#302630]">Question timetable</h2>
-            <p className="mt-0.5 text-xs text-[#4E404C]">
+            <h2 className="text-base font-bold text-[#302630] dark:text-[#FAFAFA]">Question timetable</h2>
+            <p className="mt-0.5 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               Timings use the saved quiz snapshot, not current question settings.
             </p>
           </div>
-          <p className="text-xs font-bold text-[#BE3477]">
+          <p className="text-xs font-bold text-[#BE3477] dark:text-[#8B5CF6]">
             {snapshot?.totalQuestions ?? 0} questions
           </p>
         </div>
 
         {timetable.length === 0 ? (
-          <p className="mt-4 text-xs text-[#4E404C]">
+          <p className="mt-4 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
             Start a quiz to create its timetable.
           </p>
         ) : (
@@ -637,34 +637,34 @@ const remainingMs = useMemo(() => {
                 key={slot.questionId}
                 className={`relative rounded-xl border p-3.5 transition-all ${
                   slot.isCurrent
-                    ? "border-[#D9468D] bg-[#FCE7F1]/60 shadow-xs"
-                    : "border-[#E7DCE4] bg-white/70 shadow-2xs"
+                    ? "border-[#D9468D] dark:border-[#8B5CF6] bg-[#FCE7F1]/60 dark:bg-[#8B5CF6]/15 shadow-xs"
+                    : "border-[#E7DCE4] dark:border-[#292929] bg-white/70 dark:bg-[#171717] shadow-2xs"
                 }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F1E9EF] text-xs font-bold text-[#BE3477]">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F1E9EF] dark:bg-[#202020] text-xs font-bold text-[#BE3477] dark:text-[#A78BFA]">
                       {index + 1}
                     </span>
                     <div>
-                      <p className="text-xs font-bold text-[#302630]">
+                      <p className="text-xs font-bold text-[#302630] dark:text-[#FAFAFA]">
                         Question {index + 1}
                         {slot.isCurrent && (
-                          <span className="ml-2 rounded-full border border-[#D9468D]/30 bg-[#BE3477] px-2 py-0.5 text-2xs font-black text-white">
+                          <span className="ml-2 rounded-full border border-[#D9468D]/30 dark:border-[#8B5CF6]/30 bg-[#BE3477] dark:bg-[#8B5CF6] px-2 py-0.5 text-2xs font-black text-white">
                             NOW ACTIVE
                           </span>
                         )}
                       </p>
-                      <p className="mt-0.5 text-xs text-[#4E404C]">
+                      <p className="mt-0.5 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
                         {slot.type} · {slot.durationMs / 1000}s · {slot.marks} marks
                       </p>
                     </div>
                   </div>
                   <div className="text-right text-xs">
-                    <p className="font-bold text-[#302630]">
+                    <p className="font-bold text-[#302630] dark:text-[#FAFAFA]">
                       Starts at {formatTime(slot.startOffset)}
                     </p>
-                    <p className="mt-0.5 text-[#4E404C]">
+                    <p className="mt-0.5 text-[#4E404C] dark:text-[#A3A3A3]">
                       Gap after: {slot.gapMs / 1000}s
                     </p>
                   </div>
@@ -675,7 +675,7 @@ const remainingMs = useMemo(() => {
         )}
 
         {timetable.length > 0 && (
-          <p className="mt-4 text-xs font-semibold text-[#4E404C]">
+          <p className="mt-4 text-xs font-semibold text-[#4E404C] dark:text-[#A3A3A3]">
             Total timeline:{" "}
             {formatTime(
               timetable.reduce(
@@ -701,39 +701,39 @@ const remainingMs = useMemo(() => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="start-dialog-title"
-            className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/80 bg-[#F7F2F5] p-6 shadow-2xl animate-fade-in-up"
+            className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/80 dark:border-[#292929] bg-[#F7F2F5] dark:bg-[#111111] p-6 shadow-2xl animate-fade-in-up"
           >
-            <h2 id="start-dialog-title" className="text-lg font-bold text-[#302630]">
+            <h2 id="start-dialog-title" className="text-lg font-bold text-[#302630] dark:text-[#FAFAFA]">
               Review team readiness
             </h2>
-            <p className="mt-1 text-xs text-[#4E404C]">
+            <p className="mt-1 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               Only teams that accepted the rules and checked in within the last 30 seconds will be included in the roster.
             </p>
 
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Ready teams</p>
-                <p className="mt-1 text-2xl font-black text-emerald-800">
+              <div className="rounded-xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">Ready teams</p>
+                <p className="mt-1 text-2xl font-black text-emerald-800 dark:text-emerald-300">
                   {prestart.eligibleTeams}
                 </p>
               </div>
-              <div className="rounded-xl border border-[#E7DCE4] bg-white p-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C]">Not ready</p>
-                <p className="mt-1 text-2xl font-black text-[#4E404C]">
+              <div className="rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#4E404C] dark:text-[#A3A3A3]">Not ready</p>
+                <p className="mt-1 text-2xl font-black text-[#4E404C] dark:text-[#FAFAFA]">
                   {prestart.totalTeams - prestart.eligibleTeams}
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 max-h-72 overflow-y-auto rounded-xl border border-[#E7DCE4] bg-white">
+            <div className="mt-5 max-h-72 overflow-y-auto rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717]">
               {prestart.teams.map((team) => (
                 <div
                   key={team.id}
-                  className="flex items-center justify-between gap-3 border-b border-[#E7DCE4] px-4 py-3 last:border-0"
+                  className="flex items-center justify-between gap-3 border-b border-[#E7DCE4] dark:border-[#292929] px-4 py-3 last:border-0"
                 >
                   <div>
-                    <p className="text-xs font-bold text-[#302630]">{team.name}</p>
-                    <p className="mt-0.5 text-2xs text-[#4E404C]">
+                    <p className="text-xs font-bold text-[#302630] dark:text-[#FAFAFA]">{team.name}</p>
+                    <p className="mt-0.5 text-2xs text-[#4E404C] dark:text-[#A3A3A3]">
                       {team.participantCount} members ·{" "}
                       {team.rulesAccepted
                         ? "Rules accepted"
@@ -743,8 +743,8 @@ const remainingMs = useMemo(() => {
                   <span
                     className={`shrink-0 rounded-full px-3 py-0.5 text-2xs font-bold ${
                       team.ready
-                        ? "border border-emerald-300 bg-emerald-50 text-emerald-800"
-                        : "border border-[#E7DCE4] bg-[#F1E9EF] text-[#4E404C]"
+                        ? "border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300"
+                        : "border border-[#E7DCE4] dark:border-[#292929] bg-[#F1E9EF] dark:bg-[#202020] text-[#4E404C] dark:text-[#A3A3A3]"
                     }`}
                   >
                     {team.ready ? "✓ Ready" : "○ Not ready"}
@@ -753,11 +753,11 @@ const remainingMs = useMemo(() => {
               ))}
             </div>
 
-            <p className="mt-5 text-xs font-medium text-[#4E404C]">
+            <p className="mt-5 text-xs font-medium text-[#4E404C] dark:text-[#A3A3A3]">
               Starting will freeze the roster and question order. The quiz clock will begin in 10 seconds.
             </p>
 
-            <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-[#E7DCE4] pt-4">
+            <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-[#E7DCE4] dark:border-[#292929] pt-4">
               <button
                 type="button"
                 className={secondaryButton}
@@ -785,25 +785,25 @@ const remainingMs = useMemo(() => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="reset-dialog-title"
-            className="w-full max-w-md rounded-2xl border border-white/80 bg-[#F7F2F5] p-6 shadow-2xl animate-fade-in-up"
+            className="w-full max-w-md rounded-2xl border border-white/80 dark:border-[#292929] bg-[#F7F2F5] dark:bg-[#111111] p-6 shadow-2xl animate-fade-in-up"
           >
-            <h2 id="reset-dialog-title" className="text-lg font-bold text-rose-800">
+            <h2 id="reset-dialog-title" className="text-lg font-bold text-rose-800 dark:text-rose-400">
               Reset practice run?
             </h2>
-            <p className="mt-1 text-xs text-[#4E404C]">
+            <p className="mt-1 text-xs text-[#4E404C] dark:text-[#A3A3A3]">
               This deletes recorded answers and roster entries and resets team warnings and elimination status. This cannot be undone.
             </p>
 
             <label
               htmlFor="reset-confirmation"
-              className="mt-4 block text-xs font-bold text-[#302630]"
+              className="mt-4 block text-xs font-bold text-[#302630] dark:text-[#FAFAFA]"
             >
               Type RESET to confirm
 
               {error && (
                 <div
                   role="alert"
-                  className="mt-2 rounded-xl border border-rose-300 bg-rose-50 p-2.5 text-xs font-semibold text-rose-800"
+                  className="mt-2 rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 p-2.5 text-xs font-semibold text-rose-800 dark:text-rose-300"
                 >
                   {error}
                 </div>
@@ -814,11 +814,11 @@ const remainingMs = useMemo(() => {
               value={resetText}
               onChange={(event) => setResetText(event.target.value)}
               autoComplete="off"
-              className="mt-2 w-full rounded-xl border border-[#E7DCE4] bg-white px-3.5 py-2 text-xs font-bold text-[#302630] outline-none focus:border-[#D9468D]"
+              className="mt-2 w-full rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#171717] px-3.5 py-2 text-xs font-bold text-[#302630] dark:text-[#FAFAFA] outline-none focus:border-[#D9468D] dark:focus:border-[#8B5CF6]"
               placeholder="RESET"
             />
 
-            <div className="mt-6 flex justify-end gap-3 border-t border-[#E7DCE4] pt-4">
+            <div className="mt-6 flex justify-end gap-3 border-t border-[#E7DCE4] dark:border-[#292929] pt-4">
               <button
                 type="button"
                 className={secondaryButton}

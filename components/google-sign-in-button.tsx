@@ -44,13 +44,13 @@ export default function GoogleSignInButton({
         type="button"
         onClick={handleGoogleSignIn}
         disabled={isSigningIn}
-        className="group relative flex w-full items-center justify-center gap-3 rounded-xl border border-[#E7DCE4] bg-white px-5 py-3.5 font-semibold text-[#302630] shadow-sm transition-all duration-200 hover:border-[#D9468D]/40 hover:bg-[#FAF6F8] hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9468D] disabled:cursor-not-allowed disabled:opacity-60"
+        className="group relative flex w-full items-center justify-center gap-3 rounded-xl border border-[#E7DCE4] dark:border-[#292929] bg-white dark:bg-[#111111] px-5 py-3.5 font-semibold text-[#302630] dark:text-[#FAFAFA] shadow-sm transition-all duration-200 hover:border-[#D9468D]/40 dark:hover:border-[#8B5CF6]/50 hover:bg-[#FAF6F8] dark:hover:bg-[#171717] hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9468D] dark:focus-visible:ring-[#8B5CF6] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSigningIn ? (
-          <span className="flex items-center gap-2 text-sm text-[#746873]">
+          <span className="flex items-center gap-2 text-sm text-[#746873] dark:text-[#A3A3A3]">
             <span
               aria-hidden="true"
-              className="size-4 animate-spin rounded-full border-2 border-[#BE3477] border-t-transparent"
+              className="size-4 animate-spin rounded-full border-2 border-[#BE3477] dark:border-[#8B5CF6] border-t-transparent"
             />
             Redirecting to Google...
           </span>
@@ -78,7 +78,7 @@ export default function GoogleSignInButton({
                 fill="#EA4335"
               />
             </svg>
-            <span className="text-sm font-semibold tracking-tight text-[#302630]">
+            <span className="text-sm font-semibold tracking-tight text-[#302630] dark:text-[#FAFAFA]">
               Continue with Google
             </span>
           </>

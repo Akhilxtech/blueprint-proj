@@ -12,13 +12,13 @@ export default async function SettingsPage() {
   return (
     <section className="space-y-6 animate-fade-in-up">
       <div className="mb-2">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477]">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#BE3477] dark:text-[#8B5CF6]">
           Administration
         </p>
-        <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] sm:text-3xl">
+        <h1 className="mt-1 text-2xl font-black tracking-tight text-[#302630] dark:text-[#FAFAFA] sm:text-3xl">
           Quiz Settings
         </h1>
-        <p className="mt-1 text-sm text-[#4E404C]">
+        <p className="mt-1 text-sm text-[#4E404C] dark:text-[#A3A3A3]">
           Configure default question durations and quiz timing parameters.
         </p>
       </div>
