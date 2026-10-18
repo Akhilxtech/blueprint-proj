@@ -133,6 +133,8 @@ const canRevealPrevious =
       }
     : null;
 
+    const responseServerNow = Date.now();
+
   return NextResponse.json({
     serverNow: serverNow.toISOString(),
       runStartedAt: run?.startedAt?.toISOString() ?? null,
@@ -144,6 +146,7 @@ const canRevealPrevious =
     msUntilStart: clock.msUntilStart,
     remainingMs: clock.remainingMs,
     questionDurationMs,
+    responseServerNow,
 
     team: {
       id: team.id,

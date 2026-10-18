@@ -364,9 +364,12 @@ WITH main_run AS (
       };
     });
 
-    return NextResponse.json(
-      {
-        serverNow,
+    const responseServerNow = Date.now();
+
+return NextResponse.json(
+  {
+    serverNow,
+    responseServerNow,
         run: data.run,
         phase: clock.phase,
         clock,

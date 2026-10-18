@@ -24,6 +24,7 @@ type Phase =
 type QuizState = {
   runStartedAt: string | null;
   serverNow: string;
+  responseServerNow: number;
   phase: Phase;
   index: number;
   total: number;
@@ -130,12 +131,20 @@ export default function ParticipantQuiz({
 
   const questionRequestId = useRef<string | null>(null);
   const answerRequestId = useRef<string | null>(null);
+  const refreshInFlightRef = useRef(false);
 
   const refreshState = useCallback(async () => {
-    try {
-      const response = await fetch("/api/quiz/state", {
-        cache: "no-store",
-      });
+  if (refreshInFlightRef.current) return;
+
+  refreshInFlightRef.current = true;
+
+  try {
+    const requestStartedAt = Date.now();
+
+const response = await fetch("/api/quiz/state", {
+  cache: "no-store",
+});
+     
 
       const data = (await response.json()) as QuizState & {
         error?: string;
@@ -170,7 +179,11 @@ if (isNewRun) {
 
 runStartedAtRef.current = nextRunStartedAt;
 
-setServerOffsetMs(Date.parse(data.serverNow) - Date.now());
+const responseReceivedAt = Date.now();
+const clientMidpoint =
+  (requestStartedAt + responseReceivedAt) / 2;
+
+setServerOffsetMs(data.responseServerNow - clientMidpoint);
 setState(data);
 setError("");
       if (
@@ -194,6 +207,8 @@ setError("");
       setError(
         err instanceof Error ? err.message : "Could not load quiz state.",
       );
+    } finally {
+      refreshInFlightRef.current = false;
     }
   }, []);
 

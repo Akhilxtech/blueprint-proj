@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState,useRef } from "react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 type Phase =
@@ -41,6 +41,7 @@ type Team = {
 
 type Snapshot = {
   serverNow: number | string;
+  responseServerNow: number;
   run: {
     status: "NOT_STARTED" | "RUNNING" | "PAUSED" | "ENDED";
     startedAt: string | null;
@@ -153,24 +154,33 @@ export default function QuizControlRoom() {
   const [clientNow, setClientNow] = useState(0);
   const [serverOffset, setServerOffset] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const refreshInFlightRef = useRef(false);
 
   const refresh = useCallback(async () => {
-    try {
-      const response = await fetch("/api/admin/quiz/snapshot", {
-        cache: "no-store",
-      });
+  if (refreshInFlightRef.current) return;
+
+  refreshInFlightRef.current = true;
+
+  try {
+     const requestStartedAt = Date.now();
+
+const response = await fetch("/api/admin/quiz/snapshot", {
+  cache: "no-store",
+});
 
       if (!response.ok) {
         throw new Error("Could not load the quiz snapshot.");
       }
 
-      const data: Snapshot = await response.json();
-      const receivedAt = Date.now();
+const data: Snapshot = await response.json();
+const responseReceivedAt = Date.now();
+const clientMidpoint =
+  (requestStartedAt + responseReceivedAt) / 2;
 
-      setSnapshot(data);
-      setServerOffset(
-        new Date(data.serverNow).getTime() - receivedAt,
-      );
+setSnapshot(data);
+setServerOffset(data.responseServerNow - clientMidpoint);
+
+
       setError("");
     } catch (cause) {
       setError(
@@ -179,6 +189,7 @@ export default function QuizControlRoom() {
           : "Could not load the quiz snapshot.",
       );
     } finally {
+      refreshInFlightRef.current = false;
       setLoading(false);
     }
   }, []);
