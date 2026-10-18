@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-     "postinstall": "prisma generate",
+    "postinstall": "prisma generate",
     "seed:test": "bun run scripts/seed-test.ts",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -31,7 +31,7 @@
   "devDependencies": {
     "@better-auth/cli": "^1.4.21",
     "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/papaparse": "^5.5.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
