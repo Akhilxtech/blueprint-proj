@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma skills sync || exit 0",
+     "postinstall": "prisma generate",
     "seed:test": "bun run scripts/seed-test.ts",
     "test": "vitest run",
     "test:watch": "vitest",
