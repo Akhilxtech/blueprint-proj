@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Link from "next/link";
 
 type Round1Team = {
   rank: number;
@@ -163,12 +164,12 @@ useEffect(() => {
           </p>
 
           <div className="flex items-center gap-3">
-            <a
+            <Link
               href="/"
               className="text-xs font-semibold text-[#746873] hover:text-[#BE3477] dark:text-[#A3A3A3] dark:hover:text-[#FAFAFA] transition-colors"
             >
               ← Back to home
-            </a>
+            </Link>
             <ThemeToggle />
             <button
               type="button"

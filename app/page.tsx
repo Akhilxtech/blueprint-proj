@@ -137,6 +137,19 @@ export default async function HomePage() {
               <GoogleSignInButton />
             </div>
 
+            {process.env.DEMO_MODE === "true" && (
+              <div className="mt-3">
+                <Link
+                  href="/demo-login"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#D9468D]/30 bg-white/70 px-4 py-3 text-sm font-semibold text-[#BE3477] shadow-xs transition hover:bg-[#FCE7F1] dark:border-[#8B5CF6]/30 dark:bg-[#111111] dark:text-[#A78BFA] dark:hover:bg-[#8B5CF6]/15"
+                >
+                  <ShieldCheck className="size-4" />
+                  Demo Account
+                  <ArrowRight className="size-4" />
+                </Link>
+              </div>
+            )}
+
             <p className="mt-4 text-center text-[11px] leading-4 text-[#746873]/80 dark:text-[#A3A3A3]/80">
               Access is restricted to registered participants and authorized
               event administrators.

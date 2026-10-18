@@ -43,12 +43,13 @@ export default function NotRegisteredPage() {
           Sign out and try another account
         </button>
 
-        <Link
-          href="/"
-          className="mt-5 inline-block text-xs font-semibold text-[#746873] hover:text-[#BE3477] dark:text-[#A3A3A3] dark:hover:text-[#FAFAFA] transition-colors"
-        >
-          ← Back to home
-        </Link>
+       <button
+  type="button"
+  onClick={handleSignOut}
+  className="mt-5 inline-block text-xs font-semibold text-[#746873] hover:text-[#BE3477] dark:text-[#A3A3A3] dark:hover:text-[#FAFAFA] transition-colors"
+>
+  ← Back to home
+</button>
       </section>
     </main>
   );

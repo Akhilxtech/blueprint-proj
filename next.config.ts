@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["atypical-scroll-festival.ngrok-free.dev"],
 
   experimental: {
-    agentFeedback: true,
+    agentFeedback: false,
   },
 
   cacheComponents: true,

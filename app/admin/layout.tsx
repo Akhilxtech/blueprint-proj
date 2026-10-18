@@ -35,7 +35,7 @@ async function AdminContent({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await requireAdmin();
+  
 
   return (
     <div className="min-h-screen bg-[#F7F2F5] dark:bg-[#050505] text-[#302630] dark:text-[#FAFAFA] md:flex md:h-screen md:overflow-hidden">

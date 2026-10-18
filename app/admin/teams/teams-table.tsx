@@ -85,6 +85,7 @@ export default function TeamsTable({
   const router = useRouter();
 
   const [teams, setTeams] = useState(initialTeams);
+  
 
   const [search, setSearch] = useState("");
 
@@ -106,21 +107,18 @@ export default function TeamsTable({
 
 const displayedTeams = useMemo(
   () =>
-    teams.map((team) => {
-      const refreshed = initialTeams.find((item) => item.id === team.id);
+    initialTeams.map((refreshed) => {
+      const existing = teams.find((team) => team.id === refreshed.id);
 
-      return refreshed
+      return existing
         ? {
-            ...team,
-            quizStatus: refreshed.quizStatus,
-            warningCount: refreshed.warningCount,
-            eliminatedAt: refreshed.eliminatedAt,
+            ...refreshed,
+            members: refreshed.members,
           }
-        : team;
+        : refreshed;
     }),
-  [teams, initialTeams],
+  [initialTeams, teams],
 );
-
  const filteredTeams = useMemo(() => {
   const query = search.trim().toLowerCase();
 

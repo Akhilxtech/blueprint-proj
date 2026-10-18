@@ -154,12 +154,7 @@ async function ParticipantHub() {
         </section>
 
         <footer className="mt-12 border-t border-[#E7DCE4] dark:border-[#292929] pt-6 flex items-center justify-between text-xs text-[#746873] dark:text-[#A3A3A3]">
-          <Link
-            href="/"
-            className="font-semibold text-[#746873] dark:text-[#A3A3A3] hover:text-[#BE3477] dark:hover:text-[#A78BFA] transition-colors"
-          >
-            ← Back to home
-          </Link>
+        
           <span>Blueprint to Live · Participant Portal</span>
         </footer>
       </div>
